@@ -8,7 +8,7 @@
 - `int x = 5;`
 
 # Types
-- `int`
+- `int`: Integer
 
 # Math
 - `+`: Addition
