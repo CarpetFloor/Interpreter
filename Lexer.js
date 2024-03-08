@@ -15,6 +15,13 @@ const tokens = [
         /(int)/
     ), 
 
+    // keywords
+
+    new Pattern(
+        "PRINT", 
+        /(print)/
+    ), 
+
     new Pattern(
         "ID", 
         /[a-zA-Z]+/
@@ -30,6 +37,28 @@ const tokens = [
         /[0-9]+/
     ), 
 
+    // math
+
+    new Pattern(
+        "PLUS", 
+        /(\+)/
+    ), 
+
+    new Pattern(
+        "MINUS", 
+        /(\-)/
+    ), 
+
+    new Pattern(
+        "TIMES", 
+        /(\*)/
+    ), 
+
+    new Pattern(
+        "DIVIDES", 
+        /(\/)/
+    ), 
+
     new Pattern(
         "SEMICOLON", 
         /(;)/
@@ -43,7 +72,7 @@ const tokens = [
 ];
 
 const tokensWithValue = [
-    "NUMTYPE", "ID", "NUM"
+    "NUMTYPE", "ID", "NUM", "_ERROR_"
 ];
 
 /**

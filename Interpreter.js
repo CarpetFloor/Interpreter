@@ -1,13 +1,15 @@
 let fs = require("fs");
 let lexer = require("./Lexer");
 
-let programFile = "Programs/verySimple.lang";
+let programFile = "Programs/complex.lang";
 
 fs.readFile(programFile, "utf-8", function(error, data) {
     if(error) {
-        console.log("ERROR reading program file:", error);
+        console.log("ERROR READING FILE: " + programFile);
+        console.log("WITH ERROR: " + error.message);
     }
     else {
+        console.log("READ FILE: " + programFile + " SUCCESSFUL!")
         const program = data;
         console.log("STARTED LEXING");
         const tokens = lexer.lex(program);
