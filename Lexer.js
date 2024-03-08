@@ -4,6 +4,12 @@ function Pattern(name, pattern) {
 }
 
 const tokens = [
+    // whitespace
+    new Pattern(
+        "_WHITESPACE_", 
+        /\s/
+    ), 
+
     new Pattern(
         "NUMTYPE", 
         /(int)/
@@ -27,6 +33,12 @@ const tokens = [
     new Pattern(
         "SEMICOLON", 
         /(;)/
+    ), 
+
+    // error fallback
+    new Pattern(
+        "_ERROR_", 
+        /(.)/
     )
 ];
 
@@ -59,31 +71,41 @@ module.exports.lex = function(program) {
     let tokenStream = [];
     
     let startIndex = 0;
+    let lexingFailed = false;
     
     while(startIndex < program.length) {
         let current = program.substring(startIndex);
         let token = getToken(current);
 
-        if(token != null) {
+        if(token != null ) {
             let matchedFull = current.match(token.pattern);
             let matched = matchedFull[0];
             let tokenStart = current.indexOf(matched);
             let tokenEnd = tokenStart + matched.length;
 
-            let value = null;
-            if(tokensWithValue.includes(token.name)) {
-                value = matched;
-            }
+            if(token.name != "_WHITESPACE_") {
+                let value = null;
+                if(tokensWithValue.includes(token.name)) {
+                    value = matched;
+                }
 
-            tokenStream.push(new Token(token.name, value));
+                tokenStream.push(new Token(token.name, value));
+            }
 
             startIndex += tokenEnd;
         }
+        // only fail lexing if can't match to anything, including error fallback, basically something went very wrong
         else {
+            lexingFailed = true;
             console.log("ERROR: Lexing failed at index ", startIndex, "with: ", current);
             break;
         }
     }
 
-    return tokenStream;
+    if(lexingFailed) {
+        return [null];
+    }
+    else {
+        return tokenStream;
+    }
 }
