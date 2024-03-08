@@ -3,6 +3,7 @@ function Pattern(name, pattern) {
     this.pattern = pattern;
 }
 
+// regex patterns and coresponding token name
 const tokens = [
     // whitespace
     new Pattern(
@@ -11,9 +12,17 @@ const tokens = [
     ), 
 
     // comments
+
+    // multi-line
     new Pattern(
-        "COMMENT", 
-        /(#)[^\n]*(\n)/
+        "_WHITESPACE_", 
+        /(##)[^#]*(#)/
+    ), 
+
+    // single-line
+    new Pattern(
+        "_WHITESPACE_", 
+        /(#)[^\n]*/
     ), 
 
     new Pattern(
@@ -120,23 +129,6 @@ function Token(name, value) {
     this.value = value;
 }
 
-function specialCheck(tokenName, value) {
-    switch(tokenName) {
-        case "COMMENT":
-            let before = value;
-            let after = value.replaceAll(
-                /[\n\t\r]/g,
-                ""
-            )
-            return after;
-            break;
-        
-        default:
-            return value;
-            break;
-    }
-}
-
 module.exports.lex = function(program) {
     let tokenStream = [];
     
@@ -164,9 +156,6 @@ module.exports.lex = function(program) {
                 let value = null;
                 if(tokensWithValue.includes(token.name)) {
                     value = matched;
-
-                    // the value of some tokens are different than the literal regex match
-                    value = specialCheck(token.name, value);
                 }
 
                 tokenStream.push(new Token(token.name, value));
