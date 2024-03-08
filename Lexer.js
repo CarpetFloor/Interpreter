@@ -59,12 +59,10 @@ module.exports.lex = function(program) {
     let tokenStream = [];
     
     let startIndex = 0;
-    let lexFailed = false;
     
-    for(let i = 0; i < 3; i++) { 
+    while(startIndex < program.length) {
         let current = program.substring(startIndex);
         let token = getToken(current);
-        console.log(startIndex, current);
 
         if(token != null) {
             let matchedFull = current.match(token.pattern);
@@ -79,11 +77,11 @@ module.exports.lex = function(program) {
 
             tokenStream.push(new Token(token.name, value));
 
-            startIndex = tokenEnd;
+            startIndex += tokenEnd;
         }
         else {
-            lexFailed = true;
             console.log("ERROR: Lexing failed at index ", startIndex, "with: ", current);
+            break;
         }
     }
 
