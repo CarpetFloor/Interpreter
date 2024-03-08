@@ -25,16 +25,79 @@ const tokens = [
         /(#)[^\n]*/
     ), 
 
-    new Pattern(
-        "NUMTYPE", 
-        /(int)/
-    ), 
-
     // keywords
 
     new Pattern(
+        "NUMTYPE", 
+        /int/
+    ), 
+
+    new Pattern(
+        "LISTTYPE", 
+        /list/
+    ), 
+
+    new Pattern(
+        "STRINGTYPE", 
+        /string/
+    ), 
+
+    new Pattern(
+        "GET", 
+        /get/
+    ), 
+
+    new Pattern(
+        // so as to not be confused with addition
+        "ADDKEYWORD", 
+        /add/
+    ), 
+
+    new Pattern(
+        "WHILE", 
+        /while/
+    ), 
+
+    new Pattern(
+        "METHOD_TOSTRING", 
+        /toString\(\)/
+    ), 
+
+    // groupings
+
+    new Pattern(
         "PRINT", 
-        /(print)/
+        /print/
+    ), 
+
+    new Pattern(
+        "OPENPIPE", 
+        /\[/
+    ), 
+
+    new Pattern(
+        "CLOSEPIPE", 
+        /\]/
+    ), 
+
+    new Pattern(
+        "OPENPAREN", 
+        /\(/
+    ), 
+
+    new Pattern(
+        "CLOSEPAREN", 
+        /\)/
+    ), 
+
+    new Pattern(
+        "OPENCURLY", 
+        /\{/
+    ), 
+
+    new Pattern(
+        "CLOSECURLY", 
+        /\}/
     ), 
 
     new Pattern(
@@ -44,12 +107,39 @@ const tokens = [
     
     new Pattern(
         "ASSIGN", 
-        /(=)/
+        /=/
+    ), 
+
+    new Pattern(
+        "DOT", 
+        /\./
+    ), 
+
+    new Pattern(
+        "COMMA", 
+        /\,/
     ), 
     
+    // types
+
     new Pattern(
         "NUM", 
         /[0-9]+/
+    ), 
+
+    new Pattern(
+        "STRING", 
+        /(")[^"]*(")/
+    ), 
+
+    new Pattern(
+        "STRING", 
+        /(')[^']*(')/
+    ), 
+
+    new Pattern(
+        "INCREMENTASSIGN", 
+        /\+=/
     ), 
 
     // math
@@ -74,20 +164,32 @@ const tokens = [
         /(\/)/
     ), 
 
+    // comparison
+
+    new Pattern(
+        "LESSTHAN", 
+        /</
+    ), 
+
+    new Pattern(
+        "GREATERTHAN", 
+        />/
+    ), 
+
     new Pattern(
         "SEMICOLON", 
-        /(;)/
+        /;/
     ), 
 
     // error fallback
     new Pattern(
         "_ERROR_", 
-        /(.)/
+        /./
     )
 ];
 
 const tokensWithValue = [
-    "NUMTYPE", "ID", "NUM", "_ERROR_", "COMMENT"
+    "NUMTYPE", "ID", "NUM", "_ERROR_", "STRING"
 ];
 
 /**
@@ -129,6 +231,19 @@ function Token(name, value) {
     this.value = value;
 }
 
+function checkForSpecialValue(tokenName, value) {
+    switch(tokenName) {
+        case "STRING":
+            let after = value.replaceAll(
+                /["']/g, 
+                ""
+            );
+            return after;
+        default:
+            return value;
+    }
+}
+
 module.exports.lex = function(program) {
     let tokenStream = [];
     
@@ -156,9 +271,14 @@ module.exports.lex = function(program) {
                 let value = null;
                 if(tokensWithValue.includes(token.name)) {
                     value = matched;
+
+                    // some values should be something different than the literal regex match
+                    value = checkForSpecialValue(token.name, value);
                 }
 
-                tokenStream.push(new Token(token.name, value));
+                // if(token.name == "_ERROR_") {
+                    tokenStream.push(new Token(token.name, value));
+                // }
             }
 
             // update startIndex so the next substring of program will move past the token just found
