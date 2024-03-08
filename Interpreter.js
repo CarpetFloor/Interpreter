@@ -1,7 +1,7 @@
 let fs = require("fs");
 let lexer = require("./Lexer");
 
-let programFile = "Programs/complex.lang";
+let programFile = "Programs/program.lang";
 
 fs.readFile(programFile, "utf-8", function(error, data) {
     if(error) {

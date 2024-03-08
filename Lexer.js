@@ -10,6 +10,12 @@ const tokens = [
         /\s/
     ), 
 
+    // comments
+    new Pattern(
+        "COMMENT", 
+        /(#)[^\n]*(\n)/
+    ), 
+
     new Pattern(
         "NUMTYPE", 
         /(int)/
@@ -72,7 +78,7 @@ const tokens = [
 ];
 
 const tokensWithValue = [
-    "NUMTYPE", "ID", "NUM", "_ERROR_"
+    "NUMTYPE", "ID", "NUM", "_ERROR_", "COMMENT"
 ];
 
 /**
@@ -114,6 +120,23 @@ function Token(name, value) {
     this.value = value;
 }
 
+function specialCheck(tokenName, value) {
+    switch(tokenName) {
+        case "COMMENT":
+            let before = value;
+            let after = value.replaceAll(
+                /[\n\t\r]/g,
+                ""
+            )
+            return after;
+            break;
+        
+        default:
+            return value;
+            break;
+    }
+}
+
 module.exports.lex = function(program) {
     let tokenStream = [];
     
@@ -141,6 +164,9 @@ module.exports.lex = function(program) {
                 let value = null;
                 if(tokensWithValue.includes(token.name)) {
                     value = matched;
+
+                    // the value of some tokens are different than the literal regex match
+                    value = specialCheck(token.name, value);
                 }
 
                 tokenStream.push(new Token(token.name, value));
