@@ -17,4 +17,4 @@
 - `/`: Division
 
 # Comments
-- Not yet, but soon...
+- `#`: Single-line comment
