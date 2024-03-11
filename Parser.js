@@ -23,6 +23,11 @@ class Rule {
 class Terminal {
     constructor(tokenName) {
         this.tokenName = tokenName;
+        this.value = null;
+    }
+
+    setValue(value) {
+        this.value = value;
     }
 }
 
@@ -55,6 +60,14 @@ function generateCFG() {
 
     stmtn.rules.push(new Rule([
         new NonTerminal("expression")
+    ]));
+
+    stmtn.rules.push(new Rule([
+        new Terminal("NUMTYPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new NonTerminal("expression"), 
+        new Terminal("SEMICOLON")
     ]));
     
     stmtn.rules.push(new Rule([
@@ -111,31 +124,7 @@ class Node {
 
 let tree;
 module.exports.parse = function(tokenStream) {
-    let nodea;
-    let nodeb;
-    
-    console.log("num a = 1;");
-
     tree = new Node("program", null);
-    nodea = new Node("statement list", null);
-    tree.children.push(nodea);
-
-    nodeb = new Node("statement", null);
-    nodea.children.push(nodeb);
-
-    nodea = new Node("type", null);
-    nodea.children.push(new Node("NUMTYPE", null));
-    nodeb.children.push(nodea);
-
-    nodeb.children.push(new Node("ID", "a"));
-
-    nodeb.children.push(new Node("ASSIGN", null));
-
-    nodea = new Node("expression", null);
-    nodea.children.push(new Node("NUM", "1"));
-    nodeb.children.push(nodea);
-
-    nodeb.children.push(new Node("SEMICOLON", null));
 }
 
 module.exports.print = function(parseTree) {
