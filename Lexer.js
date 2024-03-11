@@ -29,7 +29,7 @@ const tokens = [
 
     new Pattern(
         "NUMTYPE", 
-        /int/
+        /num/
     ), 
 
     new Pattern(

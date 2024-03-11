@@ -1,0 +1,32 @@
+num upTo = 10;
+list[num] sequence = [];
+
+num count = 0;
+while(count < upTo) {
+    if(count < 2) {
+        sequence.add(count);
+    }
+    else {
+        num a = sequence.get(count - 2);
+        num b = sequence.get(count - 1);
+
+        sequence.add(a + b);
+    }
+
+    count += 1;
+}
+
+string output = "";
+count = 0;
+while(count < sequence.length()) {
+    output += sequence.get(count);
+
+    if(count < sequence.length() - 1) {
+        output += ", ";
+    }
+    
+    count += 1;
+}
+
+print("First " + upTo " + terms of the Fibonacci Sequence:");
+print(output);

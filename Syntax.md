@@ -5,14 +5,14 @@
 - Yes, whitespace doesn't matter, and semicolons are the only way to signify the end of statements.
 
 ### Variable Declartion
-- `int x = 5;`
+- `num x = 5;`
 
 ### Variable Assignment
 - Can reassign the value of variables with `x = 2;`
 - Can increment with `x += 2;`
 
 ### Types
-- `int`: Integer
+- `num`: Integer
 - `list`: List
 - `string`: String
 
@@ -21,7 +21,7 @@
 - Can convert any type to string with `myInt.toString()`
 
 #### List
-- Declare with `Lists[int] myList = [1, 2, 3]`  *(can also declare as empty)*
+- Declare with `list[num] myList = [1, 2, 3]`  *(can also declare as empty)*
 - Access element with `myList.get(0)`
 - Add element with `myList.add(4)`
 - Get length with `myList.length()`
