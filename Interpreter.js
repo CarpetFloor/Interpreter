@@ -2,7 +2,11 @@ let fs = require("fs");
 let lexer = require("./Lexer");
 let parser = require("./Parser");
 
-let programFile = "SamplePrograms/SimpleMath.lang";
+let programFile = "";
+
+if(process.argv.length >= 3) {
+    programFile = process.argv[2];
+}
 
 fs.readFile(programFile, "utf-8", function(error, data) {
     if(error) {
@@ -13,14 +17,14 @@ fs.readFile(programFile, "utf-8", function(error, data) {
         console.log("READ FILE: " + programFile + " SUCCESSFUL!")
         const program = data;
 
-        console.log("STARTED LEXING");
+        console.log("\nSTARTED LEXING");
         const tokens = lexer.lex(program);
         console.log("FINISHED LEXING");
         
-        console.log("TOKEN STREAM: ");
+        console.log("\nTOKEN STREAM: ");
         console.log(tokens);
         
-        console.log("STARTED PARSING");
+        console.log("\nSTARTED PARSING");
         const parseTree = parser.parse(tokens);
         console.log("FINISHED PARSING");
 
