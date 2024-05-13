@@ -29,27 +29,31 @@ class NonTerminal {
     }
 }
 
+let cfgFoundDebug = true;
 class GenerateNode {
     constructor(context) {
         this.context = context;
+        this.debug = false;
     }
-    binaryOperatorExpression() {
+    expression() {
         let left = [];
         let right = [];
         let onleft = true;
-        let possibleOperations = ["PLUS", "MINUS", "TIMES", "DIVIDES"];
+        let possibleOperations = ["PLUS", "MINUS"];
         let operationMap = new Map();
         operationMap.set("PLUS", "+");
         operationMap.set("MINUS", "-");
-        operationMap.set("TIMES", "*");
-        operationMap.set("DIVIDES", "/");
         let operation = null;
 
-        console.log("\nCONTEXT:");
-        console.log(this.context);
+        if(this.debug) {
+            console.log("\nCONTEXT:");
+            console.log(this.context);
+        }
 
+        let foundOperation = false;
         for(let i = 0; i < this.context.length; i++) {
             if(onleft && possibleOperations.includes(this.context[i].name)) {
+                foundOperation = true;
                 onleft = false;
                 operation = operationMap.get(this.context[i].name);
             }
@@ -61,31 +65,110 @@ class GenerateNode {
             }
         }
 
-        console.log("LEFT / RIGHT:");
-        console.log(left);
-        console.log(right);
+        if(foundOperation) {
+            if(this.debug) {
+                console.log("LEFT / RIGHT:");
+                console.log(left);
+                console.log(right);
+            }
 
-        if(left.length == 1) {
-            let node = new nodes.Num(left[0].value);
-            left = node;
+            if(left.length == 1) {
+                let node = new nodes.Num(left[0].value);
+                left = node;
+            }
+            else {
+                let node = (new GenerateNode(left)).expression();
+                left = node;
+            }
+
+            if(right.length == 1) {
+                let node = new nodes.Num(right[0].value);
+                right = node;
+            }
+            else {
+                let node = (new GenerateNode(right)).expression();
+                right = node;
+            }
+
+            if(this.debug) {
+                console.log("\n");
+            } 
+
+            if(cfgFoundDebug) {
+                console.log("PARSED expression");
+            }
+
+            return new nodes.BinaryOperatorExpression(operation, left, right);
         }
         else {
-            let node = (new GenerateNode(left)).binaryOperatorExpression();
-            left = node;
+            return (new GenerateNode(this.context)).term();
+        }
+    }
+    term() {
+        let left = [];
+        let right = [];
+        let onleft = true;
+        let possibleOperations = ["TIMES", "DIVIDES"];
+        let operationMap = new Map();
+        operationMap.set("TIMES", "*");
+        operationMap.set("DIVIDES", "/");
+        let operation = null;
+
+        if(this.debug) {
+            console.log("\nCONTEXT:");
+            console.log(this.context);
         }
 
-        if(right.length == 1) {
-            let node = new nodes.Num(right[0].value);
-            right = node;
-        }
-        else {
-            let node = (new GenerateNode(right)).binaryOperatorExpression();
-            right = node;
+        let foundOperation = false;
+        for(let i = 0; i < this.context.length; i++) {
+            if(onleft && possibleOperations.includes(this.context[i].name)) {
+                foundOperation = true;
+                onleft = false;
+                operation = operationMap.get(this.context[i].name);
+            }
+            else if(onleft) {
+                left.push(this.context[i]);
+            }
+            else {
+                right.push(this.context[i]);
+            }
         }
 
-        console.log("\n");
+        if(foundOperation) {
+            if(this.debug) {
+                console.log("LEFT / RIGHT:");
+                console.log(left);
+                console.log(right);
+            }
 
-        return new nodes.BinaryOperatorExpression(operation, left, right);
+            if(left.length == 1) {
+                let node = new nodes.Num(left[0].value);
+                left = node;
+            }
+            else {
+                let node = (new GenerateNode(left)).expression();
+                left = node;
+            }
+
+            if(right.length == 1) {
+                let node = new nodes.Num(right[0].value);
+                right = node;
+            }
+            else {
+                let node = (new GenerateNode(right)).expression();
+                right = node;
+            }
+
+            if(this.debug) {
+                console.log("\n");
+            }
+
+            if(cfgFoundDebug) {
+                console.log("PARSED term");
+            }
+
+            return new nodes.BinaryOperatorExpression(operation, left, right);
+        }
     }
 }
 
@@ -110,7 +193,7 @@ function generateCFG() {
             new NonTerminal("term")
         ]
     ], 
-    function(context) {return (new GenerateNode(context)).binaryOperatorExpression();});
+    function(context) {return (new GenerateNode(context)).expression();});
     cfg.push(rule);
 
     name = "term";
@@ -129,16 +212,7 @@ function generateCFG() {
             new NonTerminal("factor")
         ]
     ], 
-    function(context) {return (new GenerateNode(context)).binaryOperatorExpression();});
-    cfg.push(rule);
-
-    name = "factor";
-    rule = new Rule(name, [
-        [
-            new Terminal("NUM")
-        ]
-    ], 
-    name);
+    function(context) {return (new GenerateNode(context)).expression();});
     cfg.push(rule);
 }
 generateCFG();
@@ -150,7 +224,7 @@ module.exports.parse = function(tokenStream) {
     let context = tokenStream;
 
     // go through every rule in cfg to find a match
-    // while(index < cfg.length) {
+    while(index < cfg.length) {
         let rules = cfg[index].parts;
 
         if(debugCFG) {
@@ -229,24 +303,39 @@ module.exports.parse = function(tokenStream) {
              * Just have to simply create a new node with the same context as current context.
              */
             else {
+                if(debugCFG) {
+                    console.log("SINGLE NON-TERMINAL MATCH");
+                }
+
                 foundMatch = true;
+                tree.push(cfg[index].generateNode(context));
                 break;
             }
 
             if(debugCFG) {
-                console.log(terminal, "(terminal?)");
                 console.log(tree);
 
                 console.log("-----");
             }
         }
 
-        // ++index;
-    // }
+        ++index;
+        
+        if(foundMatch) {
+            break;
+        }
+    }
 }
 
 module.exports.print = function(parseTree) {
     for(let i = 0; i < tree.length; i++) {
-        console.log(tree[i].print(0));
+        try {
+            console.log(tree[i].print(0));
+        }
+        catch(exception) {
+            console.error("FAILED TO PARSE:");
+            console.log("AT: " + tree[i]);
+            console.log(exception);
+        }
     }
 }
