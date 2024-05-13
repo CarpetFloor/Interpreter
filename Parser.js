@@ -1,4 +1,4 @@
-let nodes = require("./Nodes");
+let nodes = require("./TreeNodes");
 
 // context-free grammar class
 class Rule {
@@ -29,22 +29,73 @@ class NonTerminal {
     }
 }
 
+class GenerateNode {
+    constructor(context) {
+        this.context = context;
+    }
+    binaryOperatorExpression() {
+        let left = [];
+        let right = [];
+        let onleft = true;
+        let possibleOperations = ["PLUS", "MINUS", "TIMES", "DIVIDES"];
+        let operationMap = new Map();
+        operationMap.set("PLUS", "+");
+        operationMap.set("MINUS", "-");
+        operationMap.set("TIMES", "*");
+        operationMap.set("DIVIDES", "/");
+        let operation = null;
+
+        console.log("\nCONTEXT:");
+        console.log(this.context);
+
+        for(let i = 0; i < this.context.length; i++) {
+            if(onleft && possibleOperations.includes(this.context[i].name)) {
+                onleft = false;
+                operation = operationMap.get(this.context[i].name);
+            }
+            else if(onleft) {
+                left.push(this.context[i]);
+            }
+            else {
+                right.push(this.context[i]);
+            }
+        }
+
+        console.log("LEFT / RIGHT:");
+        console.log(left);
+        console.log(right);
+
+        if(left.length == 1) {
+            let node = new nodes.Num(left[0].value);
+            left = node;
+        }
+        else {
+            let node = (new GenerateNode(left)).binaryOperatorExpression();
+            left = node;
+        }
+
+        if(right.length == 1) {
+            let node = new nodes.Num(right[0].value);
+            right = node;
+        }
+        else {
+            let node = (new GenerateNode(right)).binaryOperatorExpression();
+            right = node;
+        }
+
+        console.log("\n");
+
+        return new nodes.BinaryOperatorExpression(operation, left, right);
+    }
+}
+
 // create context-free grammar
 let cfg = [];
 
 // the actual CFG rules are defined here
 function generateCFG() {
-    let name = "program";
+    let name = "expression";
     let rule = new Rule(name, [
-        [
-            new NonTerminal("expression")
-        ]
-    ], 
-    );
-    cfg.push(rule);
-
-    name = "expression";
-    rule = new Rule(name, [
         [
             new NonTerminal(name), 
             new Terminal("PLUS"), 
@@ -59,26 +110,7 @@ function generateCFG() {
             new NonTerminal("term")
         ]
     ], 
-    function(context) {
-        let left = null;
-        let right = null;
-        let possibleOperations = ["PLUS", "MINUS"];
-        let operationMap = new Map();
-        operationMap.set("PLUS", "+");
-        operationMap.set("MINUS", "-");
-        let operation = null;
-
-        for(let i = 0; i < context.length; i++) {
-            if(possibleOperations.includes(context[i].name)) {
-                left = new nodes.Num(context[i - 1].value);
-                right = new nodes.Num(context[i + 1].value);
-                
-                operation = operationMap.get(context[i].name);
-            }
-        }
-
-        return new nodes.BinaryOperatorExpression(operation, left, right);
-    });
+    function(context) {return (new GenerateNode(context)).binaryOperatorExpression();});
     cfg.push(rule);
 
     name = "term";
@@ -97,7 +129,7 @@ function generateCFG() {
             new NonTerminal("factor")
         ]
     ], 
-    name);
+    function(context) {return (new GenerateNode(context)).binaryOperatorExpression();});
     cfg.push(rule);
 
     name = "factor";
@@ -114,7 +146,7 @@ generateCFG();
 let tree = [];
 let debugCFG = false;
 module.exports.parse = function(tokenStream) {
-    let index = 1;
+    let index = 0;
     let context = tokenStream;
 
     // go through every rule in cfg to find a match
