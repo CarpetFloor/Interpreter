@@ -68,21 +68,16 @@ function generateCFG() {
         operationMap.set("MINUS", "-");
         let operation = null;
 
-        console.log("CONTEXT");
-
         for(let i = 0; i < context.length; i++) {
-            // console.log(context[i]);
             if(possibleOperations.includes(context[i].name)) {
-                console.log("yes");
-                left = context[i - 1].value;
-                console.log(context[i - 1]);
-                right = context[i + 1].value;
-
+                left = new nodes.Num(context[i - 1].value);
+                right = new nodes.Num(context[i + 1].value);
+                
                 operation = operationMap.get(context[i].name);
             }
         }
 
-        return new nodes.BinaryOperator(context, operation, left, right);
+        return new nodes.BinaryOperatorExpression(operation, left, right);
     });
     cfg.push(rule);
 
@@ -220,6 +215,6 @@ module.exports.parse = function(tokenStream) {
 
 module.exports.print = function(parseTree) {
     for(let i = 0; i < tree.length; i++) {
-        tree[i].print();
+        console.log(tree[i].print(0));
     }
 }
