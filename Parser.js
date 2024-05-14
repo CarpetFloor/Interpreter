@@ -37,6 +37,32 @@ let cfg = [];
 // the actual CFG rules are defined here
 function generateCFG() {
     let rule = null;
+
+    rule = new Rule("statement", [
+        new Terminal("NUMTYPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new NonTerminal("term"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        console.log("NT");
+        console.log(nonTerminals);
+
+        let type = terminals[0];
+
+        let varName = terminals[1];
+
+        let value = [];
+        parseLoop(value, nonTerminals[3], "expression");
+
+        return new nodes.DeclarationAssignment(
+            type, 
+            varName, 
+            value[0]
+        );
+    });
+    cfg.push(rule);
     
     rule = new Rule("expression", [
         new NonTerminal("expression"), 
@@ -44,7 +70,7 @@ function generateCFG() {
         new NonTerminal("expression")
     ], 
     function(nonTerminals, terminals) {
-        console.log("Parsed expression");
+        console.log("Parsed plus expression");
 
         let left = [];
         parseLoop(left, nonTerminals[0], "expression");
@@ -66,7 +92,7 @@ function generateCFG() {
         new NonTerminal("expression")
     ], 
     function(nonTerminals, terminals) {
-        console.log("Parsed expression");
+        console.log("Parsed minus expression");
 
         let left = [];
         parseLoop(left, nonTerminals[0], "expression");
@@ -86,7 +112,7 @@ function generateCFG() {
         new NonTerminal("term")
     ], 
     function(nonTerminals, terminals) {
-        console.log("Parsed expression");
+        console.log("Parsed expression to be term");
         let all = [];
         parseLoop(all, nonTerminals[0], "term");
 
@@ -98,9 +124,12 @@ function generateCFG() {
         new NonTerminal("factor")
     ], 
     function(nonTerminals, terminals) {
-        console.log("Parsed term");
+        console.log("Parsed term to be factor");
         if(nonTerminals[0].length == 1) {
-            return [new nodes.Num(nonTerminals[0][0].value)];
+            return new nodes.Num(nonTerminals[0][0].value);
+        }
+        else {
+            throw new Error("Parsing failed");
         }
     }
     )
@@ -114,11 +143,18 @@ function parseLoop(addTo, context, nonTerminal) {
 
     // go through every rule in cfg to find a match
     while(index < cfg.length) {
+        console.log("-----");
+        console.log("checking");
+        console.log(context);
+        console.log("nonTerminal = " + nonTerminal);
+
         if(
             (cfg[index].name == nonTerminal) || 
             (nonTerminal == "")
         ) {
             let parts = cfg[index].parts;
+            console.log("parts");
+            console.log(parts);
             
             let foundMatch = false;
 
@@ -164,15 +200,18 @@ function parseLoop(addTo, context, nonTerminal) {
                     nonTerminals.push(current);
                 }
 
-                if(foundTerminal) {
+                if(foundTerminal && (terminals.length == terminalsCheck.length)) {
+                    console.log("found match");
                     foundMatch = true;
                     addTo.push(cfg[index].generateNode(nonTerminals, terminals));
                 }
                 else {
+                    console.log("no match");
                     foundMatch = false;
                 }
             }
             else {
+                console.log("found match");
                 nonTerminals.push(context);
                 
                 foundMatch = true;
@@ -186,8 +225,11 @@ function parseLoop(addTo, context, nonTerminal) {
             }
         }
         else {
+            console.log("no match");
             ++index
         }
+
+        console.log("\n");
     }
 }
 
@@ -208,20 +250,20 @@ let tree = [];
 module.exports.parse = function(tokenStream) {
     parseLoop(tree, tokenStream, "");
 
-    // for(let i = 0; i < tree.length; i++) {
-    //     debugPrint(tree[i], 0);
-    // }
+    console.log("\n");
+    for(let i = 0; i < tree.length; i++) {
+        debugPrint(tree[i], 0);
+    }
 }
 
 module.exports.print = function(parseTree) {
     for(let i = 0; i < tree.length; i++) {
-        try {
-            console.log(tree[i].print(0));
-        }
-        catch(exception) {
-            console.error("FAILED TO PARSE:");
-            console.log("AT: " + tree[i]);
-            console.log(exception);
-        }
+        console.log(tree[i].print(0));
+        // try {
+        // }
+        // catch(exception) {
+        //     console.error("\nFAILED TO PARSE:");
+        //     console.log(tree[i]);
+        // }
     }
 }
