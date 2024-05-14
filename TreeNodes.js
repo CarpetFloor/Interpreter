@@ -1,5 +1,5 @@
 function getIndent(level) {
-    return ("..").repeat(level);
+    return ("....").repeat(level);
 }
 
 module.exports.Expression = class Expression {

@@ -193,9 +193,6 @@ function generateCFG() {
 
         let left = [];
         parseLoop(left, nonTerminals[0], "expression");
-        console.log("=====");
-        console.log("AFTER");
-        console.log(left);
 
         let right = [];
         parseLoop(right, nonTerminals[1], "expression");
@@ -215,9 +212,9 @@ function generateCFG() {
     ], 
     function(nonTerminals, terminals) {
         console.log("Parsed expression");
-        
+
         let left = [];
-        parseLoop(left, nonTerminals[0]), "expression";
+        parseLoop(left, nonTerminals[0], "expression");
 
         let right = [];
         parseLoop(right, nonTerminals[1], "expression");
@@ -237,7 +234,6 @@ function generateCFG() {
         console.log("Parsed expression");
         let all = [];
         parseLoop(all, nonTerminals[0], "term");
-        console.log("HERE IS THE FUCKING MESSAE " + all.length);
 
         return new nodes.Term(all[0]);
     });
@@ -248,8 +244,9 @@ function generateCFG() {
     ], 
     function(nonTerminals, terminals) {
         console.log("Parsed term");
-
-        return [new nodes.Num(nonTerminals[0][0].value)];
+        if(nonTerminals[0].length == 1) {
+            return [new nodes.Num(nonTerminals[0][0].value)];
+        }
     }
     )
     cfg.push(rule);
@@ -281,10 +278,8 @@ function parseLoop(addTo, context, nonTerminal) {
             (nonTerminal == "")
         ) {
             let parts = cfg[index].parts;
-
-            
-                console.log("PARTS:");
-                console.log(parts);
+            console.log("PARTS:");
+            console.log(parts);
             
             let foundMatch = false;
 
@@ -313,11 +308,16 @@ function parseLoop(addTo, context, nonTerminal) {
             if(terminalsCheck.length > 0) {
                 let current = [];
                 
+                let foundTerminal = false;
                 for(let i = 0; i < context.length; i++) {
                     // console.log("\n-----\ncurrent context token:");
                     // console.log(context[i]);
 
-                    if(terminalsCheck.includes(context[i].name)) {
+                    if(
+                        terminalsCheck.includes(context[i].name) && 
+                        terminals.length < terminalsCheck.length
+                    ) {
+                        foundTerminal = true;
                         // console.log("part IS a terminal");
 
                         let value = (context[i].value == null) ? 
@@ -342,10 +342,7 @@ function parseLoop(addTo, context, nonTerminal) {
                 console.log(nonTerminals);
 
                 console.log("\n");
-                if(
-                    (terminals.length == terminalsCheck.length) && 
-                    (nonTerminals.length == nonTerminalsCheck.length)
-                ) {
+                if(foundTerminal) {
                     console.log("FOUND MATCH");
                     
                     foundMatch = true;
