@@ -137,6 +137,8 @@ function generateCFG() {
 }
 generateCFG();
 
+let parseAgainAtRootLevel = false;
+let parseAgainAtRootLevelIndex = 0;
 
 function parseLoop(addTo, context, nonTerminal) {
     let index = 0;
@@ -192,8 +194,16 @@ function parseLoop(addTo, context, nonTerminal) {
 
                         current = [];
                     }
-                    else {
+                    else if(terminals.length < terminalsCheck.length) {
                         current.push(context[i]);
+                    }
+                    else {
+                        if(nonTerminal == "") {
+                            parseAgainAtRootLevel = true;
+                            parseAgainAtRootLevelIndex += i;
+                            
+                            break;
+                        }
                     }
                 }
                 if(current.length > 0) {
@@ -248,7 +258,28 @@ function debugPrint(toPrint, level) {
 
 let tree = [];
 module.exports.parse = function(tokenStream) {
+    console.log("token stream:");
+    
     parseLoop(tree, tokenStream, "");
+
+    while(parseAgainAtRootLevel) {
+        parseAgainAtRootLevel = false;
+
+        let context = [];
+        for(let i = parseAgainAtRootLevelIndex; i < tokenStream.length; i++) {
+            context.push(tokenStream[i]);
+        }
+
+        console.log("=====");
+        console.log("ROOT CONTEXT");
+        console.log(parseAgainAtRootLevelIndex);
+        console.log(context);
+        console.log("=====");
+
+        parseLoop(tree, context, "");
+    }
+
+    console.log("\n\nAGAIN?", parseAgainAtRootLevel)
 
     console.log("\n");
     for(let i = 0; i < tree.length; i++) {
