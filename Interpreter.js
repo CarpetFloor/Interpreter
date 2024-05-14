@@ -28,7 +28,7 @@ fs.readFile(programFile, "utf-8", function(error, data) {
         const parseTree = parser.parse(tokens);
         // console.log("FINISHED PARSING");
 
-        // console.log("PARSE TREE:");
-        // parser.print();
+        console.log("PARSE TREE:");
+        parser.print();
     }
 });

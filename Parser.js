@@ -237,6 +237,7 @@ function generateCFG() {
         console.log("Parsed expression");
         let all = [];
         parseLoop(all, nonTerminals[0], "term");
+        console.log("HERE IS THE FUCKING MESSAE " + all.length);
 
         return new nodes.Term(all[0]);
     });
@@ -246,9 +247,9 @@ function generateCFG() {
         new NonTerminal("factor")
     ], 
     function(nonTerminals, terminals) {
-        console.log("Parsed term")
+        console.log("Parsed term");
 
-        return new nodes.Num(nonTerminals[0][0].value);
+        return [new nodes.Num(nonTerminals[0][0].value)];
     }
     )
     cfg.push(rule);
@@ -393,11 +394,16 @@ function parseLoop(addTo, context, nonTerminal) {
 //     return [false];
 // }
 
-function tempPrint(toPrint, level) {
+function debugPrint(toPrint, level) {
     console.log(("....").repeat(level), toPrint);
 
-    for(let i = 0; i < toPrint.children.length; i++) {
-        tempPrint(toPrint.children[i], level + 1);
+    try {
+        for(let i = 0; i < toPrint.children.length; i++) {
+            debugPrint(toPrint.children[i], level + 1);
+        }
+    }
+    catch {
+        console.log(("....").repeat(level + 1) + " no children");
     }
 }
 
@@ -406,9 +412,12 @@ let debugCFG = false;
 module.exports.parse = function(tokenStream) {
     parseLoop(tree, tokenStream, "");
 
+    console.log("\n\nTREE ARRAY:");
+    console.log(tree);
+
     console.log("\n\nTREE:");
     for(let i = 0; i < tree.length; i++) {
-        tempPrint(tree[i], 0);
+        debugPrint(tree[i], 0);
     }
     // console.log(tree);
 
@@ -441,6 +450,4 @@ module.exports.print = function(parseTree) {
             console.log(exception);
         }
     }
-    
-    let a = 5;
 }

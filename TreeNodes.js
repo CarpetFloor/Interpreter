@@ -7,18 +7,10 @@ module.exports.Expression = class Expression {
         this.children = children;
     }
     print(level) {
-        let output = (
-            getIndent(level) + 
-            "Expression! "
-        );
-        output += "\n";
+        let output = "\n" + getIndent(level) + "Expression! ";
 
         for(let i = 0; i < this.children.length; i++) {
-            output += "...." + this.left;
-
-            if(i < this.children.length - 1) {
-                output += "\n";   
-            }
+            output += this.children[i].print(level + 1);
         }
 
         return output;
@@ -30,18 +22,10 @@ module.exports.Term = class Term {
         this.children = children;
     }
     print(level) {
-        let output = (
-            getIndent(level) + 
-            "Expression! "
-        );
-        output += "\n";
+        let output = "\n" + getIndent(level) + "Term! ";
 
         for(let i = 0; i < this.children.length; i++) {
-            output += "...." + this.left;
-
-            if(i < this.children.length - 1) {
-                output += "\n";   
-            }
+            output += this.children[i].print(level + 1);
         }
 
         return output;
@@ -62,15 +46,15 @@ module.exports.BinaryOperatorExpression = class BinaryOperatorExpression {
 
     print(level) {
         let output = (
+            "\n" + 
             getIndent(level) + 
             "BinaryOperatorExpression! " + 
             this.left.constructor.name + " " + 
             this.operation + " " + 
             this.right.constructor.name
         );
-        output += "\n";
 
-        output += this.left.print(level + 1) + "\n";
+        output += this.left.print(level + 1);
         output += this.right.print(level + 1);
 
         return output;
@@ -83,9 +67,6 @@ module.exports.Num = class Num {
     }
 
     print(level) {
-        return (
-            getIndent(level) + 
-            "Num! " + this.value
-        );
+        return "\n" + getIndent(level) + "Num! " + this.value;
     }
 }
