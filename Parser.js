@@ -1,3 +1,5 @@
+// make sure checking if non terminal equals non terminal listed in cfg rule
+
 let nodes = require("./TreeNodes");
 
 // context-free grammar class
@@ -177,8 +179,11 @@ let cfg = [];
 
 // the actual CFG rules are defined here
 function generateCFG() {
-    let name = "expression";
-    let rule = new Rule(name, [
+    let name = "";
+    let rule = null;
+    
+    name = "expression";
+    rule = new Rule(name, [
         [
             new NonTerminal(name), 
             new Terminal("PLUS"), 
@@ -197,6 +202,25 @@ function generateCFG() {
     cfg.push(rule);
 
     name = "term";
+    rule = new Rule(name, [
+        [
+            new NonTerminal(name), 
+            new Terminal("TIMES"), 
+            new NonTerminal(name)
+        ], 
+        [
+            new NonTerminal(name), 
+            new Terminal("DIVIDES"), 
+            new NonTerminal(name)
+        ], 
+        [
+            new NonTerminal("factor")
+        ]
+    ], 
+    function(context) {return (new GenerateNode(context)).expression();});
+    cfg.push(rule);
+
+    name = "fator";
     rule = new Rule(name, [
         [
             new NonTerminal(name), 

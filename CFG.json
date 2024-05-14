@@ -1,0 +1,1 @@
+{"statements":[{"name":"stmt","rules":["Numtype Id = Num","Id = Num"]},{"name":"expression","rules":["expression + expression","expression - expression","term"]},{"name":"term","rules":["term * term","term / term","factor"]},{"name":"factor","rules":["Num"]}]}

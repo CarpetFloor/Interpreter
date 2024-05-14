@@ -1,1 +1,7 @@
-let a = 5;
+num a = 5;
+num b = 1 + 2;
+num c = -1;
+
+c = a * b;
+
+print(c);
