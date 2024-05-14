@@ -2,11 +2,11 @@ let fs = require("fs");
 let lexer = require("./Lexer");
 let parser = require("./Parser");
 
-let programFile = "";
+let programFile = "SamplePrograms/Math.lang";
 
-if(process.argv.length >= 3) {
-    programFile = process.argv[2];
-}
+// if(process.argv.length >= 3) {
+//     programFile = process.argv[2];
+// }
 
 fs.readFile(programFile, "utf-8", function(error, data) {
     if(error) {
@@ -28,7 +28,7 @@ fs.readFile(programFile, "utf-8", function(error, data) {
         const parseTree = parser.parse(tokens);
         // console.log("FINISHED PARSING");
 
-        console.log("PARSE TREE:");
-        parser.print();
+        // console.log("PARSE TREE:");
+        // parser.print();
     }
 });

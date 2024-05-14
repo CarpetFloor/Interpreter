@@ -31,6 +31,7 @@ class NonTerminal {
     }
 }
 
+/*
 let cfgFoundDebug = true;
 class GenerateNode {
     constructor(context) {
@@ -173,182 +174,260 @@ class GenerateNode {
         }
     }
 }
+*/
 
 // create context-free grammar
 let cfg = [];
 
 // the actual CFG rules are defined here
 function generateCFG() {
-    let name = "";
     let rule = null;
     
-    name = "expression";
-    rule = new Rule(name, [
-        [
-            new NonTerminal(name), 
-            new Terminal("PLUS"), 
-            new NonTerminal(name)
-        ], 
-        [
-            new NonTerminal(name), 
-            new Terminal("MINUS"), 
-            new NonTerminal(name)
-        ], 
-        [
-            new NonTerminal("term")
-        ]
+    rule = new Rule("expression", [
+        new NonTerminal("expression"), 
+        new Terminal("PLUS"), 
+        new NonTerminal("expression")
     ], 
-    function(context) {return (new GenerateNode(context)).expression();});
+    function(nonTerminals, terminals) {
+        console.log("Parsed expression");
+
+        let left = [];
+        parseLoop(left, nonTerminals[0], "expression");
+        console.log("=====");
+        console.log("AFTER");
+        console.log(left);
+
+        let right = [];
+        parseLoop(right, nonTerminals[1], "expression");
+        
+        return new nodes.BinaryOperatorExpression(
+            "+", 
+            left[0], 
+            right[0]
+        );
+    });
     cfg.push(rule);
 
-    name = "term";
-    rule = new Rule(name, [
-        [
-            new NonTerminal(name), 
-            new Terminal("TIMES"), 
-            new NonTerminal(name)
-        ], 
-        [
-            new NonTerminal(name), 
-            new Terminal("DIVIDES"), 
-            new NonTerminal(name)
-        ], 
-        [
-            new NonTerminal("factor")
-        ]
+    rule = new Rule("expression", [
+        new NonTerminal("expression"), 
+        new Terminal("MINUS"), 
+        new NonTerminal("expression")
     ], 
-    function(context) {return (new GenerateNode(context)).expression();});
+    function(nonTerminals, terminals) {
+        console.log("Parsed expression");
+        
+        let left = [];
+        parseLoop(left, nonTerminals[0]), "expression";
+
+        let right = [];
+        parseLoop(right, nonTerminals[1], "expression");
+        
+        return new nodes.BinaryOperatorExpression(
+            "-", 
+            left[0], 
+            right[0]
+        );
+    });
     cfg.push(rule);
 
-    name = "fator";
-    rule = new Rule(name, [
-        [
-            new NonTerminal(name), 
-            new Terminal("TIMES"), 
-            new NonTerminal(name)
-        ], 
-        [
-            new NonTerminal(name), 
-            new Terminal("DIVIDES"), 
-            new NonTerminal(name)
-        ], 
-        [
-            new NonTerminal("factor")
-        ]
+    rule = new Rule("expression", [
+        new NonTerminal("term")
     ], 
-    function(context) {return (new GenerateNode(context)).expression();});
+    function(nonTerminals, terminals) {
+        console.log("Parsed expression");
+        let all = [];
+        parseLoop(all, nonTerminals[0], "term");
+
+        return new nodes.Term(all[0]);
+    });
+    cfg.push(rule);
+
+    rule = new Rule("term", [
+        new NonTerminal("factor")
+    ], 
+    function(nonTerminals, terminals) {
+        console.log("Parsed term")
+
+        return new nodes.Num(nonTerminals[0][0].value);
+    }
+    )
     cfg.push(rule);
 }
 generateCFG();
 
-let tree = [];
-let debugCFG = false;
-module.exports.parse = function(tokenStream) {
+// for(let i = 0; i < cfg.length; i++) {
+//     console.log("++");
+//     console.log(cfg[i].name);
+//     console.log("++");
+// }
+
+
+function parseLoop(addTo, context, nonTerminal) {
+    console.log("parsing");
     let index = 0;
-    let context = tokenStream;
 
     // go through every rule in cfg to find a match
     while(index < cfg.length) {
-        let rules = cfg[index].parts;
+        console.log("_____\nCHECKING:");
+        console.log(context);
+        console.log("NON-TERMINAL: " + nonTerminal);
 
-        if(debugCFG) {
-            console.log("\nRULES:");
-            console.log(rules);
-            console.log("__________");
-        }
-        
-        let foundMatch = false;
-        
-        /**
-         * Go through every part of the current rule. A part is the stuff between the ors. 
-         * For instance, given the following rule:
-         * expression -> expression PLUS expression | expression MINUS expression | term
-         * there would be three parts: the plus part, the minus part, and the term part.
-         */
-        for(let currentPart = 0; currentPart < rules.length; currentPart++) {
+        console.log((cfg[index].name == nonTerminal) || (nonTerminal == ""));
+        console.log(cfg[index].name);
+
+        if(
+            (cfg[index].name == nonTerminal) || 
+            (nonTerminal == "")
+        ) {
+            let parts = cfg[index].parts;
+
+            
+                console.log("PARTS:");
+                console.log(parts);
+            
+            let foundMatch = false;
+
             let terminalsCheck = [];
+            let nonTerminalsCheck = [];
 
-            // get all of the terminals in the current part of the current rule
-            for(let indexOfCurrentPart = 0; indexOfCurrentPart < rules[currentPart].length; indexOfCurrentPart++) {
-                if(debugCFG) {
-                    console.log(rules[currentPart][indexOfCurrentPart]);
+            for(let i = 0; i < parts.length; i++) {
+                if(parts[i].constructor.name == "Terminal") {
+                    terminalsCheck.push(parts[i].tokenName);
                 }
-
-                if(rules[currentPart][indexOfCurrentPart].constructor.name == "Terminal") {
-                    terminalsCheck.push(rules[currentPart][indexOfCurrentPart].tokenName);
+                else {
+                    nonTerminalsCheck.push(parts[i].name);
                 }
             }
+            
+            if(debugCFG) {
+                console.log("terminals check:");
+                console.log(terminalsCheck);
+                console.log("non terminals check:");
+                console.log(nonTerminalsCheck);
+            }
 
-            /**
-             * If there are any terminals that in the current part of the current rule, make sure 
-             * that the current context contains all of those terminals
-             */
+            let terminals = [];
+            let nonTerminals = [];
+
             if(terminalsCheck.length > 0) {
-                if(debugCFG) {
-                    console.log("\nCONTEXT:");
-                    console.log(context);
-
-                    console.log("checking terminals:");
-                    console.log(terminalsCheck);
-                }
-
+                let current = [];
+                
                 for(let i = 0; i < context.length; i++) {
+                    // console.log("\n-----\ncurrent context token:");
+                    // console.log(context[i]);
+
                     if(terminalsCheck.includes(context[i].name)) {
-                        if(debugCFG) {
-                            console.log("FOUND " + context[i].name);
-                        }
+                        // console.log("part IS a terminal");
 
-                        let index = terminalsCheck.indexOf(context[i].name);
-                        terminalsCheck.splice(index, 1);
+                        let value = (context[i].value == null) ? 
+                            context[i].name : context[i].value;
+                        
+                        terminals.push(value);
+                        nonTerminals.push(current);
 
-                        if(debugCFG) {
-                            console.log("terminals:");
-                            console.log(terminalsCheck);
-                        }
+                        current = [];
+                    }
+                    else {
+                        current.push(context[i]);
+                        // console.log("part is NOT a terminal");
                     }
                 }
+                if(current.length > 0) {
+                    nonTerminals.push(current);
+                }
 
-                if(terminalsCheck.length == 0) {
-                    if(debugCFG) {
-                        console.log("MATCH");
-                    }
+                console.log("\nTERMINALS / NON-TERMINALS:");
+                console.log(terminals);
+                console.log(nonTerminals);
 
-                    foundMatch = true;
-                    tree.push(cfg[index].generateNode(context));
+                console.log("\n");
+                if(
+                    (terminals.length == terminalsCheck.length) && 
+                    (nonTerminals.length == nonTerminalsCheck.length)
+                ) {
+                    console.log("FOUND MATCH");
                     
-                    break;
+                    foundMatch = true;
+                    addTo.push(cfg[index].generateNode(nonTerminals, terminals));
                 }
-                else if(debugCFG) {
+                else {
                     console.log("NO MATCH");
+                    
+                    foundMatch = false;
                 }
             }
-            /**
-             * When there are no terminals in the current part of the current rule. 
-             * Just have to simply create a new node with the same context as current context.
-             */
             else {
-                if(debugCFG) {
-                    console.log("SINGLE NON-TERMINAL MATCH");
-                }
+                console.log("there are no terminals");
 
+                nonTerminals.push(context);
+                
                 foundMatch = true;
-                tree.push(cfg[index].generateNode(context));
+                addTo.push(cfg[index].generateNode(nonTerminals, terminals));
+            }
+
+            ++index;
+
+            if(foundMatch) {
                 break;
             }
-
-            if(debugCFG) {
-                console.log(tree);
-
-                console.log("-----");
-            }
         }
-
-        ++index;
-        
-        if(foundMatch) {
-            break;
+        else {
+            ++index
         }
     }
+}
+
+// function checkParseAgain(check) {
+//     for(let i = 0; i < check.children.length; i++) {
+//         if(check.children[i].constructor.name == "Token") {
+//             return [true];
+//         }
+//         else {
+//             let innerCheck = checkParseAgain(check.children[i]);
+//             if(innerCheck) {
+//                 return true;
+//             }
+//         }
+//     }
+
+//     return [false];
+// }
+
+function tempPrint(toPrint, level) {
+    console.log(("....").repeat(level), toPrint);
+
+    for(let i = 0; i < toPrint.children.length; i++) {
+        tempPrint(toPrint.children[i], level + 1);
+    }
+}
+
+let tree = [];
+let debugCFG = false;
+module.exports.parse = function(tokenStream) {
+    parseLoop(tree, tokenStream, "");
+
+    console.log("\n\nTREE:");
+    for(let i = 0; i < tree.length; i++) {
+        tempPrint(tree[i], 0);
+    }
+    // console.log(tree);
+
+    // check if need to parse again
+    // let again = [];
+
+    // for(let i = 0; i < tree.length; i++) {
+    //     again = checkParseAgain(tree[i]);
+
+    //     if(again[0]) {
+    //         break;
+    //     }
+    // }
+
+    // if(again[0]) {
+
+    // }
+
+    // console.log("Again?", again);
 }
 
 module.exports.print = function(parseTree) {
@@ -362,4 +441,6 @@ module.exports.print = function(parseTree) {
             console.log(exception);
         }
     }
+    
+    let a = 5;
 }
