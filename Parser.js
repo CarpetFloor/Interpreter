@@ -44,17 +44,21 @@ function generateCFG() {
         new NonTerminal("statementlist")
     ], 
     function(nonTerminals, terminals) {
+        console.log("RECEIVING");
+        console.log(nonTerminals);
+
         return new nodes.StatementList(nonTerminals);
     });
-    cfg.push(rule);
+    // cfg.push(rule);
 
     rule = new Rule("statementlist", [
         new NonTerminal("statement")
     ], 
     function(nonTerminals, terminals) {
+        console.log("SECOND");
         return new nodes.StatementList(nonTerminals);
     });
-    cfg.push(rule);
+    // cfg.push(rule);
 
     rule = new Rule("statement", [
         new Terminal("NUMTYPE"), 
@@ -166,7 +170,7 @@ function generateCFG() {
 generateCFG();
 
 let debugParseLoop = false;
-function parseLoop(addTo, context, nonTerminal) {
+function parseLoop(context, nonTerminal) {
     let index = 0;
 
     // go through every rule in cfg to find a match
@@ -221,9 +225,9 @@ function parseLoop(addTo, context, nonTerminal) {
                 let nonTerminals = [];
 
                 for(let i = 0; i < parts.length; i++) {
-                    let check = parseLoop(null, actualContext, parts[0].name);
+                    let check = parseLoop(actualContext, parts[0].name);
 
-                    if(check != undefined) {
+                    if((check != undefined) && (parts[i].name != nonTerminal)) {
                         nonTerminals.push(check[1]);
                         ++check[0];
                         lastContextIndex += check[0];
@@ -253,12 +257,26 @@ function parseLoop(addTo, context, nonTerminal) {
                 }
             }
             else {
+                let terminalsCount = 0;
+                for(let i = 0; i < parts.length; i++) {
+                    if(parts[i].constructor.name == "Terminal") {
+                        ++terminalsCount;
+                    }
+                }
+
                 lastContextIndex = 0;
+
                 for(let i = 0; i < context.length; i++) {
+                    if(partIndex > parts.length - 1) {
+                        foundMatch = false;
+                        
+                        break;
+                    }
+
                     let partType = parts[partIndex].constructor.name;
                     
                     if(debugParseLoop) {
-                        console.log("context, parts");
+                        console.log("context, part");
                         console.log("partIndex", partIndex);
                         console.log("partType", partType)
                         console.log(context[i])
@@ -283,9 +301,6 @@ function parseLoop(addTo, context, nonTerminal) {
                             }
 
                             ++partIndex;
-                            if(partIndex > parts.length - 1) {
-                                break;
-                            }
 
                             ++lastContextIndex;
                         }
@@ -302,7 +317,12 @@ function parseLoop(addTo, context, nonTerminal) {
                     }
                 }
 
-                if(debugParseLoop) {
+                if(terminals.length != terminalsCount) {
+                    foundMatch = false;
+
+                    ++index;
+                }
+                else if(debugParseLoop) {
                     console.log("terminals");
                     console.log(terminals);
                     console.log("nonTerminals");
@@ -327,7 +347,11 @@ function parseLoop(addTo, context, nonTerminal) {
             }
 
             ++index;
-            console.log("\n");
+            
+            if(debugParseLoop) {
+                console.log("\n");
+            }
+
         }
     }
 }
@@ -347,12 +371,12 @@ function debugPrint(toPrint, level) {
 
 let tree = [];
 module.exports.parse = function(tokenStream) {
-    let check = parseLoop(tree, tokenStream, "");
-    if(check != undefined) {
-        tree.push(check[1]);
-    }
+    let check = parseLoop(tokenStream, "");
 
     console.log("\n");
+    console.log("original check");
+    console.log(check);
+
     for(let i = 0; i < tree.length; i++) {
         debugPrint(tree[i], 0);
     }
