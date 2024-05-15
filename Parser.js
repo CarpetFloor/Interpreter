@@ -42,103 +42,51 @@ function generateCFG() {
         new Terminal("NUMTYPE"), 
         new Terminal("ID"), 
         new Terminal("ASSIGN"), 
-        new NonTerminal("term"), 
+        new Terminal("NUM"), 
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        console.log("NT");
+        console.log("RECEIVING, NT / T");
         console.log(nonTerminals);
+        console.log(terminals);
 
         let type = terminals[0];
-
         let varName = terminals[1];
-
-        let value = [];
-        parseLoop(value, nonTerminals[3], "expression");
-
+        let value = new nodes.Num(terminals[3]);
+        
         return new nodes.DeclarationAssignment(
             type, 
             varName, 
-            value[0]
-        );
+            value
+        )
     });
     cfg.push(rule);
-    
-    rule = new Rule("expression", [
-        new NonTerminal("expression"), 
-        new Terminal("PLUS"), 
-        new NonTerminal("expression")
+
+    rule = new Rule("statement", [
+        new Terminal("STRINGTYPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("STRING"), 
+        new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        console.log("Parsed plus expression");
+        console.log("RECEIVING, NT / T");
+        console.log(nonTerminals);
+        console.log(terminals);
 
-        let left = [];
-        parseLoop(left, nonTerminals[0], "expression");
-
-        let right = [];
-        parseLoop(right, nonTerminals[1], "expression");
+        let type = terminals[0];
+        let varName = terminals[1];
+        let value = new nodes.Num(terminals[3]);
         
-        return new nodes.BinaryOperatorExpression(
-            "+", 
-            left[0], 
-            right[0]
-        );
+        return new nodes.DeclarationAssignment(
+            type, 
+            varName, 
+            value
+        )
     });
-    cfg.push(rule);
-
-    rule = new Rule("expression", [
-        new NonTerminal("expression"), 
-        new Terminal("MINUS"), 
-        new NonTerminal("expression")
-    ], 
-    function(nonTerminals, terminals) {
-        console.log("Parsed minus expression");
-
-        let left = [];
-        parseLoop(left, nonTerminals[0], "expression");
-
-        let right = [];
-        parseLoop(right, nonTerminals[1], "expression");
-        
-        return new nodes.BinaryOperatorExpression(
-            "-", 
-            left[0], 
-            right[0]
-        );
-    });
-    cfg.push(rule);
-
-    rule = new Rule("expression", [
-        new NonTerminal("term")
-    ], 
-    function(nonTerminals, terminals) {
-        console.log("Parsed expression to be term");
-        let all = [];
-        parseLoop(all, nonTerminals[0], "term");
-
-        return new nodes.Term(all[0]);
-    });
-    cfg.push(rule);
-
-    rule = new Rule("term", [
-        new NonTerminal("factor")
-    ], 
-    function(nonTerminals, terminals) {
-        console.log("Parsed term to be factor");
-        if(nonTerminals[0].length == 1) {
-            return new nodes.Num(nonTerminals[0][0].value);
-        }
-        else {
-            throw new Error("Parsing failed");
-        }
-    }
-    )
     cfg.push(rule);
 }
 generateCFG();
-
-let parseAgainAtRootLevel = false;
-let parseAgainAtRootLevelIndex = 0;
 
 function parseLoop(addTo, context, nonTerminal) {
     let index = 0;
@@ -149,6 +97,10 @@ function parseLoop(addTo, context, nonTerminal) {
         console.log("checking");
         console.log(context);
         console.log("nonTerminal = " + nonTerminal);
+        
+        let foundMatch = true;
+        let nonTerminals = [];
+        let terminals = [];
 
         if(
             (cfg[index].name == nonTerminal) || 
@@ -157,89 +109,75 @@ function parseLoop(addTo, context, nonTerminal) {
             let parts = cfg[index].parts;
             console.log("parts");
             console.log(parts);
-            
-            let foundMatch = false;
 
-            let terminalsCheck = [];
-            let nonTerminalsCheck = [];
+            let currentNonTerminal = [];
+            let partIndex = 0;
 
-            for(let i = 0; i < parts.length; i++) {
-                if(parts[i].constructor.name == "Terminal") {
-                    terminalsCheck.push(parts[i].tokenName);
-                }
-                else {
-                    nonTerminalsCheck.push(parts[i].name);
-                }
-            }
+            console.log("__________");
 
-            let terminals = [];
-            let nonTerminals = [];
-
-            if(terminalsCheck.length > 0) {
-                let current = [];
+            for(let i = 0; i < context.length; i++) {
+                let partType = parts[partIndex].constructor.name;
                 
-                let foundTerminal = false;
-                for(let i = 0; i < context.length; i++) {
-                    if(
-                        terminalsCheck.includes(context[i].name) && 
-                        terminals.length < terminalsCheck.length
-                    ) {
-                        foundTerminal = true;
+                console.log("context, parts");
+                console.log("partIndex", partIndex);
+                console.log("partType", partType)
+                console.log(context[i])
+                console.log(parts[partIndex]);
+                console.log("-----");
+                
+                if(partType == "Terminal") {
+                    if(parts[partIndex].tokenName == context[i].name) {
+                        foundMatch = true;
 
-                        let value = (context[i].value == null) ? 
-                            context[i].name : context[i].value;
-                        
-                        terminals.push(value);
-                        nonTerminals.push(current);
+                        if(currentNonTerminal.length > 0) {
+                            nonTerminals.push(currentNonTerminal);
+                            currentNonTerminal = [];
+                        }
 
-                        current = [];
-                    }
-                    else if(terminals.length < terminalsCheck.length) {
-                        current.push(context[i]);
-                    }
-                    else {
-                        if(nonTerminal == "") {
-                            parseAgainAtRootLevel = true;
-                            parseAgainAtRootLevelIndex += i;
-                            
+                        if(context[i].value != null) {
+                            terminals.push(context[i].value);
+                        }
+                        else {
+                            terminals.push(context[i].name);
+                        }
+
+                        ++partIndex;
+                        if(partIndex > parts.length - 1) {
                             break;
                         }
                     }
-                }
-                if(current.length > 0) {
-                    nonTerminals.push(current);
-                }
+                    else {
+                        foundMatch = false;
 
-                if(foundTerminal && (terminals.length == terminalsCheck.length)) {
-                    console.log("found match");
-                    foundMatch = true;
-                    addTo.push(cfg[index].generateNode(nonTerminals, terminals));
+                        break;
+                    }
                 }
                 else {
-                    console.log("no match");
-                    foundMatch = false;
+                    currentNonTerminal.push(context[i]);
                 }
             }
-            else {
-                console.log("found match");
-                nonTerminals.push(context);
-                
-                foundMatch = true;
-                addTo.push(cfg[index].generateNode(nonTerminals, terminals));
-            }
 
-            ++index;
-
-            if(foundMatch) {
-                break;
-            }
+            console.log("terminals");
+            console.log(terminals);
+            console.log("nonTerminals");
+            console.log(nonTerminals);
         }
         else {
-            console.log("no match");
+            foundMatch = false;
             ++index
         }
 
-        console.log("\n");
+        if(foundMatch) {
+            console.log("found MATCH");
+
+            tree.push(cfg[index].generateNode(nonTerminals, terminals));
+            break;
+        }else {
+            console.log("did NOT find match");
+
+            ++index;
+            console.log("\n");
+        }
     }
 }
 
@@ -258,28 +196,7 @@ function debugPrint(toPrint, level) {
 
 let tree = [];
 module.exports.parse = function(tokenStream) {
-    console.log("token stream:");
-    
     parseLoop(tree, tokenStream, "");
-
-    while(parseAgainAtRootLevel) {
-        parseAgainAtRootLevel = false;
-
-        let context = [];
-        for(let i = parseAgainAtRootLevelIndex; i < tokenStream.length; i++) {
-            context.push(tokenStream[i]);
-        }
-
-        console.log("=====");
-        console.log("ROOT CONTEXT");
-        console.log(parseAgainAtRootLevelIndex);
-        console.log(context);
-        console.log("=====");
-
-        parseLoop(tree, context, "");
-    }
-
-    console.log("\n\nAGAIN?", parseAgainAtRootLevel)
 
     console.log("\n");
     for(let i = 0; i < tree.length; i++) {

@@ -232,9 +232,10 @@ function Token(name, value) {
 }
 
 function checkForSpecialValue(tokenName, value) {
+    console.log(tokenName, value);
     switch(tokenName) {
         case "STRING":
-            let after = value.replaceAll(
+            let after = value.replace(
                 /["']/g, 
                 ""
             );
