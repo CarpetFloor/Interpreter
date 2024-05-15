@@ -32,6 +32,32 @@ module.exports.DeclarationAssignment = class DeclarationAssignment {
     }
 }
 
+module.exports.Assignment = class Assignement {
+    constructor(varName, value) {
+        this.children = [];
+
+        this.varName = varName;
+        this.value = value;
+
+        this.children.push(value);
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Assignment! " + 
+            "varName: " + this.varName + ", "
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
+
 // types
 
 module.exports.Num = class Num {

@@ -1,5 +1,6 @@
 // make sure checking if non terminal equals non terminal listed in cfg rule
 
+const { debug } = require("console");
 let nodes = require("./TreeNodes");
 
 // context-free grammar class
@@ -46,10 +47,6 @@ function generateCFG() {
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        console.log("RECEIVING, NT / T");
-        console.log(nonTerminals);
-        console.log(terminals);
-
         let type = terminals[0];
         let varName = terminals[1];
         let value = new nodes.Num(terminals[3]);
@@ -70,13 +67,9 @@ function generateCFG() {
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        console.log("RECEIVING, NT / T");
-        console.log(nonTerminals);
-        console.log(terminals);
-
         let type = terminals[0];
         let varName = terminals[1];
-        let value = new nodes.Num(terminals[3]);
+        let value = new nodes.String(terminals[3]);
         
         return new nodes.DeclarationAssignment(
             type, 
@@ -85,18 +78,56 @@ function generateCFG() {
         )
     });
     cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("NUM"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let varName = terminals[0];
+        let value = new nodes.Num(terminals[2]);
+        
+        return new nodes.Assignment(
+            varName, 
+            value
+        )
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("STRING"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        console.log(terminals);
+        let varName = terminals[0];
+        let value = new nodes.String(terminals[2]);
+        
+        return new nodes.Assignment(
+            varName, 
+            value
+        )
+    });
+    cfg.push(rule);
 }
 generateCFG();
 
+let debugParseLoop = false;
 function parseLoop(addTo, context, nonTerminal) {
     let index = 0;
 
     // go through every rule in cfg to find a match
     while(index < cfg.length) {
-        console.log("-----");
-        console.log("checking");
-        console.log(context);
-        console.log("nonTerminal = " + nonTerminal);
+        if(debugParseLoop) {
+            console.log("-----");
+            console.log("checking");
+            console.log(context);
+            console.log("nonTerminal = " + nonTerminal);
+        }
         
         let foundMatch = true;
         let nonTerminals = [];
@@ -107,23 +138,30 @@ function parseLoop(addTo, context, nonTerminal) {
             (nonTerminal == "")
         ) {
             let parts = cfg[index].parts;
-            console.log("parts");
-            console.log(parts);
+
+            if(debugParseLoop) {
+                console.log("parts");
+                console.log(parts);
+            }
 
             let currentNonTerminal = [];
             let partIndex = 0;
 
-            console.log("__________");
+            if(debugParseLoop) {
+                console.log("__________");
+            }
 
             for(let i = 0; i < context.length; i++) {
                 let partType = parts[partIndex].constructor.name;
                 
-                console.log("context, parts");
-                console.log("partIndex", partIndex);
-                console.log("partType", partType)
-                console.log(context[i])
-                console.log(parts[partIndex]);
-                console.log("-----");
+                if(debugParseLoop) {
+                    console.log("context, parts");
+                    console.log("partIndex", partIndex);
+                    console.log("partType", partType)
+                    console.log(context[i])
+                    console.log(parts[partIndex]);
+                    console.log("-----");
+                }
                 
                 if(partType == "Terminal") {
                     if(parts[partIndex].tokenName == context[i].name) {
@@ -157,10 +195,12 @@ function parseLoop(addTo, context, nonTerminal) {
                 }
             }
 
-            console.log("terminals");
-            console.log(terminals);
-            console.log("nonTerminals");
-            console.log(nonTerminals);
+            if(debugParseLoop) {
+                console.log("terminals");
+                console.log(terminals);
+                console.log("nonTerminals");
+                console.log(nonTerminals);
+            }
         }
         else {
             foundMatch = false;
@@ -168,12 +208,16 @@ function parseLoop(addTo, context, nonTerminal) {
         }
 
         if(foundMatch) {
-            console.log("found MATCH");
+            if(debugParseLoop) {
+                console.log("found MATCH");
+            }
 
             tree.push(cfg[index].generateNode(nonTerminals, terminals));
             break;
         }else {
-            console.log("did NOT find match");
+            if(debugParseLoop) {
+                console.log("did NOT find match");
+            }
 
             ++index;
             console.log("\n");
