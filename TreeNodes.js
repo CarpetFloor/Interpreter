@@ -58,6 +58,29 @@ module.exports.Assignment = class Assignement {
     }
 }
 
+module.exports.Print = class Print {
+    constructor(value) {
+        this.children = [];
+        this.value = value;
+
+        this.children.push(value);
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Print! "
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
+
 // types
 
 module.exports.Num = class Num {

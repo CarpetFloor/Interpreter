@@ -113,6 +113,38 @@ function generateCFG() {
         )
     });
     cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("PRINT"), 
+        new Terminal("OPENPAREN"), 
+        new Terminal("NUM"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let value = new nodes.Num(terminals[2]);
+        
+        return new nodes.Print(
+            value
+        )
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("PRINT"), 
+        new Terminal("OPENPAREN"), 
+        new Terminal("STRING"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let value = new nodes.String(terminals[2]);
+        
+        return new nodes.Print(
+            value
+        )
+    });
+    cfg.push(rule);
 }
 generateCFG();
 
