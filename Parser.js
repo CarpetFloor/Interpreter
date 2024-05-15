@@ -39,6 +39,23 @@ let cfg = [];
 function generateCFG() {
     let rule = null;
 
+    rule = new Rule("statementlist", [
+        new NonTerminal("statement"), 
+        new NonTerminal("statementlist")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.StatementList(nonTerminals);
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statementlist", [
+        new NonTerminal("statement")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.StatementList(nonTerminals);
+    });
+    cfg.push(rule);
+
     rule = new Rule("statement", [
         new Terminal("NUMTYPE"), 
         new Terminal("ID"), 
@@ -164,6 +181,7 @@ function parseLoop(addTo, context, nonTerminal) {
         let foundMatch = true;
         let nonTerminals = [];
         let terminals = [];
+        let lastContextIndex = 0;
 
         if(
             (cfg[index].name == nonTerminal) || 
@@ -183,55 +201,113 @@ function parseLoop(addTo, context, nonTerminal) {
                 console.log("__________");
             }
 
-            for(let i = 0; i < context.length; i++) {
-                let partType = parts[partIndex].constructor.name;
-                
-                if(debugParseLoop) {
-                    console.log("context, parts");
-                    console.log("partIndex", partIndex);
-                    console.log("partType", partType)
-                    console.log(context[i])
-                    console.log(parts[partIndex]);
-                    console.log("-----");
-                }
-                
-                if(partType == "Terminal") {
-                    if(parts[partIndex].tokenName == context[i].name) {
-                        foundMatch = true;
-
-                        if(currentNonTerminal.length > 0) {
-                            nonTerminals.push(currentNonTerminal);
-                            currentNonTerminal = [];
-                        }
-
-                        if(context[i].value != null) {
-                            terminals.push(context[i].value);
-                        }
-                        else {
-                            terminals.push(context[i].name);
-                        }
-
-                        ++partIndex;
-                        if(partIndex > parts.length - 1) {
-                            break;
-                        }
-                    }
-                    else {
-                        foundMatch = false;
-
-                        break;
-                    }
-                }
-                else {
-                    currentNonTerminal.push(context[i]);
+            let noTerminals = true;
+            for(let i = 0; i < parts.length; i++) {
+                if(parts[i].constructor.name == "Terminal") {
+                    noTerminals = false;
                 }
             }
 
             if(debugParseLoop) {
-                console.log("terminals");
-                console.log(terminals);
-                console.log("nonTerminals");
-                console.log(nonTerminals);
+                console.log("");
+                console.log("noTerminals?", noTerminals);
+                console.log("");
+            }
+
+            if(noTerminals) {
+                let actualContext = [...context];
+                let match = true;
+                let lastContextIndex = 0;
+                let nonTerminals = [];
+
+                for(let i = 0; i < parts.length; i++) {
+                    let check = parseLoop(null, actualContext, parts[0].name);
+
+                    if(check != undefined) {
+                        nonTerminals.push(check[1]);
+                        ++check[0];
+                        lastContextIndex += check[0];
+
+                        actualContext.splice(0, check[0]);
+
+                        if((actualContext.length < 1) && (i < parts.length - 1)) {
+                            match = false;
+
+                            break;
+                        }
+                    }
+                    else {
+                        match = false;
+
+                        break;
+                    }
+
+                }
+
+                if(match) {
+                    return [lastContextIndex, cfg[index].generateNode(nonTerminals, terminals)]
+                }
+                else {
+                    foundMatch = false;
+                    ++index;
+                }
+            }
+            else {
+                lastContextIndex = 0;
+                for(let i = 0; i < context.length; i++) {
+                    let partType = parts[partIndex].constructor.name;
+                    
+                    if(debugParseLoop) {
+                        console.log("context, parts");
+                        console.log("partIndex", partIndex);
+                        console.log("partType", partType)
+                        console.log(context[i])
+                        console.log(parts[partIndex]);
+                        console.log("-----");
+                    }
+                    
+                    if(partType == "Terminal") {
+                        if(parts[partIndex].tokenName == context[i].name) {
+                            foundMatch = true;
+
+                            if(currentNonTerminal.length > 0) {
+                                nonTerminals.push(currentNonTerminal);
+                                currentNonTerminal = [];
+                            }
+
+                            if(context[i].value != null) {
+                                terminals.push(context[i].value);
+                            }
+                            else {
+                                terminals.push(context[i].name);
+                            }
+
+                            ++partIndex;
+                            if(partIndex > parts.length - 1) {
+                                break;
+                            }
+
+                            ++lastContextIndex;
+                        }
+                        else {
+                            foundMatch = false;
+
+                            break;
+                        }
+                    }
+                    else {
+                        currentNonTerminal.push(context[i]);
+                        
+                        ++lastContextIndex;
+                    }
+                }
+
+                if(debugParseLoop) {
+                    console.log("terminals");
+                    console.log(terminals);
+                    console.log("nonTerminals");
+                    console.log(nonTerminals);
+                }
             }
         }
         else {
@@ -244,8 +320,7 @@ function parseLoop(addTo, context, nonTerminal) {
                 console.log("found MATCH");
             }
 
-            tree.push(cfg[index].generateNode(nonTerminals, terminals));
-            break;
+            return [lastContextIndex, cfg[index].generateNode(nonTerminals, terminals)];
         }else {
             if(debugParseLoop) {
                 console.log("did NOT find match");
@@ -272,7 +347,10 @@ function debugPrint(toPrint, level) {
 
 let tree = [];
 module.exports.parse = function(tokenStream) {
-    parseLoop(tree, tokenStream, "");
+    let check = parseLoop(tree, tokenStream, "");
+    if(check != undefined) {
+        tree.push(check[1]);
+    }
 
     console.log("\n");
     for(let i = 0; i < tree.length; i++) {

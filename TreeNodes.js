@@ -4,6 +4,26 @@ function getIndent(level) {
 
 // statements
 
+module.exports.StatementList = class StatementList {
+    constructor(statements) {
+        this.children = statements;
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Statement List! "
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
+
 module.exports.DeclarationAssignment = class DeclarationAssignment {
     constructor(type, varName, value) {
         this.children = [];
