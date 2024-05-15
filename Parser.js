@@ -58,7 +58,7 @@ function generateCFG() {
         console.log("SECOND");
         return new nodes.StatementList(nonTerminals);
     });
-    // cfg.push(rule);
+    cfg.push(rule);
 
     rule = new Rule("statement", [
         new Terminal("NUMTYPE"), 
@@ -169,7 +169,7 @@ function generateCFG() {
 }
 generateCFG();
 
-let debugParseLoop = false;
+let debugParseLoop = true;
 function parseLoop(context, nonTerminal) {
     let index = 0;
 
@@ -219,42 +219,7 @@ function parseLoop(context, nonTerminal) {
             }
 
             if(noTerminals) {
-                let actualContext = [...context];
-                let match = true;
-                let lastContextIndex = 0;
-                let nonTerminals = [];
-
-                for(let i = 0; i < parts.length; i++) {
-                    let check = parseLoop(actualContext, parts[0].name);
-
-                    if((check != undefined) && (parts[i].name != nonTerminal)) {
-                        nonTerminals.push(check[1]);
-                        ++check[0];
-                        lastContextIndex += check[0];
-
-                        actualContext.splice(0, check[0]);
-
-                        if((actualContext.length < 1) && (i < parts.length - 1)) {
-                            match = false;
-
-                            break;
-                        }
-                    }
-                    else {
-                        match = false;
-
-                        break;
-                    }
-
-                }
-
-                if(match) {
-                    return [lastContextIndex, cfg[index].generateNode(nonTerminals, terminals)]
-                }
-                else {
-                    foundMatch = false;
-                    ++index;
-                }
+                foundMatch = false;
             }
             else {
                 let terminalsCount = 0;
@@ -332,7 +297,6 @@ function parseLoop(context, nonTerminal) {
         }
         else {
             foundMatch = false;
-            ++index
         }
 
         if(foundMatch) {
