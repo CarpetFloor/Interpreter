@@ -195,6 +195,26 @@ module.exports.IdReference = class IdReference {
     }
 }
 
+module.exports.StringTerm = class StringTerm {
+    constructor(children) {
+        this.children = [children];
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "String Term!"
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
+
 // types
 
 module.exports.Num = class Num {

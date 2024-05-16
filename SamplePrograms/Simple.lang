@@ -1,3 +1,1 @@
-num a = 5;
-num b = 2;
-b += 1;
+string test = b + a + "does this work?";

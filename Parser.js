@@ -222,6 +222,83 @@ function generateCFG() {
         return new nodes.IdReference(terminals[0]);
     });
     cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("STRINGTYPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new NonTerminal("stringexpression"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {        
+        let type = terminals[0];
+        let varName = terminals[1];
+
+        let check = parseLoop(nonTerminals[0], "stringexpression");
+        if(check != undefined) {
+            let value = check[1];
+            
+            return new nodes.DeclarationAssignment(
+                type, 
+                varName, 
+                value
+            )
+        }
+        else {
+            return undefined;
+        }
+        
+    });
+    cfg.push(rule);
+
+    rule = new Rule("stringexpression", [
+        new NonTerminal("stringterm"), 
+        new Terminal("PLUS"), 
+        new NonTerminal("stringexpression")
+    ], 
+    function(nonTerminals, terminals) {
+        let left = parseLoop(nonTerminals[0], "stringexpression");
+        let right = parseLoop(nonTerminals[1], "stringexpression");
+
+        if((left != undefined) && (right != undefined)) {
+            return new nodes.BinaryOperatorExpression("+", left[1], right[1]);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    rule = new Rule("stringexpression", [
+        new NonTerminal("stringterm")
+    ], 
+    function(nonTerminals, terminals) {
+        let check = parseLoop(nonTerminals, "stringterm");
+        
+        if(check != undefined) {
+            return new nodes.StringTerm(check[1]);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    rule = new Rule("stringterm", [
+        new Terminal("STRING")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.String(terminals[0]);
+    });
+    cfg.push(rule);
+
+    rule = new Rule("stringterm", [
+        new Terminal("ID")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.IdReference(terminals[0]);
+    });
+    cfg.push(rule);
 }
 generateCFG();
 
