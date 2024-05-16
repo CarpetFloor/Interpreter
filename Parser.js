@@ -58,7 +58,7 @@ function generateCFG() {
         console.log("SECOND");
         return new nodes.StatementList(nonTerminals);
     });
-    cfg.push(rule);
+    // cfg.push(rule);
 
     rule = new Rule("statement", [
         new Terminal("NUMTYPE"), 
@@ -166,10 +166,48 @@ function generateCFG() {
         )
     });
     cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("NUMTYPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new NonTerminal("expression"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {        
+        let type = terminals[0];
+        let varName = terminals[1];
+
+        let check = parseLoop(nonTerminals[0], "expression");
+        if(check != undefined) {
+            let value = check[1];
+            
+            return new nodes.DeclarationAssignment(
+                type, 
+                varName, 
+                value
+            )
+        }
+        else {
+            return undefined;
+        }
+        
+    });
+    cfg.push(rule);
+
+    rule = new Rule("expression", [
+        new Terminal("NUM"), 
+        new Terminal("PLUS"), 
+        new Terminal("NUM")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.BinaryOperatorExpression("+", terminals[0], terminals[2]);
+    });
+    cfg.push(rule);
 }
 generateCFG();
 
-let debugParseLoop = true;
+let debugParseLoop = false;
 function parseLoop(context, nonTerminal) {
     let index = 0;
 
@@ -230,33 +268,12 @@ function parseLoop(context, nonTerminal) {
                 }
 
                 lastContextIndex = 0;
+                let currentNonTerminal = [];
 
                 for(let i = 0; i < context.length; i++) {
-                    if(partIndex > parts.length - 1) {
-                        foundMatch = false;
-                        
-                        break;
-                    }
-
-                    let partType = parts[partIndex].constructor.name;
-                    
-                    if(debugParseLoop) {
-                        console.log("context, part");
-                        console.log("partIndex", partIndex);
-                        console.log("partType", partType)
-                        console.log(context[i])
-                        console.log(parts[partIndex]);
-                        console.log("-----");
-                    }
-                    
-                    if(partType == "Terminal") {
-                        if(parts[partIndex].tokenName == context[i].name) {
-                            foundMatch = true;
-
-                            if(currentNonTerminal.length > 0) {
-                                nonTerminals.push(currentNonTerminal);
-                                currentNonTerminal = [];
-                            }
+                    if(parts[partIndex].constructor.name == "Terminal") {
+                        if(context[i].name == parts[partIndex].tokenName) {
+                            ++partIndex
 
                             if(context[i].value != null) {
                                 terminals.push(context[i].value);
@@ -264,21 +281,29 @@ function parseLoop(context, nonTerminal) {
                             else {
                                 terminals.push(context[i].name);
                             }
-
-                            ++partIndex;
-
-                            ++lastContextIndex;
                         }
                         else {
                             foundMatch = false;
-
                             break;
                         }
                     }
                     else {
-                        currentNonTerminal.push(context[i]);
-                        
-                        ++lastContextIndex;
+                        if(context[i].name == parts[partIndex + 1].tokenName) {
+                            partIndex += 2;
+
+                            nonTerminals.push(currentNonTerminal);
+                            currentNonTerminal = [];
+
+                            if(context[i].value != null) {
+                                terminals.push(context[i].value);
+                            }
+                            else {
+                                terminals.push(context[i].name);
+                            }
+                        }
+                        else {
+                            currentNonTerminal.push(context[i]);
+                        }
                     }
                 }
 

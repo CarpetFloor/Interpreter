@@ -101,6 +101,21 @@ module.exports.Print = class Print {
     }
 }
 
+// expression 
+
+module.exports.BinaryOperatorExpression = class BinaryOperatorExpression {
+    constructor(operator, left, right) {
+        this.children = [];
+        this.operator = operator;
+
+        this.left = left;
+        this.right = right;
+
+        this.children.push(left);
+        this.children.push(right);
+    }
+}
+
 // types
 
 module.exports.Num = class Num {
