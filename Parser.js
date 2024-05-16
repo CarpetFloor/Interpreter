@@ -386,13 +386,13 @@ module.exports.parse = function(tokenStream) {
         tree.push(check[1]);
     }
 
-    console.log("\n");
+    // console.log("\n");
     // console.log("original check");
     // console.log(check);
 
-    for(let i = 0; i < tree.length; i++) {
-        debugPrint(tree[i], 0);
-    }
+    // for(let i = 0; i < tree.length; i++) {
+    //     debugPrint(tree[i], 0);
+    // }
 }
 
 module.exports.print = function(parseTree) {

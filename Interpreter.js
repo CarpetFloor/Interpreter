@@ -17,18 +17,18 @@ fs.readFile(programFile, "utf-8", function(error, data) {
         console.log("READ FILE: " + programFile + " SUCCESSFUL!")
         const program = data;
 
-        // console.log("\nSTARTED LEXING");
+        console.log("\nSTARTED LEXING");
         const tokens = lexer.lex(program);
-        // console.log("FINISHED LEXING");
+        console.log("FINISHED LEXING");
         
-        // console.log("\nTOKEN STREAM: ");
-        // console.log(tokens);
+        console.log("\nTOKEN STREAM: ");
+        console.log(tokens);
         
-        // console.log("\nSTARTED PARSING");
+        console.log("\nSTARTED PARSING");
         const parseTree = parser.parse(tokens);
-        // console.log("FINISHED PARSING");
+        console.log("FINISHED PARSING");
 
-        // console.log("PARSE TREE:");
-        // parser.print();
+        console.log("PARSE TREE:");
+        parser.print();
     }
 });

@@ -41,7 +41,8 @@ module.exports.DeclarationAssignment = class DeclarationAssignment {
             getIndent(level) + 
             "Declaration Assignment! " + 
             "type: " + this.type + ", " + 
-            "varName: " + this.varName + ", "
+            "varName: " + this.varName + ", " + 
+            "value: "
         );
 
         for(let i = 0; i < this.children.length; i++) {
@@ -114,17 +115,56 @@ module.exports.BinaryOperatorExpression = class BinaryOperatorExpression {
         this.children.push(left);
         this.children.push(right);
     }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Binary Operator Expression! " + 
+            "Operator: " + this.operator
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
 }
 
 module.exports.Term = class Term {
     constructor(children) {
-        this.children = children;
+        this.children = [children];
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Term!"
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
     }
 }
 
 module.exports.IdReference = class IdReference {
     constructor(id) {
         this.id = id;
+    }
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Id Reference! " + 
+            "Id = " + this.id
+        );
+
+        return output;
     }
 }
 
