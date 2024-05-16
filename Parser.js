@@ -42,32 +42,22 @@ function generateCFG() {
     rule = new Rule("statement", [
         new Terminal("PRINT"), 
         new Terminal("OPENPAREN"), 
-        new Terminal("NUM"), 
+        new NonTerminal("expression"), 
         new Terminal("CLOSEPAREN"), 
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        let value = new nodes.Num(terminals[2]);
-        
-        return new nodes.Print(
-            value
-        )
-    });
-    cfg.push(rule);
+        let check = parseLoop(nonTerminals[0], "expression");
+        if(check != undefined) {
+            let value = check[1];
 
-    rule = new Rule("statement", [
-        new Terminal("PRINT"), 
-        new Terminal("OPENPAREN"), 
-        new Terminal("STRING"), 
-        new Terminal("CLOSEPAREN"), 
-        new Terminal("SEMICOLON")
-    ], 
-    function(nonTerminals, terminals) {
-        let value = new nodes.String(terminals[2]);
-        
-        return new nodes.Print(
-            value
-        )
+            return new nodes.Print(
+                value
+            )
+        }
+        else {
+            return undefined;
+        }
     });
     cfg.push(rule);
 
