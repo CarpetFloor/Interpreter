@@ -1,1 +1,5 @@
-string test = b + a + "does this work?";
+num a = 1 + 2;
+num b = 1 - 2;
+num c = 1 * 2;
+num d = 1 / 2;
+num e = 1 + 2 * 3 / 4;

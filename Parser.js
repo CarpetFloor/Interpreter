@@ -193,6 +193,24 @@ function generateCFG() {
     cfg.push(rule);
 
     rule = new Rule("expression", [
+        new NonTerminal("expression"), 
+        new Terminal("MINUS"), 
+        new NonTerminal("term")
+    ], 
+    function(nonTerminals, terminals) {
+        let left = parseLoop(nonTerminals[0], "expression");
+        let right = parseLoop(nonTerminals[1], "expression");
+
+        if((left != undefined) && (right != undefined)) {
+            return new nodes.BinaryOperatorExpression("-", left[1], right[1]);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    rule = new Rule("expression", [
         new NonTerminal("term")
     ], 
     function(nonTerminals, terminals) {
@@ -208,6 +226,57 @@ function generateCFG() {
     cfg.push(rule);
 
     rule = new Rule("term", [
+        new NonTerminal("term"), 
+        new Terminal("TIMES"), 
+        new NonTerminal("factor")
+    ], 
+    function(nonTerminals, terminals) {
+        let left = parseLoop(nonTerminals[0], "term");
+        let right = parseLoop(nonTerminals[1], "term");
+
+        if((left != undefined) && (right != undefined)) {
+            return new nodes.BinaryOperatorExpression("*", left[1], right[1]);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    rule = new Rule("term", [
+        new NonTerminal("term"), 
+        new Terminal("DIVIDES"), 
+        new NonTerminal("factor")
+    ], 
+    function(nonTerminals, terminals) {
+        let left = parseLoop(nonTerminals[0], "term");
+        let right = parseLoop(nonTerminals[1], "term");
+
+        if((left != undefined) && (right != undefined)) {
+            return new nodes.BinaryOperatorExpression("/", left[1], right[1]);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    rule = new Rule("term", [
+        new NonTerminal("factor")
+    ], 
+    function(nonTerminals, terminals) {
+        let check = parseLoop(nonTerminals, "factor");
+        
+        if(check != undefined) {
+            return new nodes.Factor(check[1]);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    rule = new Rule("factor", [
         new Terminal("NUM")
     ], 
     function(nonTerminals, terminals) {

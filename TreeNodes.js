@@ -179,6 +179,26 @@ module.exports.Term = class Term {
     }
 }
 
+module.exports.Factor = class Factor {
+    constructor(children) {
+        this.children = [children];
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Factor!"
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
+
 module.exports.IdReference = class IdReference {
     constructor(id) {
         this.id = id;
