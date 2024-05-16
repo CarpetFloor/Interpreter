@@ -39,27 +39,6 @@ let cfg = [];
 function generateCFG() {
     let rule = null;
 
-    rule = new Rule("statementlist", [
-        new NonTerminal("statement"), 
-        new NonTerminal("statementlist")
-    ], 
-    function(nonTerminals, terminals) {
-        console.log("RECEIVING");
-        console.log(nonTerminals);
-
-        return new nodes.StatementList(nonTerminals);
-    });
-    // cfg.push(rule);
-
-    rule = new Rule("statementlist", [
-        new NonTerminal("statement")
-    ], 
-    function(nonTerminals, terminals) {
-        console.log("SECOND");
-        return new nodes.StatementList(nonTerminals);
-    });
-    // cfg.push(rule);
-
     rule = new Rule("statement", [
         new Terminal("NUMTYPE"), 
         new Terminal("ID"), 
@@ -168,6 +147,35 @@ function generateCFG() {
     cfg.push(rule);
 
     rule = new Rule("statement", [
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new NonTerminal("expression"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let varName = terminals[1];
+
+        console.log("HERE");
+        console.log(nonTerminals);
+        console.log(terminals);
+
+        let check = parseLoop(nonTerminals[0], "expression");
+        if(check != undefined) {
+            let value = check[1];
+            
+            return new nodes.Assignment(
+                varName, 
+                value
+            )
+        }
+        else {
+            return undefined;
+        }
+        
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
         new Terminal("NUMTYPE"), 
         new Terminal("ID"), 
         new Terminal("ASSIGN"), 
@@ -196,12 +204,51 @@ function generateCFG() {
     cfg.push(rule);
 
     rule = new Rule("expression", [
-        new Terminal("NUM"), 
+        new NonTerminal("expression"), 
         new Terminal("PLUS"), 
+        new NonTerminal("term")
+    ], 
+    function(nonTerminals, terminals) {
+        let left = parseLoop(nonTerminals[0], "expression");
+        let right = parseLoop(nonTerminals[1], "expression");
+
+        if((left != undefined) && (right != undefined)) {
+            return new nodes.BinaryOperatorExpression("+", left[1], right[1]);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    rule = new Rule("expression", [
+        new NonTerminal("term")
+    ], 
+    function(nonTerminals, terminals) {
+        let check = parseLoop(nonTerminals, "term");
+        
+        if(check != undefined) {
+            return new nodes.Term(check[1]);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    rule = new Rule("term", [
         new Terminal("NUM")
     ], 
     function(nonTerminals, terminals) {
-        return new nodes.BinaryOperatorExpression("+", terminals[0], terminals[2]);
+        return new nodes.Num(terminals[0]);
+    });
+    cfg.push(rule);
+
+    rule = new Rule("term", [
+        new Terminal("ID")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.IdReference(terminals[0]);
     });
     cfg.push(rule);
 }
@@ -257,7 +304,9 @@ function parseLoop(context, nonTerminal) {
             }
 
             if(noTerminals) {
-                foundMatch = false;
+                nonTerminals = context;
+
+                foundMatch = true;
             }
             else {
                 let terminalsCount = 0;
@@ -269,6 +318,7 @@ function parseLoop(context, nonTerminal) {
 
                 lastContextIndex = 0;
                 let currentNonTerminal = [];
+                let secondNonTerminal = [];
 
                 for(let i = 0; i < context.length; i++) {
                     if(parts[partIndex].constructor.name == "Terminal") {
@@ -288,17 +338,30 @@ function parseLoop(context, nonTerminal) {
                         }
                     }
                     else {
-                        if(context[i].name == parts[partIndex + 1].tokenName) {
-                            partIndex += 2;
+                        if(i == 0) {
+                            currentNonTerminal.push(context[i]);
+                        }
+                        if(partIndex < parts.length - 1) {
+                            if(context[i].name == parts[partIndex + 1].tokenName) {
+                                partIndex += 2;
 
-                            nonTerminals.push(currentNonTerminal);
-                            currentNonTerminal = [];
+                                if(secondNonTerminal.length > 0) {
+                                    nonTerminals.push(secondNonTerminal);
+                                }
+                                else {
+                                    nonTerminals.push(currentNonTerminal);
+                                }
+                                currentNonTerminal = [];
 
-                            if(context[i].value != null) {
-                                terminals.push(context[i].value);
+                                if(context[i].value != null) {
+                                    terminals.push(context[i].value);
+                                }
+                                else {
+                                    terminals.push(context[i].name);
+                                }
                             }
                             else {
-                                terminals.push(context[i].name);
+                                secondNonTerminal.push(context[i]);
                             }
                         }
                         else {
@@ -307,10 +370,12 @@ function parseLoop(context, nonTerminal) {
                     }
                 }
 
+                if(currentNonTerminal.length > 0) {
+                    nonTerminals.push(currentNonTerminal);
+                }
+
                 if(terminals.length != terminalsCount) {
                     foundMatch = false;
-
-                    ++index;
                 }
                 else if(debugParseLoop) {
                     console.log("terminals");
@@ -361,10 +426,13 @@ function debugPrint(toPrint, level) {
 let tree = [];
 module.exports.parse = function(tokenStream) {
     let check = parseLoop(tokenStream, "");
+    if(check != undefined) {
+        tree.push(check[1]);
+    }
 
     console.log("\n");
-    console.log("original check");
-    console.log(check);
+    // console.log("original check");
+    // console.log(check);
 
     for(let i = 0; i < tree.length; i++) {
         debugPrint(tree[i], 0);

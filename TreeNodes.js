@@ -116,6 +116,18 @@ module.exports.BinaryOperatorExpression = class BinaryOperatorExpression {
     }
 }
 
+module.exports.Term = class Term {
+    constructor(children) {
+        this.children = children;
+    }
+}
+
+module.exports.IdReference = class IdReference {
+    constructor(id) {
+        this.id = id;
+    }
+}
+
 // types
 
 module.exports.Num = class Num {
