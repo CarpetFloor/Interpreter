@@ -205,103 +205,80 @@ function generateCFG() {
 generateCFG();
 
 let debugParseLoop = false;
+
 function parseLoop(context, nonTerminal) {
-    let index = 0;
+    let lastIndex = -1;
 
-    // go through every rule in cfg to find a match
-    while(index < cfg.length) {
-        if(debugParseLoop) {
-            console.log("-----");
-            console.log("checking");
-            console.log(context);
-            console.log("nonTerminal = " + nonTerminal);
-        }
-        
-        let foundMatch = true;
-        let nonTerminals = [];
-        let terminals = [];
-        let lastContextIndex = 0;
+    try {
+        let index = 0;
 
-        if(
-            (cfg[index].name == nonTerminal) || 
-            (nonTerminal == "")
-        ) {
-            let parts = cfg[index].parts;
-
+        // go through every rule in cfg to find a match
+        while(index < cfg.length) {
             if(debugParseLoop) {
-                console.log("parts");
-                console.log(parts);
+                console.log("-----");
+                console.log("checking");
+                console.log(context);
+                console.log("nonTerminal = " + nonTerminal);
             }
+            
+            let foundMatch = true;
+            let nonTerminals = [];
+            let terminals = [];
+            let lastContextIndex = 0;
 
-            let currentNonTerminal = [];
-            let partIndex = 0;
+            if(
+                (cfg[index].name == nonTerminal) || 
+                (nonTerminal == "")
+            ) {
+                let parts = cfg[index].parts;
+                lastIndex = index;
 
-            if(debugParseLoop) {
-                console.log("__________");
-            }
-
-            let noTerminals = true;
-            for(let i = 0; i < parts.length; i++) {
-                if(parts[i].constructor.name == "Terminal") {
-                    noTerminals = false;
+                if(debugParseLoop) {
+                    console.log("parts");
+                    console.log(parts);
                 }
-            }
 
-            if(debugParseLoop) {
-                console.log("");
-                console.log("noTerminals?", noTerminals);
-                console.log("");
-            }
+                let currentNonTerminal = [];
+                let partIndex = 0;
 
-            if(noTerminals) {
-                nonTerminals = context;
+                if(debugParseLoop) {
+                    console.log("__________");
+                }
 
-                foundMatch = true;
-            }
-            else {
-                let terminalsCount = 0;
+                let noTerminals = true;
                 for(let i = 0; i < parts.length; i++) {
                     if(parts[i].constructor.name == "Terminal") {
-                        ++terminalsCount;
+                        noTerminals = false;
                     }
                 }
 
-                lastContextIndex = 0;
-                let currentNonTerminal = [];
-                let secondNonTerminal = [];
+                if(debugParseLoop) {
+                    console.log("");
+                    console.log("noTerminals?", noTerminals);
+                    console.log("");
+                }
 
-                for(let i = 0; i < context.length; i++) {
-                    if(parts[partIndex].constructor.name == "Terminal") {
-                        if(context[i].name == parts[partIndex].tokenName) {
-                            ++partIndex
+                if(noTerminals) {
+                    nonTerminals = context;
 
-                            if(context[i].value != null) {
-                                terminals.push(context[i].value);
-                            }
-                            else {
-                                terminals.push(context[i].name);
-                            }
-                        }
-                        else {
-                            foundMatch = false;
-                            break;
+                    foundMatch = true;
+                }
+                else {
+                    let terminalsCount = 0;
+                    for(let i = 0; i < parts.length; i++) {
+                        if(parts[i].constructor.name == "Terminal") {
+                            ++terminalsCount;
                         }
                     }
-                    else {
-                        if(i == 0) {
-                            currentNonTerminal.push(context[i]);
-                        }
-                        if(partIndex < parts.length - 1) {
-                            if(context[i].name == parts[partIndex + 1].tokenName) {
-                                partIndex += 2;
 
-                                if(secondNonTerminal.length > 0) {
-                                    nonTerminals.push(secondNonTerminal);
-                                }
-                                else {
-                                    nonTerminals.push(currentNonTerminal);
-                                }
-                                currentNonTerminal = [];
+                    lastContextIndex = 0;
+                    let currentNonTerminal = [];
+                    let secondNonTerminal = [];
+
+                    for(let i = 0; i < context.length; i++) {
+                        if(parts[partIndex].constructor.name == "Terminal") {
+                            if(context[i].name == parts[partIndex].tokenName) {
+                                ++partIndex
 
                                 if(context[i].value != null) {
                                     terminals.push(context[i].value);
@@ -311,58 +288,107 @@ function parseLoop(context, nonTerminal) {
                                 }
                             }
                             else {
-                                secondNonTerminal.push(context[i]);
+                                foundMatch = false;
+                                break;
                             }
                         }
                         else {
-                            currentNonTerminal.push(context[i]);
+                            if(i == 0) {
+                                currentNonTerminal.push(context[i]);
+                            }
+                            if(partIndex < parts.length - 1) {
+                                if(context[i].name == parts[partIndex + 1].tokenName) {
+                                    partIndex += 2;
+
+                                    if(secondNonTerminal.length > 0) {
+                                        nonTerminals.push(secondNonTerminal);
+                                    }
+                                    else {
+                                        nonTerminals.push(currentNonTerminal);
+                                    }
+                                    currentNonTerminal = [];
+
+                                    if(context[i].value != null) {
+                                        terminals.push(context[i].value);
+                                    }
+                                    else {
+                                        terminals.push(context[i].name);
+                                    }
+                                }
+                                else {
+                                    secondNonTerminal.push(context[i]);
+                                }
+                            }
+                            else {
+                                currentNonTerminal.push(context[i]);
+                            }
                         }
+
+                        if(partIndex > parts.length - 1) {
+                            break;
+                        }
+
+                        ++lastContextIndex;
                     }
 
-                    if(partIndex > parts.length - 1) {
-                        break;
+                    if(currentNonTerminal.length > 0) {
+                        nonTerminals.push(currentNonTerminal);
                     }
 
-                    ++lastContextIndex;
+                    if(terminals.length != terminalsCount) {
+                        foundMatch = false;
+                    }
+                    else if(debugParseLoop) {
+                        console.log("terminals");
+                        console.log(terminals);
+                        console.log("nonTerminals");
+                        console.log(nonTerminals);
+                    }
+                }
+            }
+            else {
+                foundMatch = false;
+            }
+
+            if(foundMatch) {
+                if(debugParseLoop) {
+                    console.log("found MATCH");
                 }
 
-                if(currentNonTerminal.length > 0) {
-                    nonTerminals.push(currentNonTerminal);
+                return [lastContextIndex, cfg[index].generateNode(nonTerminals, terminals)];
+            }else {
+                if(debugParseLoop) {
+                    console.log("did NOT find match");
                 }
 
-                if(terminals.length != terminalsCount) {
-                    foundMatch = false;
+                ++index;
+                
+                if(debugParseLoop) {
+                    console.log("\n");
                 }
-                else if(debugParseLoop) {
-                    console.log("terminals");
-                    console.log(terminals);
-                    console.log("nonTerminals");
-                    console.log(nonTerminals);
-                }
+
             }
         }
-        else {
-            foundMatch = false;
+    }
+    catch(exception) {
+        console.log("");
+
+        console.log("FAILED PARSING");
+        console.log("\nGiven context:");
+        console.log(context);
+
+        if(nonTerminal.length > 0) {
+            console.log("\nTrying to find");
+            console.log(nonTerminal);
         }
 
-        if(foundMatch) {
-            if(debugParseLoop) {
-                console.log("found MATCH");
-            }
-
-            return [lastContextIndex, cfg[index].generateNode(nonTerminals, terminals)];
-        }else {
-            if(debugParseLoop) {
-                console.log("did NOT find match");
-            }
-
-            ++index;
-            
-            if(debugParseLoop) {
-                console.log("\n");
-            }
-
+        if(lastIndex != -1) {
+            console.log("\nTrying to match with:");
+            console.log(cfg[lastIndex].name);
+            console.log(cfg[lastIndex].parts);
         }
+
+        console.log("");
     }
 }
 
