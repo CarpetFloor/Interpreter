@@ -2,6 +2,7 @@
 
 const { debug } = require("console");
 let nodes = require("./TreeNodes");
+const { stat } = require("fs");
 
 // context-free grammar class
 class Rule {
@@ -38,6 +39,40 @@ let cfg = [];
 // the actual CFG rules are defined here
 function generateCFG() {
     let rule = null;
+
+    rule = new Rule("statementlist", [
+        new NonTerminal("statement"), 
+        new NonTerminal("statementlist")
+    ], 
+    function(nonTerminals, terminals) {
+        let statements = [];
+        let passContext = [...nonTerminals];
+        let statementCheck = parseLoop(passContext, "statement");
+        
+        while((statementCheck != undefined) || (passContext.length != 0)) {
+            statements.push(statementCheck[1]);
+            
+            passContext.splice(0, statementCheck[0] + 1);
+
+            statementCheck = parseLoop(passContext, "statement");
+        }
+
+        let match = true;
+        for(let i = 0; i < statements.length; i++) {
+            if(statements[i] == undefined) {
+                match = false;
+                break;
+            }
+        }
+
+        if(match) {
+            return new nodes.StatementList(statements);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
 
     rule = new Rule("statement", [
         new Terminal("PRINT"), 
@@ -283,6 +318,12 @@ function parseLoop(context, nonTerminal) {
                             currentNonTerminal.push(context[i]);
                         }
                     }
+
+                    if(partIndex > parts.length - 1) {
+                        break;
+                    }
+
+                    ++lastContextIndex;
                 }
 
                 if(currentNonTerminal.length > 0) {
