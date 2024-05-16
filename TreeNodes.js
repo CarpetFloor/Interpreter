@@ -256,3 +256,22 @@ module.exports.String = class String {
         return "\n" + getIndent(level) + "String! " + this.value;
     }
 }
+
+module.exports.List = class List {
+    constructor(type) {
+        this.children = [];
+        this.elements = [];
+        this.type = type;
+    }
+
+    print(level) {
+        let output = "\n" + getIndent(level) + "List! ";
+        output += "List Type: " + this.type + ", " + " Elements:";
+
+        for(let i = 0; i < this.elements.length; i++) {
+            output += "\n...." + this.elements[i];
+        }
+
+        return output;
+    }
+}

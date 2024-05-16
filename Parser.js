@@ -97,6 +97,52 @@ function generateCFG() {
     cfg.push(rule);
 
     rule = new Rule("statement", [
+        new Terminal("LISTTYPE"), 
+        new Terminal("OPENPIPE"), 
+        new Terminal("NUMTYPE"), 
+        new Terminal("CLOSEPIPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("OPENPIPE"), 
+        new Terminal("CLOSEPIPE"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let varName = terminals[4];
+        let listType = terminals[2];
+
+        return new nodes.DeclarationAssignment(
+            "list", 
+            varName, 
+            new nodes.List(listType)
+        );
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("LISTTYPE"), 
+        new Terminal("OPENPIPE"), 
+        new Terminal("STRINGTYPE"), 
+        new Terminal("CLOSEPIPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("OPENPIPE"), 
+        new Terminal("CLOSEPIPE"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let varName = terminals[4];
+        let listType = terminals[2];
+
+        return new nodes.DeclarationAssignment(
+            "list", 
+            varName, 
+            new nodes.List(listType)
+        );
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
         new Terminal("ID"), 
         new Terminal("ASSIGN"), 
         new NonTerminal("expression"), 
