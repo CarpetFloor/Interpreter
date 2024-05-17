@@ -24,8 +24,8 @@ module.exports.WhileLoop = class WhileLoop {
             getIndent(level) + 
             "While Loop! " + 
             "Comparison: " + this.comparison + ", " + 
-            "\nLeft expression: " + this.leftExpression.print(level  + 1) + ", " + 
-            "\nRight expression: " + this.rightExpression.print(level + 1) + ", " + 
+            "\nLeft of comparison: " + this.leftExpression.print(level  + 1) + ", " + 
+            "\nRight of comparison: " + this.rightExpression.print(level + 1) + ", " + 
             "\nStatements:" + this.statementList.print(level + 1)
         );
 

@@ -964,29 +964,31 @@ function debugPrint(toPrint, level) {
 }
 
 let tree = [];
+let printAsDebug = false;
 module.exports.parse = function(tokenStream) {
     let check = parseLoop(tokenStream, "");
     if(check != undefined) {
         tree.push(check[1]);
     }
 
-    // console.log("\n");
-    // console.log("original check");
-    // console.log(check);
+    if(printAsDebug) {
+        for(let i = 0; i < tree.length; i++) {
+            debugPrint(tree[i], 0);
+        }
+    }
 
-    // for(let i = 0; i < tree.length; i++) {
-    //     debugPrint(tree[i], 0);
-    // }
+    if(check[0] != (tokenStream.length - 1)) {
+        failed = true;
+
+        console.log("\nFAILED PARSING");
+        console.log("Parser not able to match entire token stream\n");
+    }
 }
 
-module.exports.print = function(parseTree) {
-    for(let i = 0; i < tree.length; i++) {
-        console.log(tree[i].print(0));
-        // try {
-        // }
-        // catch(exception) {
-        //     console.error("\nFAILED TO PARSE:");
-        //     console.log(tree[i]);
-        // }
+module.exports.print = function() {
+    if(!(failed)) {
+        for(let i = 0; i < tree.length; i++) {
+            console.log(tree[i].print(0));
+        }
     }
 }
