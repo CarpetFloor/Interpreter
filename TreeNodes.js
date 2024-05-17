@@ -215,6 +215,45 @@ module.exports.IdReference = class IdReference {
     }
 }
 
+module.exports.ListElementReference = class ListElementReference {
+    constructor(list, index) {
+        this.list = list;
+        this.index = index;
+    }
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "List Element Reference! " + 
+            "List = " + this.list + ", Index = " + 
+            this.index.print(level + 1)
+        );
+
+        return output;
+    }
+}
+
+module.exports.ListElementSet = class ListElementSet {
+    constructor(list, index, value) {
+        this.list = list;
+        this.index = index;
+        this.value = value;
+    }
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "List Element Set! " + 
+            "List = " + this.list + ", Index = " + 
+            this.index.print(level + 1) + 
+            "\n" + getIndent(level) + 
+            "Value = " + this.value.print(level + 1)
+        );
+
+        return output;
+    }
+}
+
 module.exports.StringTerm = class StringTerm {
     constructor(children) {
         this.children = [children];

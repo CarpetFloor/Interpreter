@@ -1,1 +1,1 @@
-list[string] sequence = [];
+num a = array.get(5);

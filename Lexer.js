@@ -48,6 +48,11 @@ const tokens = [
     ), 
 
     new Pattern(
+        "SET", 
+        /set/
+    ), 
+
+    new Pattern(
         // so as to not be confused with addition
         "ADDKEYWORD", 
         /add/

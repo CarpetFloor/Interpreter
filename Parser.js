@@ -144,6 +144,40 @@ function generateCFG() {
 
     rule = new Rule("statement", [
         new Terminal("ID"), 
+        new Terminal("DOT"), 
+        new Terminal("SET"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("COMMA"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+
+        let indexCheck = parseLoop(nonTerminals[0], "expression");
+        let setCheck = parseLoop(nonTerminals[1], "expression");
+
+        if((indexCheck != undefined) && (setCheck != undefined)) {
+            let index = indexCheck[1];
+            let value = setCheck[1];
+            
+            return new nodes.ListElementSet(
+                list, 
+                index, 
+                value
+            );
+        }
+        else {
+            return undefined;
+        }
+
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
         new Terminal("ASSIGN"), 
         new NonTerminal("expression"), 
         new Terminal("SEMICOLON")
@@ -217,6 +251,34 @@ function generateCFG() {
             return undefined;
         }
         
+    });
+    cfg.push(rule);
+
+    rule = new Rule("expression", [
+        new Terminal("ID"), 
+        new Terminal("DOT"), 
+        new Terminal("GET"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+
+        let check = parseLoop(nonTerminals[0], "expression");
+
+        if(check != undefined) {
+            let index = check[1];
+
+            return new nodes.ListElementReference(
+                list, 
+                index
+            );
+        }
+        else {
+            return undefined;
+        }
+
     });
     cfg.push(rule);
 

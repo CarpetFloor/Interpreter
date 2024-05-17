@@ -24,6 +24,7 @@
 - Declare with `list[num] myList = [1, 2, 3]`  *(can also declare as empty)*
 - Access element with `myList.get(0)`
 - Add element with `myList.add(4)`
+- Modify element with `myList.set(0, 1234)`
 - Get length with `myList.length()`
 
 ### Loops
