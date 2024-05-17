@@ -40,6 +40,44 @@ let cfg = [];
 function generateCFG() {
     let rule = null;
 
+    rule = new Rule("whilelooplist", [
+        new NonTerminal("whileloop"), 
+        new NonTerminal("whilelooplist")
+    ], 
+    function(nonTerminals, terminals) {
+        let whileloops = [];
+        let passContext = [...nonTerminals];
+        let whileloopCheck = parseLoop(passContext, "whileloop");
+        if(whileloopCheck != undefined) {
+            while((whileloopCheck != undefined) || (passContext.length != 0)) {
+                whileloops.push(whileloopCheck[1]);
+                
+                passContext.splice(0, whileloopCheck[0] + 1);
+
+                whileloopCheck = parseLoop(passContext, "whileloop");
+            }
+
+            let match = true;
+            for(let i = 0; i < whileloops.length; i++) {
+                if(whileloops[i] == undefined) {
+                    match = false;
+                    break;
+                }
+            }
+
+            if(match) {
+                return new nodes.WhileLoopList(whileloops);
+            }
+            else {
+                return undefined;
+            }
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
     rule = new Rule("whileloop", [
         new Terminal("WHILE"), 
         new Terminal("OPENPAREN"), 
@@ -975,13 +1013,6 @@ module.exports.parse = function(tokenStream) {
         for(let i = 0; i < tree.length; i++) {
             debugPrint(tree[i], 0);
         }
-    }
-
-    if(check[0] != (tokenStream.length - 1)) {
-        failed = true;
-
-        console.log("\nFAILED PARSING");
-        console.log("Parser not able to match entire token stream\n");
     }
 }
 

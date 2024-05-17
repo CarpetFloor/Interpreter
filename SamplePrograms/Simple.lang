@@ -1,6 +1,4 @@
-while(a < 5) {
+while(count < 10) {
+    num a = 1;
     num b = 2;
-}
-while(c > 10) {
-    d += 1;
 }
