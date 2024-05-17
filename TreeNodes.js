@@ -4,6 +4,35 @@ function getIndent(level) {
 
 // statements
 
+module.exports.WhileLoop = class WhileLoop {
+    constructor(comparison, leftExpression, rightExpression, statementList) {
+        this.children = [];
+        this.comparison = comparison;
+
+        this.leftExpression = leftExpression;
+        this.rightExpression = rightExpression;
+        this.children.push(leftExpression);
+        this.children.push(rightExpression);
+
+        this.statementList = statementList;
+        this.children.push(statementList);
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "While Loop! " + 
+            "Comparison: " + this.comparison + ", " + 
+            "\nLeft expression: " + this.leftExpression.print(level  + 1) + ", " + 
+            "\nRight expression: " + this.rightExpression.print(level + 1) + ", " + 
+            "\nStatements:" + this.statementList.print(level + 1)
+        );
+
+        return output;
+    }
+}
+
 module.exports.StatementList = class StatementList {
     constructor(statements) {
         this.children = statements;

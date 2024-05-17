@@ -40,6 +40,216 @@ let cfg = [];
 function generateCFG() {
     let rule = null;
 
+    rule = new Rule("whileloop", [
+        new Terminal("WHILE"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("ASSIGN"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("OPENCURLY"), 
+        new NonTerminal("statementlist"), 
+        new Terminal("CLOSECURLY")
+    ], 
+    function(nonTerminals, terminals) {
+        let leftExpressionCheck = parseLoop(nonTerminals[0], "expression");
+        let rightExpressionCheck = parseLoop(nonTerminals[1], "expression");
+        let statementListCheck = parseLoop(nonTerminals[2], "statementlist");
+        
+        if(
+            (leftExpressionCheck != undefined) && 
+            (rightExpressionCheck != undefined) && 
+            (statementListCheck != undefined)
+        ) {
+            let leftExpression = leftExpressionCheck[1];
+            let rightExpression = rightExpressionCheck[1];
+            let comparison = "==";
+
+            let statementList = statementListCheck[1];
+
+            return new nodes.WhileLoop(
+                comparison, 
+                leftExpression, 
+                rightExpression, 
+                statementList
+            );
+        }
+        else {
+            return undefined;
+        }
+    }
+    );
+    cfg.push(rule);
+
+    // it would probably be much easier to make a comparison non-terminal
+
+    rule = new Rule("whileloop", [
+        new Terminal("WHILE"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("LESSTHAN"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("OPENCURLY"), 
+        new NonTerminal("statementlist"), 
+        new Terminal("CLOSECURLY")
+    ], 
+    function(nonTerminals, terminals) {
+        let leftExpressionCheck = parseLoop(nonTerminals[0], "expression");
+        let rightExpressionCheck = parseLoop(nonTerminals[1], "expression");
+        let statementListCheck = parseLoop(nonTerminals[2], "statementlist");
+        
+        if(
+            (leftExpressionCheck != undefined) && 
+            (rightExpressionCheck != undefined) && 
+            (statementListCheck != undefined)
+        ) {
+            let leftExpression = leftExpressionCheck[1];
+            let rightExpression = rightExpressionCheck[1];
+            let comparison = "<";
+
+            let statementList = statementListCheck[1];
+
+            return new nodes.WhileLoop(
+                comparison, 
+                leftExpression, 
+                rightExpression, 
+                statementList
+            );
+        }
+        else {
+            return undefined;
+        }
+    }
+    );
+    cfg.push(rule);
+
+    rule = new Rule("whileloop", [
+        new Terminal("WHILE"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("GREATERTHAN"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("OPENCURLY"), 
+        new NonTerminal("statementlist"), 
+        new Terminal("CLOSECURLY")
+    ], 
+    function(nonTerminals, terminals) {
+        let leftExpressionCheck = parseLoop(nonTerminals[0], "expression");
+        let rightExpressionCheck = parseLoop(nonTerminals[1], "expression");
+        let statementListCheck = parseLoop(nonTerminals[2], "statementlist");
+        
+        if(
+            (leftExpressionCheck != undefined) && 
+            (rightExpressionCheck != undefined) && 
+            (statementListCheck != undefined)
+        ) {
+            let leftExpression = leftExpressionCheck[1];
+            let rightExpression = rightExpressionCheck[1];
+            let comparison = ">";
+
+            let statementList = statementListCheck[1];
+
+            return new nodes.WhileLoop(
+                comparison, 
+                leftExpression, 
+                rightExpression, 
+                statementList
+            );
+        }
+        else {
+            return undefined;
+        }
+    }
+    );
+    cfg.push(rule);
+
+    rule = new Rule("whileloop", [
+        new Terminal("WHILE"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("LESSTHAN"), 
+        new Terminal("ASSIGN"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("OPENCURLY"), 
+        new NonTerminal("statementlist"), 
+        new Terminal("CLOSECURLY")
+    ], 
+    function(nonTerminals, terminals) {
+        let leftExpressionCheck = parseLoop(nonTerminals[0], "expression");
+        let rightExpressionCheck = parseLoop(nonTerminals[1], "expression");
+        let statementListCheck = parseLoop(nonTerminals[2], "statementlist");
+        
+        if(
+            (leftExpressionCheck != undefined) && 
+            (rightExpressionCheck != undefined) && 
+            (statementListCheck != undefined)
+        ) {
+            let leftExpression = leftExpressionCheck[1];
+            let rightExpression = rightExpressionCheck[1];
+            let comparison = "<=";
+
+            let statementList = statementListCheck[1];
+
+            return new nodes.WhileLoop(
+                comparison, 
+                leftExpression, 
+                rightExpression, 
+                statementList
+            );
+        }
+        else {
+            return undefined;
+        }
+    }
+    );
+    cfg.push(rule);
+
+    rule = new Rule("whileloop", [
+        new Terminal("WHILE"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("GREATERTHAN"), 
+        new Terminal("ASSIGN"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("OPENCURLY"), 
+        new NonTerminal("statementlist"), 
+        new Terminal("CLOSECURLY")
+    ], 
+    function(nonTerminals, terminals) {
+        let leftExpressionCheck = parseLoop(nonTerminals[0], "expression");
+        let rightExpressionCheck = parseLoop(nonTerminals[1], "expression");
+        let statementListCheck = parseLoop(nonTerminals[2], "statementlist");
+        
+        if(
+            (leftExpressionCheck != undefined) && 
+            (rightExpressionCheck != undefined) && 
+            (statementListCheck != undefined)
+        ) {
+            let leftExpression = leftExpressionCheck[1];
+            let rightExpression = rightExpressionCheck[1];
+            let comparison = ">=";
+
+            let statementList = statementListCheck[1];
+
+            return new nodes.WhileLoop(
+                comparison, 
+                leftExpression, 
+                rightExpression, 
+                statementList
+            );
+        }
+        else {
+            return undefined;
+        }
+    }
+    );
+    cfg.push(rule);
+
     rule = new Rule("statementlist", [
         new NonTerminal("statement"), 
         new NonTerminal("statementlist")
@@ -245,7 +455,6 @@ function generateCFG() {
         let check = parseLoop(nonTerminals[0], "expression");
         if(check != undefined) {
             let value = check[1];
-            console.log("Are we here?");
             
             return new nodes.DeclarationAssignment(
                 type, 
@@ -636,6 +845,7 @@ function parseLoop(context, nonTerminal) {
 
                                         if(secondNonTerminal.length > 0) {
                                             nonTerminals.push(secondNonTerminal);
+                                            secondNonTerminal = [];
                                         }
                                         else {
                                             nonTerminals.push(currentNonTerminal);

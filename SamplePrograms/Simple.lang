@@ -1,1 +1,5 @@
-output += "1";
+while(some <= thing) {
+    num a = 5;
+    num b = 2;
+    num c = a + b;
+}
