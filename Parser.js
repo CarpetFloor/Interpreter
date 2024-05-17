@@ -245,6 +245,7 @@ function generateCFG() {
         let check = parseLoop(nonTerminals[0], "expression");
         if(check != undefined) {
             let value = check[1];
+            console.log("Are we here?");
             
             return new nodes.DeclarationAssignment(
                 type, 
@@ -268,7 +269,33 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let check = parseLoop(nonTerminals[0], "expression");
         
-        if(check != undefined) {
+        if((check != undefined) && (check[1].children != undefined)) {
+            let varName = terminals[0];
+            let increment = check[1];
+            
+            return new nodes.IncrementAssignment(
+                varName, 
+                increment
+            );
+        }
+        else {
+            return undefined;
+        }
+        
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
+        new Terminal("INCREMENTASSIGN"), 
+        new NonTerminal("stringexpression"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        console.log("string here");
+        let check = parseLoop(nonTerminals[0], "stringexpression");
+        
+        if((check != undefined) && (check[1].children != undefined)) {
             let varName = terminals[0];
             let increment = check[1];
             
@@ -658,11 +685,22 @@ function parseLoop(context, nonTerminal) {
                 }
 
                 if(foundMatch) {
-                    if(debugParseLoop) {
-                        console.log("found MATCH");
+                    let check = cfg[index].generateNode(nonTerminals, terminals);
+                    if(check != undefined) {
+                        if(debugParseLoop) {
+                            console.log("found MATCH");
+                        }
+
+                        return [lastContextIndex, check];
+                    }
+                    else {
+                        if(debugParseLoop) {
+                            console.log("did NOT find match");
+                        }
+
+                        ++index;
                     }
 
-                    return [lastContextIndex, cfg[index].generateNode(nonTerminals, terminals)];
                 }else {
                     if(debugParseLoop) {
                         console.log("did NOT find match");

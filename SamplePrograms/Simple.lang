@@ -1,15 +1,1 @@
-num upTo = 10;
-list[num] sequence = [];
-
-num count = 0;
-
-count += 1;
-
-string output = "";
-count = 0;
-output += ", ";
-
-count += 1;
-
-print("First " + upTo + " terms of the Fibonacci Sequence:");
-print(output);
+output += "1";
