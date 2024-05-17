@@ -28,5 +28,5 @@ while(count < sequence.length()) {
     count += 1;
 }
 
-print("First " + upTo " + terms of the Fibonacci Sequence:");
+print("First " + upTo + " terms of the Fibonacci Sequence:");
 print(output);

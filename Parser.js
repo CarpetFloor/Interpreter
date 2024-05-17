@@ -77,12 +77,13 @@ function generateCFG() {
     rule = new Rule("statement", [
         new Terminal("PRINT"), 
         new Terminal("OPENPAREN"), 
-        new NonTerminal("expression"), 
+        new NonTerminal("stringexpression"), 
         new Terminal("CLOSEPAREN"), 
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        let check = parseLoop(nonTerminals[0], "expression");
+        let check = parseLoop(nonTerminals[0], "stringexpression");
+
         if(check != undefined) {
             let value = check[1];
 
