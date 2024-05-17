@@ -1,1 +1,1 @@
-num a = array.get(5);
+sequence.add(1 + 2 * 3);

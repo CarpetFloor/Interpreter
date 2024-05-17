@@ -254,6 +254,24 @@ module.exports.ListElementSet = class ListElementSet {
     }
 }
 
+module.exports.ListAdd = class ListAdd {
+    constructor(list, value) {
+        this.list = list;
+        this.value = value;
+    }
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "List Add! " + 
+            "List = " + this.list + 
+            "Value = " + this.value.print(level + 1)
+        );
+
+        return output;
+    }
+}
+
 module.exports.StringTerm = class StringTerm {
     constructor(children) {
         this.children = [children];

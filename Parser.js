@@ -178,6 +178,35 @@ function generateCFG() {
 
     rule = new Rule("statement", [
         new Terminal("ID"), 
+        new Terminal("DOT"), 
+        new Terminal("ADDKEYWORD"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+
+        let check = parseLoop(nonTerminals[0], "expression");
+
+        if(check != undefined) {
+            let value = check[1];
+            
+            return new nodes.ListAdd(
+                list, 
+                value
+            );
+        }
+        else {
+            return undefined;
+        }
+
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
         new Terminal("ASSIGN"), 
         new NonTerminal("expression"), 
         new Terminal("SEMICOLON")
