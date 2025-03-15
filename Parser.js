@@ -148,7 +148,12 @@ function recursiveParseNonTerminal(nonTerminal, tokenStream) {
 
             if(ruleElement == ruleElement.toUpperCase()) {
                 if(ruleElement == tokenStream[tokenIndex].name) {
-                    context.push(tokenStream[tokenIndex].name);
+                    if(tokenStream[tokenIndex].value == null) {
+                        context.push(tokenStream[tokenIndex].value);
+                    }
+                    else {
+                        context.push(tokenStream[tokenIndex].value);
+                    }
                     ++tokenIndex;
                     ++recursiveContextLength;
 
@@ -208,10 +213,40 @@ module.exports.parse = function(tokenStreamReceived) {
 
 }
 
-module.exports.print = function() {
-    console.log(tree);
+function printTreeNodeContents(node, indentLevel) {
+    let indent = "";
+    for(let i = 0; i < indentLevel * 2; i++) {
+        indent += " ";
+    }
 
-    if(tree.length == 0) {
-        console.log("NO MATCH FOUND");
+    let output = indent + node.name;
+    console.log(output);
+
+    if(node.content.name != undefined) {
+        printTreeNodeContents(node.content, indentLevel + 1);
+    }
+    else {
+        let output = "";
+        output += indent + "  ";
+
+        for(let item of node.content) {
+            output += item;
+
+            if(node.content.indexOf(item) < node.content.length - 1) {
+                output += ", ";
+            }
+        }
+
+        console.log(output);
+
+    }
+}
+
+module.exports.print = function() {
+    console.log("__________");
+    // console.log(tree);
+
+    for(let node of tree) {
+        printTreeNodeContents(node, 0);
     }
 }
