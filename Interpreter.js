@@ -2,7 +2,7 @@ let fs = require("fs");
 let lexer = require("./Lexer");
 let parser = require("./Parser");
 
-let programFile = "SamplePrograms/Simple.lang";
+let programFile = "SamplePrograms/Simple2.lang";
 
 // if(process.argv.length >= 3) {
 //     programFile = process.argv[2];
@@ -26,9 +26,9 @@ fs.readFile(programFile, "utf-8", function(error, data) {
         
         console.log("\nSTARTED PARSING");
         const parseTree = parser.parse(tokens);
-        console.log("FINISHED PARSING");
+        console.log("\nFINISHED PARSING");
 
-        console.log("PARSE TREE:");
+        console.log("\nPARSE TREE:");
         parser.print();
     }
 });
