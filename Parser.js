@@ -30,8 +30,35 @@ class TreeNode {
 
 let cfg = [];
 
+function createProgram() {
+    rulesList = [];
+    
+    rulesList.push(new Rule([
+        "statementlist"
+    ]));
+
+    let nonTerminal = new NonTerminal(
+        "program", 
+        rulesList
+    );
+
+    nonTerminal.create = function(context) {
+        tree.push(
+            "program",
+            context
+        );
+    }
+
+    cfg.push(nonTerminal);
+}
+
 function createStatementList() {
     rulesList = [];
+
+    // rulesList.push(new Rule([
+    //     "statement", 
+    //     "statementlist"
+    // ]));
     
     rulesList.push(new Rule([
         "statement"
@@ -79,6 +106,7 @@ function createStatement() {
 }
 
 function generateCFG() {
+    createProgram();
     createStatementList();
     createStatement();
 }
@@ -99,41 +127,37 @@ function recursiveParseNonTerminal(nonTerminal, tokenStream) {
     }
 
     console.log("==========");
-    console.log("RECURSIVE PARSE NON TERMINAL");
-    console.log(nonTerminal);
-    console.log(nonTerminalIndex);
+    console.log("RECURSIVE PARSE NON TERMINAL:", nonTerminal);
     console.log(tokenStream);
 
     // then parse through all rule lists of non-terminal
     for(let rule of cfg[nonTerminalIndex].rulesList) {
         let tokenIndex = 0;
         let context = [];
+        let recursiveContextLength = 0;
 
         console.log("_____");
 
         console.log("RULE");
         console.log(rule);
 
-        console.log("_____");
-
         // go through each element of each rule
         for(let ruleElement of rule.contents) {
             // first check if rule element is a non-terminal or terminal
             // by if it's uppercase or lowercase
-            console.log(ruleElement);
 
             if(ruleElement == ruleElement.toUpperCase()) {
-                console.log("terminal");
                 if(ruleElement == tokenStream[tokenIndex].name) {
-
                     context.push(tokenStream[tokenIndex].name);
                     ++tokenIndex;
+                    ++recursiveContextLength;
 
                     // last rule element matches, so found match with rule, 
                     // and thus non-terminal
                     if(rule.contents.indexOf(ruleElement) == rule.contents.length - 1) {
+                        console.log("FOUND MATCH");
                         return new TreeNode(
-                            cfg[nonTerminalIndex].name, 
+                            nonTerminal,
                             context
                         );
                     }
@@ -143,82 +167,44 @@ function recursiveParseNonTerminal(nonTerminal, tokenStream) {
                 }
             }
             else {
-                console.log("non-terminal");
-                recursiveParseNonTerminal(
+                let matchCheck = recursiveParseNonTerminal(
                     ruleElement,
-                    context.slice(tokenIndex + 1)
+                    tokenStream
                 );
+
+                if(!(!(matchCheck))) {
+                    return new TreeNode(
+                        nonTerminal,
+                        matchCheck
+                    );
+                }
+                else {
+                    return false;
+                }
             }
         }
+
+        console.log("_____");
     }
 
     return false;
 }
 
-module.exports.parse = function(tokenStream) {
+module.exports.parse = function(tokenStreamReceived) {
+    let tokenStream = [...tokenStreamReceived];
     let match = false;
 
-    // go through non-terminals listed in cfg for match
     for(let nonTerminal of cfg) {
-        // go through each rule list of non-terminal for match
-        for(let rule of nonTerminal.rulesList) {
-            let tokenIndex = 0;
-            let context = [];
+        let matchCheck = recursiveParseNonTerminal(nonTerminal.name, tokenStream);
 
-            // go through each element of each rule
-            for(let ruleElement of rule.contents) {
-                // first check if rule element is a non-terminal or terminal
-                // by if it's uppercase or lowercase
-                if(ruleElement == ruleElement.toUpperCase()) {
-                    if(ruleElement == tokenStream[tokenIndex].name) {
+        if(!(!(matchCheck))) {
+            match = true;
 
-                        context.push(tokenStream[tokenIndex].name);
-                        ++tokenIndex;
-
-                        // last rule element matches, so found match with rule, 
-                        // and thus non-terminal
-                        if(rule.contents.indexOf(ruleElement) == rule.contents.length - 1) {
-                            match = true;
-                            nonTerminal.create(context);
-                        }
-                    }
-                    else {
-                        match = false;
-                        break;
-                    }
-                }
-                else {
-                    let matchCheck = recursiveParseNonTerminal(
-                        ruleElement,
-                        tokenStream.slice(tokenIndex)
-                    );
-
-                    // if matchCheck is not false
-                    // can't just check for true because if not false
-                    // matchCheck will contain the context
-                    if(!(!(matchCheck))) {
-                        match = true;
-
-                        nonTerminal.create(matchCheck);
-                    }
-
-                    console.log("matchCheck", matchCheck);
-                }
-            }
-
-            if(match) {
-                break;
-            }
-
-        }
-
-        if(match) {
+            console.log("MATCH CHECK");
+            tree.push(matchCheck);
             break;
         }
-
     }
-
-    console.log("MATCH", match);
 
 }
 
