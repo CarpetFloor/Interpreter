@@ -147,6 +147,11 @@ const tokens = [
         /\+=/
     ), 
 
+    new Pattern(
+        "MULTINCREMENTASSIGN", 
+        /\*=/
+    ), 
+
     // math
 
     new Pattern(

@@ -131,6 +131,33 @@ module.exports.Assignment = class Assignement {
     }
 }
 
+module.exports.MultIncrementAssignment = class MultIncrementAssignment {
+    constructor(varName, increment) {
+        this.children = [];
+
+        this.varName = varName;
+        this.increment = increment;
+
+        this.children.push(increment);
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Multiplaction Increment Assignment! " + 
+            "varName: " + this.varName + ", " + 
+            "multiply by: "
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
+
 module.exports.IncrementAssignment = class IncrementAssignment {
     constructor(varName, increment) {
         this.children = [];
