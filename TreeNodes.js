@@ -25,14 +25,11 @@ module.exports.WhileLoopList = class WhileLoopList {
 }
 
 module.exports.WhileLoop = class WhileLoop {
-    constructor(comparison, leftExpression, rightExpression, statementList) {
+    constructor(comparison, statementList) {
         this.children = [];
-        this.comparison = comparison;
 
-        this.leftExpression = leftExpression;
-        this.rightExpression = rightExpression;
-        this.children.push(leftExpression);
-        this.children.push(rightExpression);
+        this.comparison = comparison;
+        this.children.push(comparison);
 
         this.statementList = statementList;
         this.children.push(statementList);
@@ -43,13 +40,8 @@ module.exports.WhileLoop = class WhileLoop {
             "\n" + 
             getIndent(level) + 
             "While Loop! " + 
-            "Comparison: " + this.comparison + ", " + 
-            "\n" + getIndent(level) + 
-            "Left of comparison: " + this.leftExpression.print(level  + 1) + ", " + 
-            "\n" + getIndent(level) + 
-            "Right of comparison: " + this.rightExpression.print(level + 1) + ", " + 
-            "\n" + getIndent(level) + 
-            "Statements:" + this.statementList.print(level + 1)
+            this.comparison.print(level + 1) + 
+            this.statementList.print(level + 1)
         );
 
         return output;
@@ -209,6 +201,34 @@ module.exports.Print = class Print {
 }
 
 // expression 
+
+module.exports.Comparison = class Comparison {
+    constructor(comparison, left, right) {
+        this.children = [];
+        this.comparison = comparison;
+
+        this.left = left;
+        this.right = right;
+
+        this.children.push(left);
+        this.children.push(right);
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Comparison! " + 
+            "compare operator: " + this.comparison
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
 
 module.exports.BinaryOperatorExpression = class BinaryOperatorExpression {
     constructor(operator, left, right) {
