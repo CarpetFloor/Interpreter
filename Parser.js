@@ -509,6 +509,54 @@ function generateCFG() {
     cfg.push(rule);
 
     rule = new Rule("comparison", [
+        new NonTerminal("comparison"), 
+        new Terminal("OR"),
+        new NonTerminal("comparison")
+    ], 
+    function(nonTerminals, terminals) {
+        let leftCheck = parseLoop(nonTerminals[0], "comparison");
+        let rightCheck = parseLoop(nonTerminals[1], "comparison");
+
+        if(
+            (leftCheck != undefined) && 
+            (rightCheck != undefined)
+        ) {
+            return new nodes.Comparison(
+                "OR", 
+                leftCheck[1], 
+                rightCheck[1]
+            );
+        }
+        
+        return undefined;
+    });
+    cfg.push(rule);
+
+    rule = new Rule("comparison", [
+        new NonTerminal("comparison"), 
+        new Terminal("AND"),
+        new NonTerminal("comparison")
+    ], 
+    function(nonTerminals, terminals) {
+        let leftCheck = parseLoop(nonTerminals[0], "comparison");
+        let rightCheck = parseLoop(nonTerminals[1], "comparison");
+
+        if(
+            (leftCheck != undefined) && 
+            (rightCheck != undefined)
+        ) {
+            return new nodes.Comparison(
+                "AND", 
+                leftCheck[1], 
+                rightCheck[1]
+            );
+        }
+        
+        return undefined;
+    });
+    cfg.push(rule);
+
+    rule = new Rule("comparison", [
         new NonTerminal("expression"), 
         new Terminal("LESSTHAN"),
         new NonTerminal("term")
@@ -516,9 +564,6 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let leftCheck = parseLoop(nonTerminals[0], "expression");
         let rightCheck = parseLoop(nonTerminals[1], "expression");
-
-        console.log("\t\tCHECKING HERE");
-        console.log(nonTerminals);
 
         if(
             (leftCheck != undefined) && 

@@ -68,11 +68,21 @@ const tokens = [
         /toString\(\)/
     ), 
 
+    new Pattern(
+        "OR", 
+        /or/
+    ), 
+
+    new Pattern(
+        "AND", 
+        /and/
+    ), 
+
     // groupings
 
     new Pattern(
-        "PRINT", 
-        /print/
+        "or", 
+        /or/
     ), 
 
     new Pattern(
@@ -185,6 +195,18 @@ const tokens = [
         "GREATERTHAN", 
         />/
     ), 
+
+    new Pattern(
+        "OR", 
+        /\|\|/
+    ), 
+
+    new Pattern(
+        "AND", 
+        /&&/
+    ), 
+
+    // semicolon
 
     new Pattern(
         "SEMICOLON", 

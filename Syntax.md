@@ -12,7 +12,7 @@
 - Can increment with `x += 2;`
 
 ### Types
-- `num`: Integer
+- `num`: Integer or float
 - `list`: List
 - `string`: String
 
@@ -38,6 +38,12 @@
 - `-`: Subtraction
 - `*`: Multiplication
 - `/`: Division
+- `||`: Or
+- `or`: Or
+- `&&`: And
+- `and`: And
+
+*Note that parentheses are not supported around comparisons or expressions.*
 
 ### Comments
 - `#`: Single-line comment

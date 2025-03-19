@@ -2,7 +2,7 @@ let fs = require("fs");
 let lexer = require("./Lexer");
 let parser = require("./Parser");
 
-let programFile = "SamplePrograms/Simple2.lang";
+let programFile = "SamplePrograms/comparison.lang";
 
 // if(process.argv.length >= 3) {
 //     programFile = process.argv[2];
