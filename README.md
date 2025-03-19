@@ -11,4 +11,7 @@ Also check out [CFG.json](CFG.json) to view the context-free grammar for this la
 &#9745; Context-Free Grammar\
 &#9745; Lexer\
 &#9744; Parser\
-&#9744; Runner
+&#9744; Runner\
+&#9744; VS Code syntax highlighting\
+&#9744; Sublime syntax highlighting\
+&#9744; Distribution
