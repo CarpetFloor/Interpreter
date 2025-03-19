@@ -202,6 +202,29 @@ module.exports.Print = class Print {
 
 // expression 
 
+module.exports.Not = class Not {
+    constructor(comparison) {
+        this.children = [];
+
+        this.comparison = comparison;
+        this.children.push(comparison);
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Not! "
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
+
 module.exports.Comparison = class Comparison {
     constructor(comparison, left, right) {
         this.children = [];

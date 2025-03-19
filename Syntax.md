@@ -42,8 +42,10 @@
 - `or`: Or
 - `&&`: And
 - `and`: And
+- `![comparison]`: Not - the only way to use the not operation is to wrap a comparison around the not brackets. Also works for or and and, for instance `![a < 1 && b > 2]`
 
 *Note that parentheses are not supported around comparisons or expressions.*
 
 ### Comments
 - `#`: Single-line comment
+- `## #`: Multi-line comment

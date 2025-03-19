@@ -206,6 +206,11 @@ const tokens = [
         /&&/
     ), 
 
+    new Pattern(
+        "NOT",
+        /!/
+    ), 
+
     // semicolon
 
     new Pattern(

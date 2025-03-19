@@ -1,6 +1,4 @@
--New while loop tree node to support new comparison non-terminal:
-	>Currently only supports single comparison ("==", ">", "<", etc)
-	>Need to be able to support OR and AND
 >whilelooplist (nested while loops)
 >conditional
 >conditionallist (nested conditionals)
+>runner

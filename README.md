@@ -8,7 +8,7 @@ Check out [Syntax.md](Syntax.md) for the syntax of this language.\
 Also check out [CFG.json](CFG.json) to view the context-free grammar for this language (which the implementation is based upon). To actually open the grammar, you can use [this](https://github.com/thereisatablehere/CFG_Planner) tool.
 
 # Roadmap
-&#9745; <s>Context-Free Grammar</s>\
-&#9745; <s>Lexer</s>\
+&#9745; Context-Free Grammar\
+&#9745; Lexer\
 &#9744; Parser\
 &#9744; Runner

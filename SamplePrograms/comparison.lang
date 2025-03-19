@@ -1,3 +1,15 @@
-while((a < 12)) {
-	a = 2;
+# testing commment here
+
+## testing 
+
+another 
+comment 
+here
+#
+while(![
+	![ ![a < 2] ]
+	|| 
+	![b > 1]
+]) {
+	b = 3;
 }

@@ -40,13 +40,16 @@ function generateCFG() {
     let rule = null;
 
     rule = new Rule("whilelooplist", [
-        new NonTerminal("whileloop"), 
-        new NonTerminal("whilelooplist")
+        new Terminal("WHILE"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("comparison"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("OPENCURLY"), 
+        new NonTerminal("statementlist"), 
+        new Terminal("CLOSECURLY")
     ], 
     function(nonTerminals, terminals) {
         let whileloops = [];
-        let passContext = [...nonTerminals];
-        let whileloopCheck = parseLoop(passContext, "whileloop");
         
         console.log("----------");
         console.log("----------");
@@ -54,48 +57,8 @@ function generateCFG() {
         console.log("----------");
         console.log("----------");
 
-        // console.log("nonTerminals");
-        // console.log(nonTerminals);
-        
-        // console.log("terminals");
-        // console.log(terminals);
-
-        if(
-            (nonTerminals[0].name == "WHILE") && 
-            (nonTerminals[nonTerminals.length - 1].name == "CLOSECURLY")
-        ) {
-            // first find the bounds of the tokens of the parenthesis
-            // to check to make sure it's a valid comparison
-            let comparisonCheckStart = 1;
-            let comparisonCheckEnd = -1;
-
-            for(let i = 1; i < nonTerminals.length; i++) {
-                if(nonTerminals[i].name == "OPENCURLY") {
-                    comparisonCheckEnd = i - 1;
-                    break;
-                }
-            }
-
-            if(comparisonCheckEnd == -1) {
-                return undefined;
-            }
-
-            let comparisonCheckNonTerminals = nonTerminals.slice(
-                comparisonCheckStart + 1, 
-                comparisonCheckEnd
-            );
-
-            let comparisonCheck = parseLoop(
-                comparisonCheckNonTerminals, 
-                "comparison"
-            );
-
-            console.log("COMPARISON CHECK:");
-            console.log(comparisonCheckNonTerminals);
-            console.log(comparisonCheck);
-        }
-
-        console.log("__________");
+        let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
+        if(comparisonCheck != undefined)
         
         return undefined;
     });
@@ -112,6 +75,10 @@ function generateCFG() {
     ], 
     function(nonTerminals, terminals) {
         let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
+        console.log("\tWHILE LOOP COMPARISON");
+        console.log("CONTEXT");
+        console.log(nonTerminals[0])
+        console.log(comparisonCheck);
         let statementListCheck = parseLoop(nonTerminals[1], "statementlist");
         
         if(
@@ -510,22 +477,93 @@ function generateCFG() {
 
     rule = new Rule("comparison", [
         new NonTerminal("comparison"), 
-        new Terminal("OR"),
+        new Terminal("AND"),
         new NonTerminal("comparison")
     ], 
     function(nonTerminals, terminals) {
-        let leftCheck = parseLoop(nonTerminals[0], "comparison");
-        let rightCheck = parseLoop(nonTerminals[1], "comparison");
+        let leftContext = [...nonTerminals[0]];
+        let leftNames = [];
+        for(let token of leftContext) {
+            leftNames.push(token.name);
+        }
+
+        let rightContext = [...nonTerminals[1]];
+        let rightNames = [];
+        for(let token of rightContext) {
+            rightNames.push(token.name);
+        }
+
+        // determine left comparison nots
+        let leftNotCount = 0;
+
+        while(
+            (leftContext[0].name == "NOT") && 
+            (leftContext[1].name == "OPENPIPE") && 
+            (leftContext[leftContext.length - 1].name == "CLOSEPIPE")
+        ) {
+            ++leftNotCount;
+            leftContext.splice(0, 2);
+            leftContext.splice(leftContext.length - 1, 1);
+        }
+
+        // determine right comparison nots
+        let rightNotCount = 0;
+
+        while(
+            (rightContext[0].name == "NOT") && 
+            (rightContext[1].name == "OPENPIPE") && 
+            (rightContext[rightContext.length - 1].name == "CLOSEPIPE")
+        ) {
+            ++rightNotCount;
+            rightContext.splice(0, 2);
+            rightContext.splice(rightContext.length - 1, 1);
+        }
+
+        // determine nots around entire or
+        let outterNots = 0;
+
+        while(
+            (leftContext[0].name == "NOT") && 
+            (leftContext[1].name == "OPENPIPE") && 
+            (rightContext[rightContext.length - 1].name == "CLOSEPIPE")
+        ) {
+            ++outterNots;
+            leftContext.splice(0, 2);
+            rightContext.splice(rightContext.length - 1, 1);
+        }
+
+        let leftCheck = parseLoop(leftContext, "comparison");
+        let rightCheck = parseLoop(rightContext, "comparison");
+
 
         if(
             (leftCheck != undefined) && 
             (rightCheck != undefined)
         ) {
-            return new nodes.Comparison(
-                "OR", 
-                leftCheck[1], 
-                rightCheck[1]
+            let left = leftCheck[1];
+                
+            if((leftNotCount % 2) != 0) {
+                left = new nodes.Not(left);
+            }
+
+            let right = rightCheck[1];
+            
+            if((rightNotCount % 2) != 0) {
+                right = new nodes.Not(right);
+            }
+
+            let comparisonNode = new nodes.Comparison(
+                "AND", 
+                left, 
+                right
             );
+            
+            if((outterNots % 2) == 0) {
+                return comparisonNode;
+            }
+            else {
+                return new nodes.Not(comparisonNode);
+            }
         }
         
         return undefined;
@@ -534,22 +572,160 @@ function generateCFG() {
 
     rule = new Rule("comparison", [
         new NonTerminal("comparison"), 
-        new Terminal("AND"),
+        new Terminal("OR"),
         new NonTerminal("comparison")
     ], 
     function(nonTerminals, terminals) {
-        let leftCheck = parseLoop(nonTerminals[0], "comparison");
-        let rightCheck = parseLoop(nonTerminals[1], "comparison");
+        let leftContext = [...nonTerminals[0]];
+        let leftNames = [];
+        for(let token of leftContext) {
+            leftNames.push(token.name);
+        }
+
+        let rightContext = [...nonTerminals[1]];
+        let rightNames = [];
+        for(let token of rightContext) {
+            rightNames.push(token.name);
+        }
+
+        // determine left comparison nots
+        let leftNotCount = 0;
+
+        while(
+            (leftContext[0].name == "NOT") && 
+            (leftContext[1].name == "OPENPIPE") && 
+            (leftContext[leftContext.length - 1].name == "CLOSEPIPE")
+        ) {
+            ++leftNotCount;
+            leftContext.splice(0, 2);
+            leftContext.splice(leftContext.length - 1, 1);
+        }
+
+        // determine right comparison nots
+        let rightNotCount = 0;
+
+        while(
+            (rightContext[0].name == "NOT") && 
+            (rightContext[1].name == "OPENPIPE") && 
+            (rightContext[rightContext.length - 1].name == "CLOSEPIPE")
+        ) {
+            ++rightNotCount;
+            rightContext.splice(0, 2);
+            rightContext.splice(rightContext.length - 1, 1);
+        }
+
+        // determine nots around entire or
+        let outterNots = 0;
+
+        while(
+            (leftContext[0].name == "NOT") && 
+            (leftContext[1].name == "OPENPIPE") && 
+            (rightContext[rightContext.length - 1].name == "CLOSEPIPE")
+        ) {
+            ++outterNots;
+            leftContext.splice(0, 2);
+            rightContext.splice(rightContext.length - 1, 1);
+        }
+
+        let leftCheck = parseLoop(leftContext, "comparison");
+        let rightCheck = parseLoop(rightContext, "comparison");
+
 
         if(
             (leftCheck != undefined) && 
             (rightCheck != undefined)
         ) {
-            return new nodes.Comparison(
-                "AND", 
-                leftCheck[1], 
-                rightCheck[1]
+            let left = leftCheck[1];
+                
+            if((leftNotCount % 2) != 0) {
+                left = new nodes.Not(left);
+            }
+
+            let right = rightCheck[1];
+            
+            if((rightNotCount % 2) != 0) {
+                right = new nodes.Not(right);
+            }
+
+            let comparisonNode = new nodes.Comparison(
+                "OR", 
+                left, 
+                right
             );
+            
+            if((outterNots % 2) == 0) {
+                return comparisonNode;
+            }
+            else {
+                return new nodes.Not(comparisonNode);
+            }
+        }
+        
+        return undefined;
+    });
+    cfg.push(rule);
+
+    rule = new Rule("comparison", [ 
+        new Terminal("NOT"), 
+        new Terminal("OPENPIPE"), 
+        new NonTerminal("comparison"), 
+        new Terminal("CLOSEPIPE")
+    ], 
+    function(nonTerminals, terminals) {
+        console.log("DO WE EVER GET HERE???");
+        console.log("DO WE EVER GET HERE???");
+        console.log("DO WE EVER GET HERE???");
+        console.log("DO WE EVER GET HERE???");
+        console.log("DO WE EVER GET HERE???");
+
+        // deal with directly-nested nots
+        let context = [...nonTerminals[0]];
+        
+        console.log("\ncontext");
+        console.log(nonTerminals);
+        console.log("-----");
+        console.log(context);
+
+        let names = [];
+        for(let token of context) {
+            names.push(token.name);
+        }
+
+        let notCount = 1;
+        if(
+            (context[0].name == "NOT") && 
+            !(names.includes("OR") || names.includes("AND"))
+        ) {
+            console.log("WE GOOD");
+            console.log("WE GOOD");
+            console.log("WE GOOD");
+            console.log("WE GOOD");
+            console.log("WE GOOD");
+            while(
+                (context[0].name == "NOT") && 
+                (context[1].name == "OPENPIPE")
+            ) {
+                console.log("YUUUUUUUUUUP!");
+                context.splice(0, 2);
+                ++notCount;
+            }
+        }
+
+        console.log("notCount", notCount);
+
+        let comparisonCheck = parseLoop(context, "comparison");
+
+        if(comparisonCheck != undefined) {
+            let comparison = comparisonCheck[1];
+
+            if((notCount % 2) == 0) {
+                return comparison;
+            }
+            else {
+                return new nodes.Not(
+                    comparison
+                );
+            }
         }
         
         return undefined;
