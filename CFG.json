@@ -1,1 +1,165 @@
-{"statements":[{"name":"somenonterminal","rules":["somerule","anotherrule"]}]}
+{
+    "statements": [
+        {
+            "name": "programlist",
+            "rules": [
+                "program programlist",
+                "program",
+                "whilelooplist programlist",
+                "whilelooplist",
+                "program whilelooplist programlist",
+                "program whilelooplist",
+                "whilelooplist program programlist",
+                "whilelooplist program"
+            ]
+        },
+        {
+            "name": "program",
+            "rules": [
+                "statementlist conditionallist program",
+                "conditionallist statementlist program",
+                "statementlist program",
+                "conditionallist program",
+                "statementlist",
+                "conditionallist"
+            ]
+        },
+        {
+            "name": "statementlist",
+            "rules": [
+                "statement statementlist",
+                "statement"
+            ]
+        },
+        {
+            "name": "statement",
+            "rules": [
+                "PRINT ( expression ) ;",
+                "PRINT ( stringexpression ) ;",
+                "LISTTYPE [ NUMTYPE ] ID = [ ] ;",
+                "LISTTYPE [ STRINGTYPE ] ID = [ ] ;",
+                "NUMTYPE ID = expression ;",
+                "STRINGTYPE ID = stringexpression ;",
+                "ID = expression ;",
+                "ID = stringexpression ;",
+                "ID [ NUM ] = expression ;",
+                "ID [ NUM ] = stringexpression ;",
+                "ID . ADD ( expression ) ;",
+                "ID . ADD ( stringexpression ) ;",
+                "ID += expression ;",
+                "ID += stringexpression ;",
+                "ID [ NUM ] += expression ;",
+                "ID [ NUM ] += stringexpression ;"
+            ]
+        },
+        {
+            "name": "expression",
+            "rules": [
+                "expression + term",
+                "expression - term",
+                "term"
+            ]
+        },
+        {
+            "name": "term",
+            "rules": [
+                "term * factor",
+                "term / factor",
+                "factor"
+            ]
+        },
+        {
+            "name": "factor",
+            "rules": [
+                "exponent ^ factor",
+                "exponent"
+            ]
+        },
+        {
+            "name": "exponent",
+            "rules": [
+                "NUM",
+                "ID",
+                "ID . GET ( NUM )",
+                "( expression )"
+            ]
+        },
+        {
+            "name": "stringexpression",
+            "rules": [
+                "stringterm + stringexpression",
+                "stringterm"
+            ]
+        },
+        {
+            "name": "stringterm",
+            "rules": [
+                "STRING",
+                "ID",
+                "ID . GET ( NUM )"
+            ]
+        },
+        {
+            "name": "conditionallist",
+            "rules": [
+                "conditional conditionallist",
+                "conditional"
+            ]
+        },
+        {
+            "name": "conditional",
+            "rules": [
+                "IF ( expression = = expression ) { statementlist }",
+                "IF ( expression < expression ) { statementlist }",
+                "IF ( expression > expression ) { statementlist }",
+                "IF ( expression = = expression ) { statementlist } ELSE { statementlist }",
+                "IF ( expression < expression ) { statementlist } ELSE { statementlist }",
+                "IF ( expression > expression ) { statementlist } ELSE { statementlist }",
+                "IF ( expression == expression ) { statementlist } elseifconditionallist",
+                "IF ( expression < expression ) { statementlist } elseifconditionallist",
+                "IF (expression > expression ) { statementlist } elseifconditionallist",
+                "IF ( expression == expression ) { statementlist } elseifconditionallist ELSE { statementlist }",
+                "IF ( expression < expression ) { statementlist } elseifconditionallist ELSE { statementlist }",
+                "IF (expression > expression ) { statementlist } elseifconditionallist ELSE { conditionallist }"
+            ]
+        },
+        {
+            "name": "elseifconditionallist",
+            "rules": [
+                "ELSE IF ( expression = = expression ) { statementlist } elseifconditionallist",
+                "ELSE IF ( expression < expression ) { statementlist } elseifconditionallist",
+                "ELSE IF ( expression > expression ) { statementlist } elseifconditionallist",
+                "ELSE IF ( expression = = expression ) { statementlist }",
+                "ELSE IF ( expression < expression ) { statementlist }",
+                "ELSE IF ( expression > expression ) { statementlist }"
+            ]
+        },
+        {
+            "name": "whilelooplist",
+            "rules": [
+                "whileloop whilelooplist",
+                "whileloop"
+            ]
+        },
+        {
+            "name": "whileloop",
+            "rules": [
+                "WHILE ( comparison ) { program }"
+            ]
+        }, 
+        {
+            "name": "comparison",
+            "rules": [
+                "comparison AND comparison", 
+                "comparison OR comparison", 
+                "NOT OPENPIPE comparison CLOSEPIPE", 
+                "expression < term", 
+                "expression <= term", 
+                "expression > term", 
+                "expression >= term", 
+                "expression == term", 
+                "_empty_"
+            ]
+        }
+    ]
+}
