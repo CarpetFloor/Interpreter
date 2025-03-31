@@ -45,8 +45,7 @@ function generateCFG() {
         new NonTerminal("comparison"), 
         new Terminal("CLOSEPAREN"), 
         new Terminal("OPENCURLY"), 
-        new NonTerminal("statementlist"), 
-        new Terminal("CLOSECURLY")
+        new NonTerminal("statementlist"),
     ], 
     function(nonTerminals, terminals) {
         let whileloops = [];
@@ -57,12 +56,78 @@ function generateCFG() {
         console.log("----------");
         console.log("----------");
 
+        console.log("\tnonTerminals");
+        console.log(nonTerminals);
+        console.log("-----");
+        console.log("\tterminals");
+        console.log(terminals);
+
+        // first make sure comparison of outter while loop valid
         let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
-        if(comparisonCheck != undefined)
+        if(comparisonCheck != undefined) {
+            // make sure inner while loop exists
+            let body = nonTerminals[1];
+            let innerLoop = false;
+            let innerIndex = -1;
+
+            for(let token of body) {
+                if(token.name == "WHILE") {
+                    innerLoop = true;
+                    innerIndex = body.indexOf(token);
+                    break;
+                }
+            }
+
+            console.log("==========");
+            console.log("==========");
+            console.log("==========");
+            console.log("==========");
+            console.log("==========");
+            if(innerLoop) {
+                // get inner loop comparison
+                // first make sure parentheses exist
+                if(body[innerIndex + 1].name != "OPENPAREN") {
+                    return undefined;
+                }
+
+                let innerComparisonEndIndex = -1;
+                for(let i = innerIndex + 2; i < body.length; i++) {
+                    if(body[i].name == "CLOSEPAREN") {
+                        innerComparisonEndIndex = i;
+                        break;
+                    }
+                }
+
+                if(innerComparisonEndIndex == -1) {
+                    return undefined;
+                }
+
+                let innnerComparisonTokens = body.slice(innerIndex + 2, innerComparisonEndIndex);
+                // check if inner comparison is valid
+                let innnerComparisonCheck = parseLoop(innnerComparisonTokens, "comparison");
+
+                if(innnerComparisonCheck == undefined) {
+                    return undefined;
+                }
+
+                // find indices range of inner while loop body
+
+                // find statements of outer while loop body by everything not in 
+                // indices range of inner while loop body
+
+                // run all of this again and again until inner while loop body 
+                // doesn't have an inner while loop
+
+                // then check if final nested while loop body is a valid 
+                // statement list, and if so entire while loop list is valid
+
+                
+            }
+        }
         
         return undefined;
     });
-    // cfg.push(rule);
+    cfg.push(rule);
 
     rule = new Rule("whileloop", [
         new Terminal("WHILE"), 
