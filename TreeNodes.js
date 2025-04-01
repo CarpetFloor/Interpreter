@@ -177,6 +177,33 @@ module.exports.IncrementAssignment = class IncrementAssignment {
     }
 }
 
+module.exports.DecrementAssignment = class DecrementAssignment {
+    constructor(varName, decrement) {
+        this.children = [];
+
+        this.varName = varName;
+        this.decrement = decrement;
+
+        this.children.push(decrement);
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Decrement Assignment! " + 
+            "varName: " + this.varName + ", " + 
+            "decrement by: "
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
+
 module.exports.Print = class Print {
     constructor(value) {
         this.children = [];

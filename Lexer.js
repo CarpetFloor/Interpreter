@@ -158,6 +158,11 @@ const tokens = [
     ), 
 
     new Pattern(
+        "DECREMENTASSIGN", 
+        /\-=/
+    ), 
+
+    new Pattern(
         "MULTINCREMENTASSIGN", 
         /\*=/
     ), 
