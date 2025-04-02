@@ -67,148 +67,79 @@ function generateCFG() {
         if(comparisonCheck != undefined) {
             // make sure inner while loop exists
             let body = nonTerminals[1];
-            let innerLoop = false;
-            // actually the index of where while is
-            // ie where the inner while loop starts
-            let innerIndex = -1;
+            let bodyElements = [];
 
-            for(let token of body) {
-                if(token.name == "WHILE") {
-                    innerLoop = true;
-                    innerIndex = body.indexOf(token);
-                    break;
+            console.log("==========");
+            console.log("==========");
+            console.log("==========");
+            console.log("==========");
+            console.log("==========");
+
+            /**
+             * keep array that body elements are sequentially added to.
+             * go through body
+             */
+            let currentTokens = [];
+            for(let i = 0; i < body.length; i++) {
+                // console.log(i, body[i]);
+                if(body[i].name == "WHILE") {
+                    // check if currentTokens is a valid statement list
+                    let statementListCheck = parseLoop(currentTokens, "statementlist");
+                    // console.log("STATEMENT LIST CHECK");
+                    // console.log(currentTokens);
+                    // console.log("--");
+                    // console.log(statementListCheck);
+
+                    if(statementListCheck == undefined) {
+                        return undefined;
+                    }
+
+                    bodyElements.push(statementListCheck);
+                    currentTokens = [];
+
+                    // find entire inner-loop context
+                    let loopIndex = {
+                        start: i,
+                        end: -1
+                    };
+
+                    for(let j = body.length - 1; j > loopIndex.start; j--) {
+                        if(body[j].name == "CLOSECURLY") {
+                            loopIndex.end = j;
+                        }
+                    }
+
+                    if(loopIndex.end == -1) {
+                        return undefined;
+                    }
+
+                    // console.log("LOOP INDICES:");
+                    // console.log(loopIndex.start, loopIndex.end);
+
+                    // recursively check inner while loops by calling method 
+                    // and passing inner loop context
                 }
+                else if(i == body.length - 1) {
+                    // NOT TESTED
+                    let statementListCheck = parseLoop(currentTokens, "statementlist");
+
+                    if(statementListCheck == undefined) {
+                        return undefined;
+                    }
+
+                    bodyElements.push(statementListCheck);
+                }
+                else {
+                    currentTokens.push(body[i]);
+                }
+
             }
 
-            console.log("==========");
-            console.log("==========");
-            console.log("==========");
-            console.log("==========");
-            console.log("==========");
-            let innerLoops = [];
-            if(innerLoop) {
-                // get inner loop comparison
-                // first make sure parentheses exist
-                if(body[innerIndex + 1].name != "OPENPAREN") {
-                    return undefined;
-                }
-
-                let innerComparisonEndIndex = -1;
-                for(let i = innerIndex + 2; i < body.length; i++) {
-                    if(body[i].name == "CLOSEPAREN") {
-                        innerComparisonEndIndex = i;
-                        break;
-                    }
-                }
-
-                if(innerComparisonEndIndex == -1) {
-                    return undefined;
-                }
-
-                let innerComparisonTokens = body.slice(innerIndex + 2, innerComparisonEndIndex);
-                // check if inner comparison is valid
-                let innerComparisonCheck = parseLoop(innerComparisonTokens, "comparison");
-
-                if(innerComparisonCheck == undefined) {
-                    return undefined;
-                }
-
-                // find indices range of inner while loop body 
-                // and also check to make sure inner inner while loop exists
-                let innerWhileIndexStart = innerComparisonEndIndex + 1;
-                if(body[innerWhileIndexStart].name != "OPENCURLY") {
-                    return undefined;
-                }
-
-                let innerWhileIndexEnd = -1;
-                // -2 because last non-terminal is closecurly for outer while
-                for(let i = body.length - 2; i > innerWhileIndexStart; i--) {
-                    if(body[i].name == "CLOSECURLY") {
-                        innerWhileIndexEnd = i;
-                        break;
-                    }
-                }
-                if(innerWhileIndexEnd == -1) {
-                    return undefined;
-                }
-
-                // console.log("\tINNER WHILE BODY");
-                // console.log(body.slice(innerWhileIndexStart + 1, innerWhileIndexEnd));
-
-                // find statements of outer while loop body by everything not in 
-                // indices range of inner while loop body
-
-                let statementListTokens = [];
-                for(let i = 0; i < body.length - 1; i++) {
-                    // console.log("\t", body[i].name, i, innerWhileIndexStart, innerWhileIndexEnd);
-                    if((i < innerIndex) || (i > innerWhileIndexEnd)) {
-                        statementListTokens.push(body[i]);
-                    }
-                }
-
-                console.log("\tOUTER STATEMENT LIST");
-                console.log(statementListTokens);
-
-                let statementListCheck = false;
-                
-                /**
-                 * copied from statement list:
-                 * for some reason calling parseLoop(statementListTokens, "statementlist") 
-                 * has the entire context for whilelooplist nonTerminals
-                 */
-
-                let statements = [];
-                let passContext = [...statementListTokens];
-                let statementCheck = parseLoop(passContext, "statement");
-
-                while((statementCheck != undefined) || (passContext.length != 0)) {
-                    console.log("A");
-                    statements.push(statementCheck[1]);
-                    console.log("B");
-                    passContext.splice(0, statementCheck[0] + 1);
-                    console.log("C");
-                    statementCheck = parseLoop(passContext, "statement");
-                    console.log("D");
-                    console.log(statementCheck);
-                    console.log(statements);
-                }
-
-                let match = true;
-                for(let i = 0; i < statements.length; i++) {
-                    if(statements[i] == undefined) {
-                        match = false;
-                        break;
-                    }
-                }
-
-                if(match) {
-                    statementListCheck = true;
-                }
-
-                /**
-                 * end of copied code
-                 */
-
-                console.log("\tSTATEMENTLIST CHECK:");
-                console.log("CONTEXT:");
-                console.log(statementListTokens);
-                console.log("-----");
-                console.log(statementListCheck);
-
-
-                // run all of this again and again until inner while loop body 
-                // doesn't have an inner while loop
-
-                // then check if final nested while loop body is a valid 
-                // statement list, and if so entire while loop list is valid
-
-                
-            }
         }
         
         return undefined;
     });
-    // cfg.push(rule);
+    cfg.push(rule);
 
     rule = new Rule("whileloop", [
         new Terminal("WHILE"), 
@@ -221,10 +152,6 @@ function generateCFG() {
     ], 
     function(nonTerminals, terminals) {
         let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
-        console.log("\tWHILE LOOP COMPARISON");
-        console.log("CONTEXT");
-        console.log(nonTerminals[0])
-        console.log(comparisonCheck);
         let statementListCheck = parseLoop(nonTerminals[1], "statementlist");
         
         if(
@@ -255,9 +182,6 @@ function generateCFG() {
         let statements = [];
         let passContext = [...nonTerminals];
         let statementCheck = parseLoop(passContext, "statement");
-
-        console.log("\t\tCHECKING statementlist");
-        console.log(nonTerminals)
         
         while((statementCheck != undefined) || (passContext.length != 0)) {
             statements.push(statementCheck[1]);

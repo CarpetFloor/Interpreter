@@ -1,11 +1,12 @@
 ### File Extension
-- Not enforced yet, but thinking about `.lang`.
+- Whatever you want
 
 ### Semicolons?
-- Yes, whitespace doesn't matter, and semicolons are the only way to signify the end of statements.
+- Yes, whitespace doesn't matter, and semicolons are the only way to signify the end of statements
 
 ### Variable Declartion
 - `num x = 5;`
+- Note that variables can only contain letters, but can be any mix of lowercase or uppercase letters
 
 ### Variable Assignment
 - Can reassign the value of variables with `x = 2;`
@@ -13,8 +14,8 @@
 
 ### Types
 - `num`: Integer or float
-- `list`: List
 - `string`: String
+- `list`: List
 
 #### String
 - Can use either `"` or `'`.
@@ -33,6 +34,9 @@
         count += 1;
     }
 
+### Functions
+- No
+
 ### Math
 - `+`: Addition
 - `-`: Subtraction
@@ -42,10 +46,16 @@
 - `or`: Or
 - `&&`: And
 - `and`: And
-- `![comparison]`: Not - the only way to use the not operation is to wrap a comparison around the not brackets. Also works for or and and, for instance `![a < 1 && b > 2]`
+- `![comparison]`: Not operator - the only way to use the not operation is to wrap a comparison around the not brackets. Also works for or and and, for instance `![a < 1 && b > 2]`
 
-*Note that parentheses are not supported around comparisons or expressions.*
+*Note that parentheses are not supported around comparisons or expressions*
+
+### Nesting?
+- Yes, up to infinity for everything
+
+### Scope?
+- No, everything is just global
 
 ### Comments
 - `#`: Single-line comment
-- `## #`: Multi-line comment
+- `## comment here #`: Multi-line comment
