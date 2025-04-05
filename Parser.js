@@ -40,12 +40,48 @@ function generateCFG() {
     let rule = null;
 
     rule = new Rule("whilelooplist", [
+        new NonTerminal("whileloop"), 
+        new NonTerminal("whilelooplist")
+    ], 
+    function(nonTerminals, terminals) {
+        let whileloops = [];
+        let passContext = [...nonTerminals];
+        let whileloopCheck = parseLoop(passContext, "whileloop");
+        
+        while((whileloopCheck != undefined) || (passContext.length != 0)) {
+            whileloops.push(whileloopCheck[1]);
+            
+            passContext.splice(0, whileloopCheck[0] + 1);
+
+            whileloopCheck = parseLoop(passContext, "whileloop");
+        }
+
+        let match = true;
+        for(let i = 0; i < whileloops.length; i++) {
+            if(whileloops[i] == undefined) {
+                match = false;
+                break;
+            }
+        }
+
+        if(match) {
+            return new nodes.WhileLoopList(whileloops);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    // nested while loops
+    rule = new Rule("whileloop", [
         new Terminal("WHILE"), 
         new Terminal("OPENPAREN"), 
         new NonTerminal("comparison"), 
         new Terminal("CLOSEPAREN"), 
         new Terminal("OPENCURLY"), 
         new NonTerminal("statementlist"),
+        new Terminal("CLOSECURLY")
     ], 
     function(nonTerminals, terminals) {
         let whileloops = [];
@@ -75,13 +111,17 @@ function generateCFG() {
             console.log("==========");
             console.log("==========");
 
+            console.log("\tCOMPARISON");
+            console.log(comparisonCheck);
+
             /**
              * keep array that body elements are sequentially added to.
              * go through body
              */
             let currentTokens = [];
             for(let i = 0; i < body.length; i++) {
-                // console.log(i, body[i]);
+                console.log("\t", i, body[i]);
+
                 if(body[i].name == "WHILE") {
                     // check if currentTokens is a valid statement list
                     let statementListCheck = parseLoop(currentTokens, "statementlist");
@@ -109,12 +149,12 @@ function generateCFG() {
                         }
                     }
 
+                    console.log("LOOP INDICES:");
+                    console.log(loopIndex.start, loopIndex.end);
+
                     if(loopIndex.end == -1) {
                         return undefined;
                     }
-
-                    // console.log("LOOP INDICES:");
-                    // console.log(loopIndex.start, loopIndex.end);
 
                     // recursively check inner while loops by calling method 
                     // and passing inner loop context
@@ -139,7 +179,7 @@ function generateCFG() {
         
         return undefined;
     });
-    cfg.push(rule);
+    // cfg.push(rule);
 
     rule = new Rule("whileloop", [
         new Terminal("WHILE"), 
