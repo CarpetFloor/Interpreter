@@ -1,7 +1,5 @@
 while(a < 1) {
 	while(b > 2) {
-		while(plswork < 2) {
-			plswork += 1;
-		}
+		b -= 1;
 	}
 }

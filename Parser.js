@@ -181,20 +181,38 @@ function parseInnerWhileLoop(loopsList, tokens) {
                         end: -1
                     };
 
-                    for(let j = body.length - 2; j > loopIndex.start; j--) {
+                    /**
+                     * Need to differentiate between a while loop directly succeeding another 
+                     * while loop, and a while loop nested within another while loop. To do so, 
+                     * parse through tokens from start of inner while loop until a closing curly 
+                     * bracket is found and the number of open and curly brackets found is equal.
+                     */
+                    let openCurlyCount = 0;
+                    let closeCurlyCount = 0;
+
+                    for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
                         if(debug) {
                             console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
                         }
 
-                        if(body[j].name == "CLOSECURLY") {
-                            if(debug) {
-                                console.log("FOUND");
-                            }
-                            
-
-                            loopIndex.end = j;
-                            break;
+                        if(body[j].name == "OPENCURLY") {
+                            ++openCurlyCount;
                         }
+
+                        if(body[j].name == "CLOSECURLY") {
+                            ++closeCurlyCount;
+
+                            if(openCurlyCount == closeCurlyCount) {
+                                if(debug) {
+                                    console.log("FOUND");
+                                }
+                                
+
+                                loopIndex.end = j;
+                                break;
+                            }
+                        }
+
                     }
 
                     if(debug) {
@@ -401,11 +419,32 @@ function generateCFG() {
                         end: -1
                     };
 
-                    for(let j = body.length - 2; j > loopIndex.start; j--) {
-                        if(body[j].name == "CLOSECURLY") {
-                            loopIndex.end = j;
-                            break;
+                    let innerOpenCurlyCount = 0;
+                    let innerCloseCurlyCount = 0;
+
+                    for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
+                        if(debug) {
+                            console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
                         }
+
+                        if(body[j].name == "OPENCURLY") {
+                            ++innerOpenCurlyCount;
+                        }
+
+                        if(body[j].name == "CLOSECURLY") {
+                            ++innerCloseCurlyCount;
+
+                            if(innerOpenCurlyCount == innerCloseCurlyCount) {
+                                if(debug) {
+                                    console.log("FOUND");
+                                }
+                                
+
+                                loopIndex.end = j;
+                                break;
+                            }
+                        }
+                        
                     }
 
                     console.log("LOOP INDICES:");

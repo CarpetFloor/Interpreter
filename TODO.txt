@@ -1,10 +1,10 @@
 Make sure the while loops work:
-    -Regular while loop
+    +Regular while loop
     -Regular while loop list
     -Regular while loop list with statements around and between
-    -While loop with nested while loops
+    +While loop with nested while loops
     -While loops lists with nested while loops
-    -While loop with nested while loop lists
+    +While loop with nested while loop lists
     -While loop lists with nested while loop lists
 
 >whilelooplist (nested while loops)
