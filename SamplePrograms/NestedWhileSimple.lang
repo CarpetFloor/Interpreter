@@ -1,13 +1,7 @@
 while(a < 1) {
-	a += 1;
-	
 	while(b > 2) {
-		b -= 1;
-
 		while(plswork < 2) {
 			plswork += 1;
 		}
 	}
-	
-	c -= 2;
 }

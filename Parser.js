@@ -81,7 +81,7 @@ function parseInnerWhileLoop(loopsList, tokens) {
     }
 
     // get body
-    let body = tokens.slice(comparisonIndices.end + 2, tokens.length - 1);
+    let body = tokens.slice(comparisonIndices.end + 2, tokens.length);
 
     if(debug) {
         console.log("BODY TOKENS");
@@ -108,7 +108,12 @@ function parseInnerWhileLoop(loopsList, tokens) {
 
     // check if entire body is valid statement list
     if(lastNestedLoop) {
-        let statementListCheck = parseLoop(body, "statementlist");
+        console.log("DOING LAST NESTED LOOP CHECK STUFF");
+        console.log("BODY BEING PASSED INTO STATEMENT LIST CHECK:");
+        let bodyForStatementListCheck = [...(body.slice(0, body.length - 1))];
+        console.log(bodyForStatementListCheck);
+        let statementListCheck = parseLoop(bodyForStatementListCheck, "statementlist");
+        console.log("ARE WE HERE?");
 
         if(debug) {
             console.log("STATEMENT LIST CHECK");
@@ -119,17 +124,153 @@ function parseInnerWhileLoop(loopsList, tokens) {
             return false;
         }
         else {
-            console.log("_____");
-            console.log("CHECKING WHILE LOOP PARTS");
-            console.log(comparisonCheck[1]);
-            console.log("_____");
-            console.log(statementListCheck[1]);
+            if(debug) {
+                console.log("_____");
+                console.log("CHECKING WHILE LOOP PARTS");
+                console.log(comparisonCheck[1]);
+                console.log("_____");
+                console.log(statementListCheck[1]);
+            }
 
             let whileloop = new nodes.WhileLoop(comparisonCheck[1], [statementListCheck[1]]);
             loopsList.push(whileloop);
 
             return true;
         }
+    }
+    else {
+        if(debug) {
+            console.log("GOING THROUGH BODY");
+            console.log("BODY:");
+            console.log(body);
+            console.log("_____\n");
+        }
+
+        let bodyElements = [];
+            let currentTokens = [];;
+
+            for(let i = 0; i < body.length; i++) {
+                if(debug) {
+                    console.log("\t", i, body[i]);
+                }
+
+                if(body[i].name == "WHILE") {
+                    let statementListCheck = parseLoop(currentTokens, "statementlist");
+
+                    if(debug) {
+                        console.log("VALID STATEMENT LIST CHECK?");
+                        console.log("TOKENS:");
+                        console.log(currentTokens);
+                        console.log("--");
+                        console.log(statementListCheck);
+                        console.log("--DONE");
+                    }
+
+                    if(statementListCheck == undefined) {
+                        return false;
+                    }
+
+                    if(statementListCheck[1].children.length > 0) {
+                        bodyElements.push(statementListCheck[1]);
+                    }
+                    
+                    currentTokens = [];
+
+                    let loopIndex = {
+                        start: i,
+                        end: -1
+                    };
+
+                    for(let j = body.length - 2; j > loopIndex.start; j--) {
+                        if(debug) {
+                            console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
+                        }
+
+                        if(body[j].name == "CLOSECURLY") {
+                            if(debug) {
+                                console.log("FOUND");
+                            }
+                            
+
+                            loopIndex.end = j;
+                            break;
+                        }
+                    }
+
+                    if(debug) {
+                        console.log("LOOP INDICES");
+                        console.log(loopIndex.start, loopIndex.end);
+                    }
+
+                    if(loopIndex.end == -1) {
+                        return false;
+                    }
+
+                    let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
+
+                    if(debug) {
+                        console.log("\nINNER LOOP TOKENS");
+                        console.log(innerLoopTokens);
+                    }
+
+                    let valid = parseInnerWhileLoop(bodyElements, innerLoopTokens);
+                    
+                    if(!(valid)) {
+                        return false;
+                    }
+
+                    i += innerLoopTokens.length - 1;
+                }
+                else if(i == body.length - 1) {
+                    let statementListCheck = parseLoop(currentTokens, "statementlist");
+
+                    if(statementListCheck == undefined) {
+                        return false;
+                    }
+
+                    if(statementListCheck[1].children.length > 0) {
+                        bodyElements.push(statementListCheck[1]);
+                    }
+
+                    console.log("\n\n\t\tADDED BOTTOM");
+                    console.log(statementListCheck[1].children.length);
+                }
+                else {
+                    currentTokens.push(body[i]);
+                }
+
+            }
+
+            if(debug) {
+                console.log("COMBINING BODY ELEMENTS");
+            }
+
+            // combine while loops
+            for(let i = bodyElements.length - 1; i > 0; i--) {
+                if(bodyElements[i].name == "WHILE") {
+                    let loop = bodyElements[i];
+
+                    if(bodyElements[i - 1].name == "WHILE") {
+                        bodyElements[i - 1].body.push(loop);
+                    }
+
+                    bodyElements.splice(i, 1);
+                }
+            }
+
+            let whileloop = new nodes.WhileLoop(
+                comparisonCheck[1], 
+                bodyElements
+            );
+            loopsList.push(whileloop);
+
+            if(debug) {
+                console.log("FINAL WHILE LOOP");
+                console.log(whileloop);
+            }
+            
+            return true;
+
     }
 
     return false;
@@ -249,7 +390,9 @@ function generateCFG() {
                         return undefined;
                     }
 
-                    bodyElements.push(statementListCheck[1]);
+                    if(statementListCheck[1].children.length > 0) {
+                        bodyElements.push(statementListCheck[1]);
+                    }
                     currentTokens = [];
 
                     // find entire inner-loop context
@@ -258,9 +401,10 @@ function generateCFG() {
                         end: -1
                     };
 
-                    for(let j = body.length - 1; j > loopIndex.start; j--) {
+                    for(let j = body.length - 2; j > loopIndex.start; j--) {
                         if(body[j].name == "CLOSECURLY") {
                             loopIndex.end = j;
+                            break;
                         }
                     }
 
@@ -279,15 +423,11 @@ function generateCFG() {
                     console.log(innerLoopTokens);
                     let valid = parseInnerWhileLoop(bodyElements, innerLoopTokens);
 
-                    console.log("\tVALID CHECK");
-                    console.log("\tVALID CHECK");
-                    console.log("\tVALID CHECK");
-                    console.log("\tVALID CHECK");
-                    console.log("\tVALID CHECK");
+                    console.log("\n__________\n\tVALID CHECK");
                     console.log(valid);
                     
                     if(!(valid)) {
-                        return undefined
+                        return undefined;
                     }
 
                     i += innerLoopTokens.length - 1;
@@ -299,7 +439,9 @@ function generateCFG() {
                         return undefined;
                     }
 
-                    bodyElements.push(statementListCheck[1]);
+                    if(statementListCheck[1].children.length > 0) {
+                        bodyElements.push(statementListCheck[1]);
+                    }
                 }
                 else {
                     if(body[i].name == "OPENCURLY") {
@@ -383,15 +525,18 @@ function generateCFG() {
         }
     }
     );
-    cfg.push(rule);
+    // cfg.push(rule);
 
     rule = new Rule("statementlist", [
         new NonTerminal("statement"), 
         new NonTerminal("statementlist")
     ], 
     function(nonTerminals, terminals) {
+        console.log("\n\n\n\n\nSTATEMENT LIST CHECk");
         let statements = [];
         let passContext = [...nonTerminals];
+        console.log("PASS CONTEXT");
+        console.log(passContext);
         let statementCheck = parseLoop(passContext, "statement");
         
         while((statementCheck != undefined) || (passContext.length != 0)) {
