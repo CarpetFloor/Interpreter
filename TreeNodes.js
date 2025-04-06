@@ -25,14 +25,16 @@ module.exports.WhileLoopList = class WhileLoopList {
 }
 
 module.exports.WhileLoop = class WhileLoop {
-    constructor(comparison, statementList) {
+    constructor(comparison, body) {
         this.children = [];
 
         this.comparison = comparison;
         this.children.push(comparison);
 
-        this.statementList = statementList;
-        this.children.push(statementList);
+        this.body = body;
+        for(let element of body) {
+            this.children.push(element);
+        }
     }
 
     print(level) {
@@ -41,8 +43,12 @@ module.exports.WhileLoop = class WhileLoop {
             getIndent(level) + 
             "While Loop! " + 
             this.comparison.print(level + 1) + 
-            this.statementList.print(level + 1)
+            "\n" + getIndent(level) + "_____BODY_____"
         );
+
+        for(let element of this.body) {
+            output += element.print(level + 1)
+        }
 
         return output;
     }
