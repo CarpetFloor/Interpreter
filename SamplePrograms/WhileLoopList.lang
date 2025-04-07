@@ -1,4 +1,23 @@
-b = 2;
+num b = 1;
+
 while(a < 1) {
 	a += 1;
+
+	while(a < 1) {
+		a += 1;
+	}
+
+	while(a < 1) {
+		a += 1;
+	}
+}
+
+num a = 2;
+
+while (b < 2) {
+	b += 2;
+
+	while(a < 1) {
+		a += 1;
+	}
 }

@@ -33,7 +33,7 @@ class NonTerminal {
 }
 
 function parseInnerWhileLoop(loopsList, tokens) {
-    let debug = true;
+    let debug = false;
 
     if(debug) {
         console.log("_____{=}{=}{=}{=}{=}_____");
@@ -108,12 +108,22 @@ function parseInnerWhileLoop(loopsList, tokens) {
 
     // check if entire body is valid statement list
     if(lastNestedLoop) {
-        console.log("DOING LAST NESTED LOOP CHECK STUFF");
-        console.log("BODY BEING PASSED INTO STATEMENT LIST CHECK:");
+        if(debug) {
+            console.log("DOING LAST NESTED LOOP CHECK STUFF");
+            console.log("BODY BEING PASSED INTO STATEMENT LIST CHECK:");
+        }
+        
         let bodyForStatementListCheck = [...(body.slice(0, body.length - 1))];
-        console.log(bodyForStatementListCheck);
+        
+        if(debug) {
+            console.log(bodyForStatementListCheck);
+        }
+        
         let statementListCheck = parseLoop(bodyForStatementListCheck, "statementlist");
-        console.log("ARE WE HERE?");
+        
+        if(debug) {
+            console.log("ARE WE HERE?");
+        }
 
         if(debug) {
             console.log("STATEMENT LIST CHECK");
@@ -250,8 +260,10 @@ function parseInnerWhileLoop(loopsList, tokens) {
                         bodyElements.push(statementListCheck[1]);
                     }
 
-                    console.log("\n\n\t\tADDED BOTTOM");
-                    console.log(statementListCheck[1].children.length);
+                    if(debug) {
+                        console.log("\n\n\t\tADDED BOTTOM");
+                        console.log(statementListCheck[1].children.length);
+                    }
                 }
                 else {
                     currentTokens.push(body[i]);
@@ -331,14 +343,93 @@ function generateCFG() {
         console.log("GOING THROUGH TOKENS");
 
         // go through tokens
-        for(let token of tokens) {
+        for(let i = 0; i < tokens.length; i++) {
+            let token = tokens[i];
+
             console.log("\t", token.name);
-            /*
+            
             if(token.name == "WHILE") {
-                // 
+                console.log("_____");
+                console.log("CHECKING WHILE LOOP");
+                console.log("_____");
+
+                // first check if current tokens valid statement list
+                let statementListCheck = parseLoop(currentTokens, "statementlist");
+                console.log("FIRST CHECKING STATEMENT LIST");
+                console.log("TOKENS");
+                console.log(currentTokens);
+                console.log("CHECK");
+                console.log(statementListCheck);
+                console.log("_____");
+
+                if(statementListCheck == undefined) {
+                    return undefined;
+                }
+
+                bodyElements.push(statementListCheck[1]);
+                currentTokens = [];
+                
+                let loopIndices = {
+                    start: tokens.indexOf(token), 
+                    end: -1
+                };
+
+                let openCurlyCount = 0;
+                let closeCurlyCount = 0;
+
+                /**
+                 * Parse through tokens until a close curly is found 
+                 * while the number of close curlys is equal to the 
+                 * number of open curlys.
+                 */
+                for(let i = loopIndices.start + 1; i < tokens.length; i++) {
+                    if(tokens[i].name == "OPENCURLY") {
+                        ++openCurlyCount;
+                    }
+                    else if(tokens[i].name == "CLOSECURLY") {
+                        ++closeCurlyCount;
+
+                        if(openCurlyCount == closeCurlyCount) {
+                            loopIndices.end = i;
+                            break;
+                        }
+                    }
+
+                }
+
+                console.log("LOOP INDICES");
+                console.log(loopIndices.start, loopIndices.end);
+
+                if(loopIndices.end == -1) {
+                    return undefined;
+                }
+
+                let whileTokens = tokens.slice(loopIndices.start, loopIndices.end + 1);
+                console.log("WHILE TOKENS");
+                console.log(whileTokens);
+
+                let whileLoopCheck = parseLoop(whileTokens, "whileloop");
+
+                console.log("WHILE LOOP CHECK");
+                console.log(whileLoopCheck);
+
+                if(whileLoopCheck == undefined) {
+                    return undefined;
+                }
+
+                bodyElements.push(whileLoopCheck[1]);
+                currentTokens = [];
+                i = loopIndices.end;
             }
-            else */if(tokens.indexOf(token) == tokens.length - 1) {
+            else if(tokens.indexOf(token) == tokens.length - 1) {
+                console.log("_____");
+                console.log("REACHED END");
+
                 currentTokens.push(token);
+
+                console.log("STATEMENT LIST CHECK");
+                console.log("TOKENS");
+                console.log(currentTokens);
 
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
 
@@ -347,7 +438,6 @@ function generateCFG() {
                 }
 
                 bodyElements.push(statementListCheck[1]);
-                currentTokens = [];
             }
             else {
                 currentTokens.push(token);
@@ -371,33 +461,33 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let whileloops = [];
         
-        console.log("----------");
-        console.log("----------");
-        console.log("Parisng nested while loop");
-        console.log("----------");
-        console.log("----------");
+        // console.log("----------");
+        // console.log("----------");
+        // console.log("Parisng nested while loop");
+        // console.log("----------");
+        // console.log("----------");
 
-        console.log("\tnonTerminals");
-        console.log(nonTerminals);
-        console.log("-----");
-        console.log("\tterminals");
-        console.log(terminals);
-        console.log("-")
+        // console.log("\tnonTerminals");
+        // console.log(nonTerminals);
+        // console.log("-----");
+        // console.log("\tterminals");
+        // console.log(terminals);
+        // console.log("-")
 
         // first make sure comparison of outter while loop valid
         let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
-        console.log("\tCOMPARISON")
-        console.log(parseLoop(nonTerminals[0], "comparison"));
+        // console.log("\tCOMPARISON")
+        // console.log(parseLoop(nonTerminals[0], "comparison"));
         if(comparisonCheck != undefined) {
             // make sure inner while loop exists
             let body = nonTerminals[1];
             let bodyElements = [];
 
-            console.log("==========");
-            console.log("==========");
-            console.log("==========");
-            console.log("==========");
-            console.log("==========");
+            // console.log("==========");
+            // console.log("==========");
+            // console.log("==========");
+            // console.log("==========");
+            // console.log("==========");
 
             /**
              * keep array that body elements are sequentially added to.
@@ -411,10 +501,10 @@ function generateCFG() {
             let closeCurlyCount = 0;
 
             for(let i = 0; i < body.length; i++) {
-                console.log("\t", i, body[i]);
+                // console.log("\t", i, body[i]);
 
                 if(body[i].name == "WHILE") {
-                    console.log(openCurlyCount, closeCurlyCount);
+                    // console.log(openCurlyCount, closeCurlyCount);
                     // detect while loop list instead of nested while loops
                     if(openCurlyCount == closeCurlyCount) {
                         return undefined;
@@ -447,7 +537,7 @@ function generateCFG() {
 
                     for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
                         if(debug) {
-                            console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
+                            // console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
                         }
 
                         if(body[j].name == "OPENCURLY") {
@@ -459,7 +549,7 @@ function generateCFG() {
 
                             if(innerOpenCurlyCount == innerCloseCurlyCount) {
                                 if(debug) {
-                                    console.log("FOUND");
+                                    // console.log("FOUND");
                                 }
                                 
 
@@ -470,8 +560,8 @@ function generateCFG() {
                         
                     }
 
-                    console.log("LOOP INDICES:");
-                    console.log(loopIndex.start, loopIndex.end);
+                    // console.log("LOOP INDICES:");
+                    // console.log(loopIndex.start, loopIndex.end);
 
                     if(loopIndex.end == -1) {
                         return undefined;
@@ -481,12 +571,12 @@ function generateCFG() {
                     // and passing inner loop context
                     let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
 
-                    console.log("TOKENS");
-                    console.log(innerLoopTokens);
+                    // console.log("TOKENS");
+                    // console.log(innerLoopTokens);
                     let valid = parseInnerWhileLoop(bodyElements, innerLoopTokens);
 
-                    console.log("\n__________\n\tVALID CHECK");
-                    console.log(valid);
+                    // console.log("\n__________\n\tVALID CHECK");
+                    // console.log(valid);
                     
                     if(!(valid)) {
                         return undefined;
@@ -518,15 +608,15 @@ function generateCFG() {
 
             }
 
-            console.log("-----");
-            console.log("\tDONE");
-            console.log("-----");
-            console.log("\tBODY ELEMENTS");
-            console.log(bodyElements);
-            console.log("-----");
-            console.log("\tCOMPARISON")
-            console.log(comparisonCheck[1])
-            console.log("-----");
+            // console.log("-----");
+            // console.log("\tDONE");
+            // console.log("-----");
+            // console.log("\tBODY ELEMENTS");
+            // console.log(bodyElements);
+            // console.log("-----");
+            // console.log("\tCOMPARISON")
+            // console.log(comparisonCheck[1])
+            // console.log("-----");
 
             // combine while loops
             for(let i = bodyElements.length - 1; i > 0; i--) {
@@ -541,9 +631,9 @@ function generateCFG() {
                 }
             }
 
-            console.log("=====");
-            console.log("NEW ELEMENTS");
-            console.log(bodyElements);
+            // console.log("=====");
+            // console.log("NEW ELEMENTS");
+            // console.log(bodyElements);
 
             return new nodes.WhileLoop(
                 comparisonCheck[1], 
@@ -561,11 +651,11 @@ function generateCFG() {
         new NonTerminal("statementlist")
     ], 
     function(nonTerminals, terminals) {
-        console.log("\n\n\n\n\nSTATEMENT LIST CHECk");
+        // console.log("\n\n\n\n\nSTATEMENT LIST CHECk");
         let statements = [];
         let passContext = [...nonTerminals];
-        console.log("PASS CONTEXT");
-        console.log(passContext);
+        // console.log("PASS CONTEXT");
+        // console.log(passContext);
         let statementCheck = parseLoop(passContext, "statement");
         
         while((statementCheck != undefined) || (passContext.length != 0)) {
