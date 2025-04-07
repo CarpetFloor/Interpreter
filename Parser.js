@@ -742,7 +742,7 @@ function generateCFG() {
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        let varName = terminals[1];
+        let varName = terminals[0];
 
         let check = parseLoop(nonTerminals[0], "expression");
         if(check != undefined) {
@@ -756,6 +756,42 @@ function generateCFG() {
         else {
             return undefined;
         }
+        
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("TRUEVALUE"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let varName = terminals[0];
+        let boolValue = new nodes.BoolValue("true");
+
+        return new nodes.Assignment(
+            varName, 
+            boolValue
+        );
+        
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("FALSEVALUE"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let varName = terminals[0];
+        let boolValue = new nodes.BoolValue("false");
+
+        return new nodes.Assignment(
+            varName, 
+            boolValue
+        );
         
     });
     cfg.push(rule);
@@ -784,6 +820,48 @@ function generateCFG() {
         else {
             return undefined;
         }
+        
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("BOOLTYPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("TRUEVALUE"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {        
+        let type = "bool";
+        let varName = terminals[1];
+        let value = new nodes.BoolValue("true");
+        
+        return new nodes.DeclarationAssignment(
+            type, 
+            varName, 
+            value
+        );
+        
+    });
+    cfg.push(rule);
+
+    rule = new Rule("statement", [
+        new Terminal("BOOLTYPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("FALSEVALUE"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {        
+        let type = "bool";
+        let varName = terminals[1];
+        let value = new nodes.BoolValue("false");
+        
+        return new nodes.DeclarationAssignment(
+            type, 
+            varName, 
+            value
+        );
         
     });
     cfg.push(rule);

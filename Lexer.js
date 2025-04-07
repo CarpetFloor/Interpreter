@@ -28,6 +28,21 @@ const tokens = [
     // keywords
 
     new Pattern(
+        "BOOLTYPE", 
+        /bool/
+    ), 
+
+    new Pattern(
+        "TRUEVALUE", 
+        /true/
+    ),
+
+    new Pattern(
+        "FALSEVALUE", 
+        /false/
+    ),
+
+    new Pattern(
         "NUMTYPE", 
         /num/
     ), 

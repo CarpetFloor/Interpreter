@@ -286,6 +286,23 @@ module.exports.Comparison = class Comparison {
     }
 }
 
+module.exports.BoolValue = class BoolValue {
+    constructor(value) {
+        this.value = value;
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "Boolean Value! " + 
+            this.value
+        );
+
+        return output;
+    }
+}
+
 module.exports.BinaryOperatorExpression = class BinaryOperatorExpression {
     constructor(operator, left, right) {
         this.children = [];

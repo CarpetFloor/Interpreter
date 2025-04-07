@@ -13,9 +13,15 @@
 - Can increment with `x += 2;`
 
 ### Types
+- `bool`: boolean
 - `num`: Integer or float
 - `string`: String
 - `list`: List
+
+#### Boolean
+- Values are either `true` or `false`, cannot use comparison or not operator as part of declaration or assignment
+- Have to explicity compare to `true` or `false` in comparisons (*for instance have to do `while(a == true)` can't just do `while(a)`*)
+- Cannot use not operator directly on a boolean for declarations and assignments *(for instance cannot do `bool a = ![b]`)*, as well as for comparisons *(for instance have to do `while(![a == true])`)*
 
 #### String
 - Can use either `"` or `'`.
