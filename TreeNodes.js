@@ -2,18 +2,16 @@ function getIndent(level) {
     return ("....").repeat(level);
 }
 
-// statements
-
-module.exports.WhileLoopList = class WhileLoopList {
-    constructor(whileloops) {
-        this.children = whileloops;
+module.exports.Program = class Program {
+    constructor(children) {
+        this.children = children;
     }
 
     print(level) {
         let output = (
             "\n" + 
             getIndent(level) + 
-            "While Loop List! "
+            "Program! "
         );
 
         for(let i = 0; i < this.children.length; i++) {
@@ -23,6 +21,8 @@ module.exports.WhileLoopList = class WhileLoopList {
         return output;
     }
 }
+
+// statements
 
 module.exports.WhileLoop = class WhileLoop {
     constructor(comparison, body) {

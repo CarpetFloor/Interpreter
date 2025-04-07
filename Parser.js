@@ -302,41 +302,64 @@ let cfg = [];
 function generateCFG() {
     let rule = null;
 
-    rule = new Rule("whilelooplist", [
-        new NonTerminal("whileloop"), 
-        new NonTerminal("whilelooplist")
+    /**
+     * Most top-level node that will go through the entire top-level 
+     * of the file. Basically identify and match everything that is 
+     * in the global block and not within a while or conditional 
+     * block.
+     * Works similar to how while loop parses the body.
+     */
+    rule = new Rule("program", [
+        new NonTerminal("everything")
     ], 
     function(nonTerminals, terminals) {
-        let whileloops = [];
-        let passContext = [...nonTerminals];
-        let whileloopCheck = parseLoop(passContext, "whileloop");
-        
-        while((whileloopCheck != undefined) || (passContext.length != 0)) {
-            whileloops.push(whileloopCheck[1]);
-            
-            passContext.splice(0, whileloopCheck[0] + 1);
+        let tokens = [...nonTerminals];
 
-            whileloopCheck = parseLoop(passContext, "whileloop");
-        }
+        console.log("=====");
+        console.log("=====");
+        console.log("=====");
+        console.log("=====");
+        console.log("=====");
+        console.log("PARSING PROGRAM");
+        console.log("TOKENS");
+        console.log(tokens);
 
-        let match = true;
-        for(let i = 0; i < whileloops.length; i++) {
-            if(whileloops[i] == undefined) {
-                match = false;
-                break;
+        let currentTokens = [];
+        let bodyElements = [];
+
+        console.log("\n_____");
+        console.log("GOING THROUGH TOKENS");
+
+        // go through tokens
+        for(let token of tokens) {
+            console.log("\t", token.name);
+            /*
+            if(token.name == "WHILE") {
+                // 
             }
+            else */if(tokens.indexOf(token) == tokens.length - 1) {
+                currentTokens.push(token);
+
+                let statementListCheck = parseLoop(currentTokens, "statementlist");
+
+                if(statementListCheck == undefined) {
+                    return undefined;
+                }
+
+                bodyElements.push(statementListCheck[1]);
+                currentTokens = [];
+            }
+            else {
+                currentTokens.push(token);
+            }
+
         }
 
-        if(match) {
-            return new nodes.WhileLoopList(whileloops);
-        }
-        else {
-            return undefined;
-        }
+        // create program node
+        return new nodes.Program(bodyElements);
     });
-    // cfg.push(rule);
+    cfg.push(rule);
 
-    // nested while loops
     rule = new Rule("whileloop", [
         new Terminal("WHILE"), 
         new Terminal("OPENPAREN"), 
@@ -532,39 +555,6 @@ function generateCFG() {
         return undefined;
     });
     cfg.push(rule);
-
-    rule = new Rule("whileloop", [
-        new Terminal("WHILE"), 
-        new Terminal("OPENPAREN"), 
-        new NonTerminal("comparison"), 
-        new Terminal("CLOSEPAREN"), 
-        new Terminal("OPENCURLY"), 
-        new NonTerminal("statementlist"), 
-        new Terminal("CLOSECURLY")
-    ], 
-    function(nonTerminals, terminals) {
-        let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
-        let statementListCheck = parseLoop(nonTerminals[1], "statementlist");
-        
-        if(
-            (comparisonCheck != undefined) && 
-            (statementListCheck != undefined)
-        ) {
-            let comparison = comparisonCheck[1];
-
-            let statementList = statementListCheck[1];
-
-            return new nodes.WhileLoop(
-                comparison, 
-                [statementList]
-            );
-        }
-        else {
-            return undefined;
-        }
-    }
-    );
-    // cfg.push(rule);
 
     rule = new Rule("statementlist", [
         new NonTerminal("statement"), 
