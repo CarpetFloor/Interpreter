@@ -1427,6 +1427,27 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    rule = new Rule("comparison", [
+        new NonTerminal("expression"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("TRUEVALUE")
+    ], 
+    function(nonTerminals, terminals) {
+        let leftCheck = parseLoop(nonTerminals[0], "expression");
+
+        if(leftCheck != undefined) {
+            return new nodes.Comparison(
+                "==", 
+                leftCheck[1], 
+                new nodes.BoolValue("true")
+            );
+        }
+        
+        return undefined;
+    });
+    cfg.push(rule);
+
     rule = new Rule("term", [
         new NonTerminal("term"), 
         new Terminal("TIMES"), 
