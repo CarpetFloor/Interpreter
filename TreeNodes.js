@@ -129,6 +129,32 @@ module.exports.Assignment = class Assignement {
     }
 }
 
+module.exports.ListAssignment = class ListAssignement {
+    constructor(varName, values) {
+        this.children = [];
+
+        this.varName = varName;
+        this.values = values;
+
+        this.children = values;
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "List Assignment! " + 
+            "varName: " + this.varName + ", "
+        );
+
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
+        }
+
+        return output;
+    }
+}
+
 module.exports.MultIncrementAssignment = class MultIncrementAssignment {
     constructor(varName, increment) {
         this.children = [];
@@ -487,18 +513,18 @@ module.exports.String = class String {
 }
 
 module.exports.List = class List {
-    constructor(type) {
-        this.children = [];
-        this.elements = [];
+    constructor(type, elements) {
+        this.elements = elements;
         this.type = type;
+        this.children = elements;
     }
 
     print(level) {
         let output = "\n" + getIndent(level) + "List! ";
         output += "List Type: " + this.type + ", " + " Elements:";
 
-        for(let i = 0; i < this.elements.length; i++) {
-            output += "\n...." + this.elements[i];
+        for(let i = 0; i < this.children.length; i++) {
+            output += this.children[i].print(level + 1);
         }
 
         return output;

@@ -706,6 +706,7 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    // num list declaration
     rule = new Rule("statement", [
         new Terminal("LISTTYPE"), 
         new Terminal("OPENPIPE"), 
@@ -714,21 +715,65 @@ function generateCFG() {
         new Terminal("ID"), 
         new Terminal("ASSIGN"), 
         new Terminal("OPENPIPE"), 
+        new NonTerminal("values"), 
         new Terminal("CLOSEPIPE"), 
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
+        console.log("\n_____");
+        console.log("LIST DECLARATION");
+        console.log("_____");
+        console.log("\nNON TERMINALS");
+        console.log(nonTerminals);
+
+        // validate declaration values
+        let valueTokens = nonTerminals[0];
+        let values = [];
+        let currentTokens = [];
+
+        console.log("\n_____");
+        console.log("GOING THROUGH VALUES");
+
+        for(let token of valueTokens) {
+            console.log("\t", token.name);
+
+            if((token.name == "COMMA") || (valueTokens.indexOf(token) == valueTokens.length - 1)) {
+                if(valueTokens.indexOf(token) == valueTokens.length - 1) {
+                    currentTokens.push(token);
+                }
+
+                console.log("CHECKING FOR EXPRESSION");
+                console.log("TOKENS");
+                console.log(currentTokens);
+                let expressionCheck = parseLoop(currentTokens, "expression");
+                console.log("EXPRESSION CHECK");
+                console.log(expressionCheck)
+                
+                if(expressionCheck == undefined) {
+                    return undefined;
+                }
+
+                values.push(expressionCheck[1]);
+                currentTokens = [];
+            }
+            else {
+                currentTokens.push(token);
+            }
+        }
+
+
         let varName = terminals[4];
         let listType = terminals[2];
 
         return new nodes.DeclarationAssignment(
             "list", 
             varName, 
-            new nodes.List(listType)
+            new nodes.List(listType, values)
         );
     });
     cfg.push(rule);
 
+    // string list declaration
     rule = new Rule("statement", [
         new Terminal("LISTTYPE"), 
         new Terminal("OPENPIPE"), 
@@ -736,53 +781,163 @@ function generateCFG() {
         new Terminal("CLOSEPIPE"), 
         new Terminal("ID"), 
         new Terminal("ASSIGN"), 
-        new Terminal("OPENPIPE"), 
+        new Terminal("OPENPIPE"),
+        new NonTerminal("values"),  
         new Terminal("CLOSEPIPE"), 
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
+        console.log("\n\nSTRING LIST DECLARATION");
+        console.log("+++++");
+        console.log("+++++");
+        console.log("+++++");
+        console.log("+++++");
+        console.log("+++++");
+        let currentTokens = [];
+        let valueTokens = nonTerminals[0];
+        let values = [];
+
+        for(let token of valueTokens) {
+            if((token.name == "COMMA") || (valueTokens.indexOf(token) == valueTokens.length - 1)) {
+                if(valueTokens.indexOf(token) == valueTokens.length - 1) {
+                    currentTokens.push(token);
+                }
+                
+                let stringExpressionCheck = parseLoop(currentTokens, "stringexpression");
+                if(stringExpressionCheck == undefined) {
+                    return undefined;
+                }
+
+                values.push(stringExpressionCheck[1]);
+                currentTokens = [];
+            }
+            else {
+                currentTokens.push(token);
+            }
+        }
+
+        console.log("VALUES");
+        console.log(values);
+
         let varName = terminals[4];
         let listType = terminals[2];
 
         return new nodes.DeclarationAssignment(
             "list", 
             varName, 
-            new nodes.List(listType)
+            new nodes.List(listType, values)
         );
     });
     cfg.push(rule);
 
+    // num list assignment
     rule = new Rule("statement", [
         new Terminal("ID"), 
-        new Terminal("DOT"), 
-        new Terminal("SET"), 
-        new Terminal("OPENPAREN"), 
-        new NonTerminal("expression"), 
-        new Terminal("COMMA"), 
-        new NonTerminal("expression"), 
-        new Terminal("CLOSEPAREN"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("OPENPIPE"), 
+        new NonTerminal("values"), 
+        new Terminal("CLOSEPIPE"), 
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        let list = terminals[0];
+        let valueTokens = nonTerminals[0];
+        let values = [];
+        let currentTokens = [];
 
-        let indexCheck = parseLoop(nonTerminals[0], "expression");
-        let setCheck = parseLoop(nonTerminals[1], "expression");
+        for(let token of valueTokens) {
+            if((token.name == "COMMA") || (valueTokens.indexOf(token) == valueTokens.length - 1)) {
+                if(valueTokens.indexOf(token) == valueTokens.length - 1) {
+                    currentTokens.push(token);
+                }
+                
+                let expressionCheck = parseLoop(currentTokens, "expression");
+                
+                if(expressionCheck == undefined) {
+                    return undefined;
+                }
 
-        if((indexCheck != undefined) && (setCheck != undefined)) {
-            let index = indexCheck[1];
-            let value = setCheck[1];
-            
-            return new nodes.ListElementSet(
-                list, 
-                index, 
-                value
-            );
+                values.push(expressionCheck[1]);
+                currentTokens = [];
+            }
+            else {
+                currentTokens.push(token);
+            }
         }
-        else {
-            return undefined;
+
+
+        let varName = terminals[0];
+        let listType = terminals[2];
+
+        console.log("VALUES");
+        console.log(values);
+
+        return new nodes.ListAssignment(
+            varName, 
+            values
+        );
+    });
+    cfg.push(rule);
+
+    // list assignment for both num and string
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("OPENPIPE"), 
+        new NonTerminal("values"), 
+        new Terminal("CLOSEPIPE"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let valueTokens = nonTerminals[0];
+        let values = [];
+        let currentTokens = [];
+
+        // console.log("*****");
+        // console.log("*****");
+        // console.log("*****");
+        // console.log("*****");
+        // console.log("*****");
+        // console.log("LIST ASASIGNMENT")
+
+        for(let token of valueTokens) {
+            if((token.name == "COMMA") || (valueTokens.indexOf(token) == valueTokens.length - 1)) {
+                if(valueTokens.indexOf(token) == valueTokens.length - 1) {
+                    currentTokens.push(token);
+                }
+                
+                let expressionCheck = parseLoop(currentTokens, "expression");
+                
+                if(expressionCheck == undefined) {
+                    let stringExpressionCheck = parseLoop(currentTokens, "stringexpression");
+
+                    if(stringExpressionCheck == undefined) {
+                        return undefined;
+                    }
+
+                    values.push(stringExpressionCheck[1]);
+                    currentTokens = [];
+                }
+                else {
+                    values.push(expressionCheck[1]);
+                    currentTokens = [];
+                }
+            }
+            else {
+                currentTokens.push(token);
+            }
         }
 
+
+        let varName = terminals[0];
+        let listType = terminals[2];
+
+        console.log("VALUES");
+        console.log(values);
+
+        return new nodes.ListAssignment(
+            varName, 
+            values
+        );
     });
     cfg.push(rule);
 

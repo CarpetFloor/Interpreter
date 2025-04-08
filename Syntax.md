@@ -7,6 +7,7 @@
 ### Variable Declartion
 - `num x = 5;`
 - Note that variables can only contain letters, but can be any mix of lowercase or uppercase letters
+- Also note that variables cannot start with a type in the name *(for instance stringList is not a valid variable name, but myStringList is)*
 
 ### Variable Assignment
 - Can reassign the value of variables with `x = 2;`
@@ -26,13 +27,19 @@
 #### String
 - Can use either `"` or `'`.
 - Can convert any type to string with `myInt.toString()`
+- Can concatenate two strings with `+`
 
 #### List
-- Declare with `list[num] myList = [1, 2, 3]`  *(can also declare as empty)*
-- Access element with `myList.get(0)`
-- Add element with `myList.add(4)`
-- Modify element with `myList.set(0, 1234)`
+- Declare with `list[num] myList = [1, 2, 3]`  *(can also declare as empty, and each value can also be an expression)*
+- Can reassign with `myList = [4]`
+- Access element with `myList.get(index)` *(can also be an expression)*
+- Add element with `myList.add(value)` *(can also be an expression)*
+- Remove element with `myList.remove(index)` *(can also be an expression)*
+- Modify element with `myList.set(index, value)` *(both can also be an expression)*
 - Get length with `myList.length()`
+- The only two supported list types are num and string
+- Nested lists? No
+- Multi-dimensional lists? NO
 
 ### Loops
 - ```
@@ -57,7 +64,7 @@
 *Note that parentheses are not supported around comparisons or expressions*
 
 ### Nesting?
-- Yes, up to infinity for everything
+- Yes, up to infinity for everything except for lists
 
 ### Scope?
 - No, everything is just global
