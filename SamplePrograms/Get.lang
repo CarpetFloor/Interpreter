@@ -1,0 +1,3 @@
+while("test" == get[myList, 1 + b]) {
+	a += 1;
+}

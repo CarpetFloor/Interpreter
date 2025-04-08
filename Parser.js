@@ -1310,42 +1310,6 @@ function generateCFG() {
     });
     cfg.push(rule);
 
-    // access list element by index
-    rule = new Rule("expression", [
-        new Terminal("ID"), 
-        new Terminal("DOT"), 
-        new Terminal("GET"), 
-        new Terminal("OPENPAREN"), 
-        new NonTerminal("expression"), 
-        new Terminal("CLOSEPAREN")
-    ], 
-    function(nonTerminals, terminals) {
-        let list = terminals[0];
-
-        let expressionCheck = parseLoop(nonTerminals[0], "expression");
-
-        if(expressionCheck == undefined) {
-            let stringExpressionCheck = parseLoop(nonTerminals[0], "stringexpression");
-
-            if(stringExpressionCheck == undefined) {
-                return undefined;
-            }
-
-            return new nodes.ListElementReference(
-                list, 
-                stringExpressionCheck[1]
-            );
-        }
-        else {
-            return new nodes.ListElementReference(
-                list, 
-                expressionCheck[1]
-            );
-        }
-
-    });
-    cfg.push(rule);
-
     rule = new Rule("expression", [
         new NonTerminal("expression"), 
         new Terminal("PLUS"), 
@@ -1825,6 +1789,33 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    // access list element by index
+    rule = new Rule("expression", [ 
+        new Terminal("GET"), 
+        new Terminal("OPENPIPE"), 
+        new Terminal("ID"), 
+        new Terminal("COMMA"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPIPE")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+
+        let expressionCheck = parseLoop(nonTerminals[0], "expression");
+
+        if(expressionCheck == undefined) {
+            return undefined;
+        }
+        else {
+            return new nodes.ListElementReference(
+                list, 
+                expressionCheck[1]
+            );
+        }
+
+    });
+    cfg.push(rule);
+
     // get the length of a list
     rule = new Rule("term", [
         new Terminal("LENGTH"), 
@@ -2008,6 +1999,33 @@ function generateCFG() {
         else {
             return undefined;
         }
+    });
+    cfg.push(rule);
+
+    // access list element by index
+    rule = new Rule("stringterm", [ 
+        new Terminal("GET"), 
+        new Terminal("OPENPIPE"), 
+        new Terminal("ID"), 
+        new Terminal("COMMA"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPIPE")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+
+        let expressionCheck = parseLoop(nonTerminals[0], "expression");
+
+        if(expressionCheck == undefined) {
+            return undefined;
+        }
+        else {
+            return new nodes.ListElementReference(
+                list, 
+                expressionCheck[1]
+            );
+        }
+
     });
     cfg.push(rule);
 
