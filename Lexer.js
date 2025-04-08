@@ -155,22 +155,12 @@ const tokens = [
         /[a-zA-Z]+/
     ), 
     
-    new Pattern(
-        "ASSIGN", 
-        /=/
-    ), 
-
-    new Pattern(
-        "DOT", 
-        /\./
-    ), 
-
-    new Pattern(
-        "COMMA", 
-        /\,/
-    ), 
-    
     // types
+
+    new Pattern(
+        "NUM", 
+        /[0-9]\.[0-9]+/
+    ), 
 
     new Pattern(
         "NUM", 
@@ -222,6 +212,22 @@ const tokens = [
     new Pattern(
         "DIVIDES", 
         /(\/)/
+    ), 
+
+    // operators
+    new Pattern(
+        "ASSIGN", 
+        /=/
+    ), 
+
+    new Pattern(
+        "DOT", 
+        /\./
+    ), 
+
+    new Pattern(
+        "COMMA", 
+        /\,/
     ), 
 
     // comparison

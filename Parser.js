@@ -1760,6 +1760,14 @@ function generateCFG() {
     cfg.push(rule);
 
     rule = new Rule("factor", [
+        new Terminal("FLOAT")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.Num(terminals[0]);
+    });
+    cfg.push(rule);
+
+    rule = new Rule("factor", [
         new Terminal("NUM")
     ], 
     function(nonTerminals, terminals) {
