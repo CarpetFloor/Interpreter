@@ -1,0 +1,5 @@
+string myString = toString[a + 5];
+
+while(a == toString[2 + b + 1]) {
+	a += 1;
+}

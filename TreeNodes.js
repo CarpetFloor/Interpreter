@@ -569,6 +569,23 @@ module.exports.String = class String {
     }
 }
 
+module.exports.ToString = class ToString {
+    constructor(expression) {
+        this.expression = expression;
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "To String!" + 
+            this.expression.print(level + 1)
+        );
+
+        return output;
+    }
+}
+
 module.exports.List = class List {
     constructor(type, elements) {
         this.elements = elements;

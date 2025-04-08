@@ -461,11 +461,11 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let whileloops = [];
         
-        // console.log("----------");
-        // console.log("----------");
-        // console.log("Parisng nested while loop");
-        // console.log("----------");
-        // console.log("----------");
+        console.log("----------");
+        console.log("----------");
+        console.log("Parsing while loop");
+        console.log("----------");
+        console.log("----------");
 
         // console.log("\tnonTerminals");
         // console.log(nonTerminals);
@@ -476,8 +476,12 @@ function generateCFG() {
 
         // first make sure comparison of outter while loop valid
         let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
-        // console.log("\tCOMPARISON")
-        // console.log(parseLoop(nonTerminals[0], "comparison"));
+        console.log("\tCOMPARISON")
+        console.log("TOKENS");
+        console.log(nonTerminals[0]);
+        console.log("_____");
+        console.log(parseLoop(nonTerminals[0], "comparison"));
+
         if(comparisonCheck != undefined) {
             // make sure inner while loop exists
             let body = nonTerminals[1];
@@ -1755,6 +1759,32 @@ function generateCFG() {
     cfg.push(rule);
 
     rule = new Rule("comparison", [
+        new NonTerminal("stringexpression"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("ASSIGN"), 
+        new NonTerminal("stringexpression")
+    ], 
+    function(nonTerminals, terminals) {
+        let leftCheck = parseLoop(nonTerminals[0], "stringexpression");
+        let rightCheck = parseLoop(nonTerminals[1], "stringexpression");
+
+
+        if(
+            (leftCheck != undefined) && 
+            (rightCheck != undefined)
+        ) {
+            return new nodes.Comparison(
+                "==", 
+                leftCheck[1], 
+                rightCheck[1]
+            );
+        }
+        
+        return undefined;
+    });
+    cfg.push(rule);
+
+    rule = new Rule("comparison", [
         new NonTerminal("expression"), 
         new Terminal("ASSIGN"), 
         new Terminal("ASSIGN"), 
@@ -1920,6 +1950,30 @@ function generateCFG() {
         else {
             return undefined;
         }
+    });
+    cfg.push(rule);
+
+    // toString()
+    rule = new Rule("stringexpression", [
+        new Terminal("TOSTRING"), 
+        new Terminal("OPENPIPE"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPIPE")
+    ], 
+    function(nonTerminals, terminals) {
+        console.log("\n+++++");
+        console.log("+++++");
+        console.log("TO STRING");
+
+        let expressionCheck = parseLoop(nonTerminals[0], "expression");
+        console.log("EXPRESSION CHECK");
+        console.log(expressionCheck);
+
+        if(expressionCheck == undefined) {
+            return undefined;
+        }
+
+        return new nodes.ToString(expressionCheck[1]);
     });
     cfg.push(rule);
 

@@ -89,8 +89,8 @@ const tokens = [
     ), 
 
     new Pattern(
-        "METHOD_TOSTRING", 
-        /toString\(\)/
+        "TOSTRING", 
+        /toString/
     ), 
 
     new Pattern(
