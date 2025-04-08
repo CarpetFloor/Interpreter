@@ -103,6 +103,11 @@ const tokens = [
         /and/
     ), 
 
+    new Pattern(
+        "PRINT", 
+        /print/
+    ), 
+
     // groupings
 
     new Pattern(

@@ -1,4 +1,0 @@
-while(count < 10) {
-    num a = 1;
-    num b = 2;
-}

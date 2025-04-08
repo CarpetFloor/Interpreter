@@ -7,4 +7,4 @@ num a = myList.get(1 + "num");
 myList.add("test" + 1);
 myList.remove(0 + a);
 myList.set(1 + b, "value" + 1);
-num a = myList.length();
+num a = length[myList];

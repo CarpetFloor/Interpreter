@@ -1290,6 +1290,26 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    // print
+    rule = new Rule("statement", [
+        new Terminal("PRINT"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("stringexpression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let check = parseLoop(nonTerminals[0], "stringexpression");
+        
+        if(check == undefined) {
+            return undefined;
+        }
+
+        return new nodes.Print(check[1]);
+        
+    });
+    cfg.push(rule);
+
     // access list element by index
     rule = new Rule("expression", [
         new Terminal("ID"), 
@@ -1807,14 +1827,13 @@ function generateCFG() {
 
     // get the length of a list
     rule = new Rule("term", [
-        new Terminal("ID"), 
-        new Terminal("DOT"), 
         new Terminal("LENGTH"), 
-        new Terminal("OPENPAREN"), 
-        new Terminal("CLOSEPAREN")
+        new Terminal("OPENPIPE"), 
+        new Terminal("ID"), 
+        new Terminal("CLOSEPIPE")
     ], 
     function(nonTerminals, terminals) {
-        let list = terminals[0];
+        let list = terminals[2];
 
         return new nodes.ListLength(list);
 

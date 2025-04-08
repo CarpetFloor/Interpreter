@@ -37,7 +37,7 @@
 - Add element with `myList.add(value)`
 - Remove element with `myList.remove(index)`
 - Modify element with `myList.set(index, value)`
-- Get length with `myList.length()`
+- Get length with `length[myLength]`
 - The only two supported list types are num and string
 - List indices and values can be expressions, including string expressions
 - Nested lists? No
@@ -53,6 +53,12 @@
 ### Functions
 - No
 
+### Nesting?
+- Yes, up to infinity for everything except lists
+
+### Scope?
+- No, everything is just global
+
 ### Math
 - `+`: Addition
 - `-`: Subtraction
@@ -65,12 +71,6 @@
 - `![comparison]`: Not operator - the only way to use the not operation is to wrap a comparison around the not brackets. Also works for or and and, for instance `![a < 1 && b > 2]`
 
 *Note that parentheses are not supported around comparisons or expressions*
-
-### Nesting?
-- Yes, up to infinity for everything except lists
-
-### Scope?
-- No, everything is just global
 
 ### Comments
 - `#`: Single-line comment

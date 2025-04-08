@@ -237,23 +237,17 @@ module.exports.DecrementAssignment = class DecrementAssignment {
 }
 
 module.exports.Print = class Print {
-    constructor(value) {
-        this.children = [];
-        this.value = value;
-
-        this.children.push(value);
+    constructor(stringexpression) {
+        this.stringexpression = stringexpression;
     }
 
     print(level) {
         let output = (
             "\n" + 
             getIndent(level) + 
-            "Print! "
+            "Print! " + 
+            this.stringexpression.print(level + 1)
         );
-
-        for(let i = 0; i < this.children.length; i++) {
-            output += this.children[i].print(level + 1);
-        }
 
         return output;
     }
