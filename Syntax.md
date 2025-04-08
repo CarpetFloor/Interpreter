@@ -28,18 +28,21 @@
 - Can use either `"` or `'`.
 - Can convert any type to string with `myInt.toString()`
 - Can concatenate two strings with `+`
+- Can concatenate a string with a number with `+`, but the first term must be a string
 
 #### List
-- Declare with `list[num] myList = [1, 2, 3]`  *(can also declare as empty, and each value can also be an expression)*
-- Can reassign with `myList = [4]`
-- Access element with `myList.get(index)` *(can also be an expression)*
-- Add element with `myList.add(value)` *(can also be an expression)*
-- Remove element with `myList.remove(index)` *(can also be an expression)*
-- Modify element with `myList.set(index, value)` *(both can also be an expression)*
+- Declare with `list[num] myList = [1, 2, 3]`
+- Can reassign with `myList = [4, 3]`
+- Access element with `myList.get(index)`
+- Add element with `myList.add(value)`
+- Remove element with `myList.remove(index)`
+- Modify element with `myList.set(index, value)`
 - Get length with `myList.length()`
 - The only two supported list types are num and string
+- List indices and values can be expressions, including string expressions
 - Nested lists? No
-- Multi-dimensional lists? NO
+- Multi-dimensional lists? No
+- Negative index values? No
 
 ### Loops
 - ```
@@ -64,7 +67,7 @@
 *Note that parentheses are not supported around comparisons or expressions*
 
 ### Nesting?
-- Yes, up to infinity for everything except for lists
+- Yes, up to infinity for everything except lists
 
 ### Scope?
 - No, everything is just global

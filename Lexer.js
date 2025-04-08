@@ -68,6 +68,16 @@ const tokens = [
     ), 
 
     new Pattern(
+        "REMOVE", 
+        /remove/
+    ), 
+
+    new Pattern(
+        "LENGTH", 
+        /length/
+    ), 
+
+    new Pattern(
         // so as to not be confused with addition
         "ADDKEYWORD", 
         /add/

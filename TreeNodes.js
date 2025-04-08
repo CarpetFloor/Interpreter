@@ -413,6 +413,8 @@ module.exports.IdReference = class IdReference {
     }
 }
 
+// lists
+
 module.exports.ListElementReference = class ListElementReference {
     constructor(list, index) {
         this.list = list;
@@ -425,6 +427,22 @@ module.exports.ListElementReference = class ListElementReference {
             "List Element Reference! " + 
             "List = " + this.list + ", Index = " + 
             this.index.print(level + 1)
+        );
+
+        return output;
+    }
+}
+
+module.exports.ListLength = class ListLength {
+    constructor(list) {
+        this.list = list;
+    }
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "List Length! " + 
+            "List = " + this.list
         );
 
         return output;
@@ -463,6 +481,45 @@ module.exports.ListAdd = class ListAdd {
             getIndent(level) + 
             "List Add! " + 
             "List = " + this.list + 
+            "Value = " + this.value.print(level + 1)
+        );
+
+        return output;
+    }
+}
+
+module.exports.ListRemove = class ListRemove {
+    constructor(list, index) {
+        this.list = list;
+        this.index = index;
+    }
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "List Remove! " + 
+            "List = " + this.list + 
+            "Index = " + this.index.print(level + 1)
+        );
+
+        return output;
+    }
+}
+
+module.exports.ListSetValue = class ListSetValue {
+    constructor(list, index, value) {
+        this.list = list;
+        this.index = index;
+        this.value = value;
+    }
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "List Set! " + 
+            "List = " + this.list + 
+            "Index = " + this.index.print(level + 1) + 
+            "\n" + getIndent(level) + 
             "Value = " + this.value.print(level + 1)
         );
 

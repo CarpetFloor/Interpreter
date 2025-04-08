@@ -941,6 +941,7 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    // add list element
     rule = new Rule("statement", [
         new Terminal("ID"), 
         new Terminal("DOT"), 
@@ -953,18 +954,101 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let list = terminals[0];
 
-        let check = parseLoop(nonTerminals[0], "expression");
+        let expressionCheck = parseLoop(nonTerminals[0], "expression");
 
-        if(check != undefined) {
-            let value = check[1];
-            
+        if(expressionCheck == undefined) {
+            let stringExpressionCheck = parseLoop(nonTerminals[0], "stringexpression");
+
+            if(stringExpressionCheck == undefined) {
+                return undefined;
+            }
+
             return new nodes.ListAdd(
                 list, 
-                value
+                stringExpressionCheck[1]
             );
         }
         else {
+            return new nodes.ListAdd(
+                list, 
+                expressionCheck[1]
+            );
+        }
+
+    });
+    cfg.push(rule);
+
+    // remove list element by index
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
+        new Terminal("DOT"), 
+        new Terminal("REMOVE"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+
+        let expressionCheck = parseLoop(nonTerminals[0], "expression");
+
+        if(expressionCheck == undefined) {
             return undefined;
+        }
+        else {
+            return new nodes.ListRemove(
+                list, 
+                expressionCheck[1]
+            );
+        }
+
+    });
+    cfg.push(rule);
+
+    // update list element by index
+    rule = new Rule("statement", [
+        new Terminal("ID"), 
+        new Terminal("DOT"), 
+        new Terminal("SET"), 
+        new Terminal("OPENPAREN"), 
+        new NonTerminal("expression"), 
+        new Terminal("COMMA"), 
+        new NonTerminal("expression"), 
+        new Terminal("CLOSEPAREN"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+        let indexTokens = nonTerminals[0];
+        let indexExpressionCheck = parseLoop(indexTokens, "expression");
+
+        if(indexExpressionCheck == undefined) {
+            return undefined;
+        }
+
+        let valueTokens = nonTerminals[0];
+        let valueExpressionCheck = parseLoop(valueTokens, "expression");
+
+        if(valueExpressionCheck == undefined) {
+            let valueStringExpressionCheck = parseLoop(valueTokens, "stringexpression");
+
+            if(valueStringExpressionCheck == undefined) {
+                return undefined;
+            }
+
+            return new nodes.ListSetValue(
+                list, 
+                indexExpressionCheck[1], 
+                valueStringExpressionCheck[1]
+            );
+        }
+        else {
+            return new nodes.ListSetValue(
+                list, 
+                indexExpressionCheck[1], 
+                valueExpressionCheck[1]
+            );
         }
 
     });
@@ -1202,6 +1286,7 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    // access list element by index
     rule = new Rule("expression", [
         new Terminal("ID"), 
         new Terminal("DOT"), 
@@ -1213,19 +1298,42 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let list = terminals[0];
 
-        let check = parseLoop(nonTerminals[0], "expression");
+        let expressionCheck = parseLoop(nonTerminals[0], "expression");
 
-        if(check != undefined) {
-            let index = check[1];
+        if(expressionCheck == undefined) {
+            let stringExpressionCheck = parseLoop(nonTerminals[0], "stringexpression");
+
+            if(stringExpressionCheck == undefined) {
+                return undefined;
+            }
 
             return new nodes.ListElementReference(
                 list, 
-                index
+                stringExpressionCheck[1]
             );
         }
         else {
-            return undefined;
+            return new nodes.ListElementReference(
+                list, 
+                expressionCheck[1]
+            );
         }
+
+    });
+    cfg.push(rule);
+
+    // get the length of a list
+    rule = new Rule("expression", [
+        new Terminal("ID"), 
+        new Terminal("DOT"), 
+        new Terminal("LENGTH"), 
+        new Terminal("OPENPAREN"), 
+        new Terminal("CLOSEPAREN")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+
+        return new nodes.ListLength(list);
 
     });
     cfg.push(rule);
@@ -1786,6 +1894,25 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let left = parseLoop(nonTerminals[0], "stringexpression");
         let right = parseLoop(nonTerminals[1], "stringexpression");
+
+        if((left != undefined) && (right != undefined)) {
+            return new nodes.BinaryOperatorExpression("+", left[1], right[1]);
+        }
+        else {
+            return undefined;
+        }
+    });
+    cfg.push(rule);
+
+    // for string expressions like ("index" + a)
+    rule = new Rule("stringexpression", [
+        new NonTerminal("stringexpression"), 
+        new Terminal("PLUS"), 
+        new NonTerminal("term")
+    ], 
+    function(nonTerminals, terminals) {
+        let left = parseLoop(nonTerminals[0], "stringexpression");
+        let right = parseLoop(nonTerminals[1], "term");
 
         if((left != undefined) && (right != undefined)) {
             return new nodes.BinaryOperatorExpression("+", left[1], right[1]);
