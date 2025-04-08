@@ -1322,22 +1322,6 @@ function generateCFG() {
     });
     cfg.push(rule);
 
-    // get the length of a list
-    rule = new Rule("expression", [
-        new Terminal("ID"), 
-        new Terminal("DOT"), 
-        new Terminal("LENGTH"), 
-        new Terminal("OPENPAREN"), 
-        new Terminal("CLOSEPAREN")
-    ], 
-    function(nonTerminals, terminals) {
-        let list = terminals[0];
-
-        return new nodes.ListLength(list);
-
-    });
-    cfg.push(rule);
-
     rule = new Rule("expression", [
         new NonTerminal("expression"), 
         new Terminal("PLUS"), 
@@ -1788,6 +1772,22 @@ function generateCFG() {
         }
         
         return undefined;
+    });
+    cfg.push(rule);
+
+    // get the length of a list
+    rule = new Rule("term", [
+        new Terminal("ID"), 
+        new Terminal("DOT"), 
+        new Terminal("LENGTH"), 
+        new Terminal("OPENPAREN"), 
+        new Terminal("CLOSEPAREN")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+
+        return new nodes.ListLength(list);
+
     });
     cfg.push(rule);
 
