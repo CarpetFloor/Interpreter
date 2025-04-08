@@ -1,3 +1,7 @@
-while("test" == get[myList, 1 + b]) {
+while("test" == get|myList, 1|) {
+	a += 1;
+}
+
+while(a < get|myList, a| * 2) {
 	a += 1;
 }

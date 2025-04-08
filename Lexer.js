@@ -146,6 +146,11 @@ const tokens = [
     ), 
 
     new Pattern(
+        "PIPE", 
+        /\|/
+    ), 
+
+    new Pattern(
         "ID", 
         /[a-zA-Z]+/
     ), 

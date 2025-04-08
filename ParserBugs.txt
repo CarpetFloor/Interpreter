@@ -1,0 +1,1 @@
+Factor list get will parse correctly with an expression (should not), although the AST will be incorrect

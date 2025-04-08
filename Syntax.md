@@ -33,14 +33,14 @@
 #### List
 - Declare with `list[num] myList = [1, 2, 3]`
 - Can reassign with `myList = [4, 3]`
-- Access element with `get[myList, index]`
+- Access element with `get|myList, index|`
 - Add element with `myList.add(value)`
 - Remove element with `myList.remove(index)`
 - Modify element with `myList.set(index, value)`
-- Get length with `length[myLength]`
-- The only two supported list types are num and string
-- List indices and values can be expressions, including string expressions
-- Nested lists? No
+- Get length with `length|myLength|`
+- The only two supported list types are num and string *(for instance **cannot** use `a = get|myList, i + 1|`)*
+- List indices and values **cannot** be expressions or string expressions
+- Nested lists? No, including getting values 
 - Multi-dimensional lists? No
 - Negative index values? No
 

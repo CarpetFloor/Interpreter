@@ -443,27 +443,6 @@ module.exports.ListLength = class ListLength {
     }
 }
 
-module.exports.ListElementSet = class ListElementSet {
-    constructor(list, index, value) {
-        this.list = list;
-        this.index = index;
-        this.value = value;
-    }
-    print(level) {
-        let output = (
-            "\n" + 
-            getIndent(level) + 
-            "List Element Set! " + 
-            "List = " + this.list + ", Index = " + 
-            this.index.print(level + 1) + 
-            "\n" + getIndent(level) + 
-            "Value = " + this.value.print(level + 1)
-        );
-
-        return output;
-    }
-}
-
 module.exports.ListAdd = class ListAdd {
     constructor(list, value) {
         this.list = list;
@@ -512,9 +491,10 @@ module.exports.ListSetValue = class ListSetValue {
             getIndent(level) + 
             "List Set! " + 
             "List = " + this.list + 
-            "Index = " + this.index.print(level + 1) + 
-            "\n" + getIndent(level) + 
-            "Value = " + this.value.print(level + 1)
+            "\n" + getIndent(level + 1) + 
+            "Index = " + this.index.print(level + 2) + 
+            "\n" + getIndent(level + 1) + 
+            "Value = " + this.value.print(level + 2)
         );
 
         return output;

@@ -724,41 +724,34 @@ function generateCFG() {
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        console.log("\n_____");
-        console.log("LIST DECLARATION");
-        console.log("_____");
-        console.log("\nNON TERMINALS");
-        console.log(nonTerminals);
-
-        // validate declaration values
         let valueTokens = nonTerminals[0];
         let values = [];
         let currentTokens = [];
 
-        console.log("\n_____");
-        console.log("GOING THROUGH VALUES");
+        let pipeCount = 0;
 
+        // validate values
         for(let token of valueTokens) {
-            console.log("\t", token.name);
+            if(token.name == "PIPE") {
+                ++pipeCount;
+            }
 
-            if((token.name == "COMMA") || (valueTokens.indexOf(token) == valueTokens.length - 1)) {
+			if(
+                ((token.name == "COMMA") && ((pipeCount % 2) == 0)) || 
+                (valueTokens.indexOf(token) == valueTokens.length - 1)
+            ) {
                 if(valueTokens.indexOf(token) == valueTokens.length - 1) {
                     currentTokens.push(token);
                 }
 
-                console.log("CHECKING FOR EXPRESSION");
-                console.log("TOKENS");
-                console.log(currentTokens);
-                let expressionCheck = parseLoop(currentTokens, "expression");
-                console.log("EXPRESSION CHECK");
-                console.log(expressionCheck)
-                
-                if(expressionCheck == undefined) {
+                let factorCheck = parseLoop(currentTokens, "factor");
+                currentTokens = [];
+
+                if(factorCheck == undefined) {
                     return undefined;
                 }
 
-                values.push(expressionCheck[1]);
-                currentTokens = [];
+                values.push(factorCheck[1]);
             }
             else {
                 currentTokens.push(token);
@@ -791,37 +784,22 @@ function generateCFG() {
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        console.log("\n\nSTRING LIST DECLARATION");
-        console.log("+++++");
-        console.log("+++++");
-        console.log("+++++");
-        console.log("+++++");
-        console.log("+++++");
         let currentTokens = [];
         let valueTokens = nonTerminals[0];
         let values = [];
 
+        // validate values
         for(let token of valueTokens) {
-            if((token.name == "COMMA") || (valueTokens.indexOf(token) == valueTokens.length - 1)) {
-                if(valueTokens.indexOf(token) == valueTokens.length - 1) {
-                    currentTokens.push(token);
-                }
-                
-                let stringExpressionCheck = parseLoop(currentTokens, "stringexpression");
-                if(stringExpressionCheck == undefined) {
+            if(token.name != "COMMA") {
+                let stringTermCheck = parseLoop([token], "stringterm");
+
+                if(stringTermCheck == undefined) {
                     return undefined;
                 }
 
-                values.push(stringExpressionCheck[1]);
-                currentTokens = [];
-            }
-            else {
-                currentTokens.push(token);
+                values.push(stringTermCheck[1]);
             }
         }
-
-        console.log("VALUES");
-        console.log(values);
 
         let varName = terminals[4];
         let listType = terminals[2];
@@ -830,54 +808,6 @@ function generateCFG() {
             "list", 
             varName, 
             new nodes.List(listType, values)
-        );
-    });
-    cfg.push(rule);
-
-    // num list assignment
-    rule = new Rule("statement", [
-        new Terminal("ID"), 
-        new Terminal("ASSIGN"), 
-        new Terminal("OPENPIPE"), 
-        new NonTerminal("values"), 
-        new Terminal("CLOSEPIPE"), 
-        new Terminal("SEMICOLON")
-    ], 
-    function(nonTerminals, terminals) {
-        let valueTokens = nonTerminals[0];
-        let values = [];
-        let currentTokens = [];
-
-        for(let token of valueTokens) {
-            if((token.name == "COMMA") || (valueTokens.indexOf(token) == valueTokens.length - 1)) {
-                if(valueTokens.indexOf(token) == valueTokens.length - 1) {
-                    currentTokens.push(token);
-                }
-                
-                let expressionCheck = parseLoop(currentTokens, "expression");
-                
-                if(expressionCheck == undefined) {
-                    return undefined;
-                }
-
-                values.push(expressionCheck[1]);
-                currentTokens = [];
-            }
-            else {
-                currentTokens.push(token);
-            }
-        }
-
-
-        let varName = terminals[0];
-        let listType = terminals[2];
-
-        console.log("VALUES");
-        console.log(values);
-
-        return new nodes.ListAssignment(
-            varName, 
-            values
         );
     });
     cfg.push(rule);
@@ -896,47 +826,29 @@ function generateCFG() {
         let values = [];
         let currentTokens = [];
 
-        // console.log("*****");
-        // console.log("*****");
-        // console.log("*****");
-        // console.log("*****");
-        // console.log("*****");
-        // console.log("LIST ASASIGNMENT")
-
+        // validate values
         for(let token of valueTokens) {
-            if((token.name == "COMMA") || (valueTokens.indexOf(token) == valueTokens.length - 1)) {
-                if(valueTokens.indexOf(token) == valueTokens.length - 1) {
-                    currentTokens.push(token);
-                }
-                
-                let expressionCheck = parseLoop(currentTokens, "expression");
-                
-                if(expressionCheck == undefined) {
-                    let stringExpressionCheck = parseLoop(currentTokens, "stringexpression");
+            if(token.name != "COMMA") {
+                let factorCheck = parseLoop([token], "factor");
 
-                    if(stringExpressionCheck == undefined) {
+                if(factorCheck == undefined) {
+                    let stringTermCheck = parseLoop([token], "stringterm");
+
+                    if(stringTermCheck == undefined) {
                         return undefined;
                     }
 
-                    values.push(stringExpressionCheck[1]);
-                    currentTokens = [];
+                    values.push(stringTermCheck[1]);
                 }
                 else {
-                    values.push(expressionCheck[1]);
-                    currentTokens = [];
+                    values.push(factorCheck[1]);
                 }
-            }
-            else {
-                currentTokens.push(token);
             }
         }
 
 
         let varName = terminals[0];
         let listType = terminals[2];
-
-        console.log("VALUES");
-        console.log(values);
 
         return new nodes.ListAssignment(
             varName, 
@@ -951,31 +863,31 @@ function generateCFG() {
         new Terminal("DOT"), 
         new Terminal("ADDKEYWORD"), 
         new Terminal("OPENPAREN"), 
-        new NonTerminal("expression"), 
+        new NonTerminal("value"), 
         new Terminal("CLOSEPAREN"), 
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
         let list = terminals[0];
 
-        let expressionCheck = parseLoop(nonTerminals[0], "expression");
+        let factorCheck = parseLoop(nonTerminals[0], "factor");
 
-        if(expressionCheck == undefined) {
-            let stringExpressionCheck = parseLoop(nonTerminals[0], "stringexpression");
+        if(factorCheck == undefined) {
+            let stringTermCheck = parseLoop(nonTerminals[0], "stringterm");
 
-            if(stringExpressionCheck == undefined) {
+            if(stringTermCheck == undefined) {
                 return undefined;
             }
 
             return new nodes.ListAdd(
                 list, 
-                stringExpressionCheck[1]
+                stringTermCheck[1]
             );
         }
         else {
             return new nodes.ListAdd(
                 list, 
-                expressionCheck[1]
+                factorCheck[1]
             );
         }
 
@@ -988,24 +900,23 @@ function generateCFG() {
         new Terminal("DOT"), 
         new Terminal("REMOVE"), 
         new Terminal("OPENPAREN"), 
-        new NonTerminal("expression"), 
+        new NonTerminal("index"), 
         new Terminal("CLOSEPAREN"), 
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
         let list = terminals[0];
 
-        let expressionCheck = parseLoop(nonTerminals[0], "expression");
+        let factorCheck = parseLoop(nonTerminals[0], "factor");
 
-        if(expressionCheck == undefined) {
+        if(factorCheck == undefined) {
             return undefined;
         }
-        else {
-            return new nodes.ListRemove(
-                list, 
-                expressionCheck[1]
-            );
-        }
+        
+        return new nodes.ListRemove(
+            list, 
+            factorCheck[1]
+        );
 
     });
     cfg.push(rule);
@@ -1016,42 +927,42 @@ function generateCFG() {
         new Terminal("DOT"), 
         new Terminal("SET"), 
         new Terminal("OPENPAREN"), 
-        new NonTerminal("expression"), 
+        new NonTerminal("index"), 
         new Terminal("COMMA"), 
-        new NonTerminal("expression"), 
+        new NonTerminal("value"), 
         new Terminal("CLOSEPAREN"), 
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
         let list = terminals[0];
         let indexTokens = nonTerminals[0];
-        let indexExpressionCheck = parseLoop(indexTokens, "expression");
+        let indexFactorCheck = parseLoop(indexTokens, "factor");
 
-        if(indexExpressionCheck == undefined) {
+        if(indexFactorCheck == undefined) {
             return undefined;
         }
 
         let valueTokens = nonTerminals[0];
-        let valueExpressionCheck = parseLoop(valueTokens, "expression");
+        let valueFactorCheck = parseLoop(valueTokens, "factor");
 
-        if(valueExpressionCheck == undefined) {
-            let valueStringExpressionCheck = parseLoop(valueTokens, "stringexpression");
+        if(valueFactorCheck == undefined) {
+            let valueStringTermCheck = parseLoop(valueTokens, "stringterm");
 
-            if(valueStringExpressionCheck == undefined) {
+            if(valueStringTermCheck == undefined) {
                 return undefined;
             }
 
             return new nodes.ListSetValue(
                 list, 
-                indexExpressionCheck[1], 
-                valueStringExpressionCheck[1]
+                indexFactorCheck[1], 
+                valueStringTermCheck[1]
             );
         }
         else {
             return new nodes.ListSetValue(
                 list, 
-                indexExpressionCheck[1], 
-                valueExpressionCheck[1]
+                indexFactorCheck[1], 
+                valueFactorCheck[1]
             );
         }
 
@@ -1789,48 +1700,6 @@ function generateCFG() {
     });
     cfg.push(rule);
 
-    // access list element by index
-    rule = new Rule("expression", [ 
-        new Terminal("GET"), 
-        new Terminal("OPENPIPE"), 
-        new Terminal("ID"), 
-        new Terminal("COMMA"), 
-        new NonTerminal("expression"), 
-        new Terminal("CLOSEPIPE")
-    ], 
-    function(nonTerminals, terminals) {
-        let list = terminals[0];
-
-        let expressionCheck = parseLoop(nonTerminals[0], "expression");
-
-        if(expressionCheck == undefined) {
-            return undefined;
-        }
-        else {
-            return new nodes.ListElementReference(
-                list, 
-                expressionCheck[1]
-            );
-        }
-
-    });
-    cfg.push(rule);
-
-    // get the length of a list
-    rule = new Rule("term", [
-        new Terminal("LENGTH"), 
-        new Terminal("OPENPIPE"), 
-        new Terminal("ID"), 
-        new Terminal("CLOSEPIPE")
-    ], 
-    function(nonTerminals, terminals) {
-        let list = terminals[2];
-
-        return new nodes.ListLength(list);
-
-    });
-    cfg.push(rule);
-
     rule = new Rule("term", [
         new NonTerminal("term"), 
         new Terminal("TIMES"), 
@@ -1882,6 +1751,14 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    rule = new Rule("term", [
+        new Terminal("ID")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.IdReference(terminals[0]);
+    });
+    cfg.push(rule);
+
     rule = new Rule("factor", [
         new Terminal("NUM")
     ], 
@@ -1890,11 +1767,57 @@ function generateCFG() {
     });
     cfg.push(rule);
 
-    rule = new Rule("term", [
+    rule = new Rule("factor", [
         new Terminal("ID")
     ], 
     function(nonTerminals, terminals) {
         return new nodes.IdReference(terminals[0]);
+    });
+    cfg.push(rule);
+
+    // access list num element by index
+    rule = new Rule("factor", [ 
+        new Terminal("GET"), 
+        new Terminal("PIPE"), 
+        new Terminal("ID"), 
+        new Terminal("COMMA"), 
+        new NonTerminal("factor"), 
+        new Terminal("PIPE")
+    ], 
+    function(nonTerminals, terminals) {
+        console.log("+++++");
+        console.log("+++++");
+        console.log("TERM LIST GET");
+
+        let list = terminals[0];
+
+        let termCheck = parseLoop(nonTerminals[0], "expression");
+
+        if(termCheck == undefined) {
+            return undefined;
+        }
+        else {
+            return new nodes.ListElementReference(
+                list, 
+                termCheck[1]
+            );
+        }
+
+    });
+    cfg.push(rule);
+
+    // get the length of a list
+    rule = new Rule("factor", [
+        new Terminal("LENGTH"), 
+        new Terminal("PIPE"), 
+        new Terminal("ID"), 
+        new Terminal("PIPE")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[2];
+
+        return new nodes.ListLength(list);
+
     });
     cfg.push(rule);
 
@@ -2002,14 +1925,14 @@ function generateCFG() {
     });
     cfg.push(rule);
 
-    // access list element by index
+    // access list string element by index
     rule = new Rule("stringterm", [ 
         new Terminal("GET"), 
-        new Terminal("OPENPIPE"), 
+        new Terminal("PIPE"), 
         new Terminal("ID"), 
         new Terminal("COMMA"), 
         new NonTerminal("expression"), 
-        new Terminal("CLOSEPIPE")
+        new Terminal("PIPE")
     ], 
     function(nonTerminals, terminals) {
         let list = terminals[0];
