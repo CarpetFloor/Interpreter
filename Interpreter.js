@@ -2,7 +2,7 @@ let fs = require("fs");
 let lexer = require("./Lexer");
 let parser = require("./Parser");
 
-let programName = "NestedConditional";
+let programName = "WhileIf";
 let programFile = "SamplePrograms/" + programName + ".lang";
 
 // if(process.argv.length >= 3) {

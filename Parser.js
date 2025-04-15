@@ -45,6 +45,11 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
         console.log("PARSING INNER LOOP");
     }
 
+    let loopToken = "WHILE";
+    if(!(isWhileLoop)) {
+        loopToken = "IF";
+    }
+
     // get comparison
     let comparisonIndices = {
         start: 2,
@@ -96,13 +101,12 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
      * loop with nested while loops can be verified.
      */
     let lastNestedLoop = true;
-    let tokenName = "WHILE";
-    if(!(isWhileLoop)) {
-        tokenName = "IF";
-    }
 
     for(let token of body) {
-        if(token.name == tokenName) {
+        if(
+            (token.name == "WHILE") || 
+            (token.name == "IF")
+        ) {
             lastNestedLoop = false;
             break;
         }
@@ -170,11 +174,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
             console.log("_____\n");
         }
 
-        let loopToken = "WHILE";
-        if(!(isWhileLoop)) {
-            loopToken = "IF"
-        }
-
         let bodyElements = [];
             let currentTokens = [];;
 
@@ -183,7 +182,10 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                     console.log("\t", i, body[i]);
                 }
 
-                if(body[i].name == loopToken) {
+                if(
+                    (body[i].name == "WHILE") || 
+                    (body[i].name == "IF")
+                ) {
                     let statementListCheck = parseLoop(currentTokens, "statementlist");
 
                     if(debug) {
@@ -260,7 +262,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                         console.log(innerLoopTokens);
                     }
 
-                    let valid = parseInnerLoop(bodyElements, innerLoopTokens, true);
+                    let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
                     
                     if(!(valid)) {
                         return false;
@@ -592,7 +594,10 @@ function generateCFG() {
             for(let i = 0; i < body.length; i++) {
                 // console.log("\t", i, body[i]);
 
-                if(body[i].name == "WHILE") {
+                if(
+                    (body[i].name == "WHILE") || 
+                    (body[i].name == "IF")
+                ) {
                     // console.log(openCurlyCount, closeCurlyCount);
                     // detect while loop list instead of nested while loops
                     if(openCurlyCount == closeCurlyCount) {
@@ -662,7 +667,8 @@ function generateCFG() {
 
                     // console.log("TOKENS");
                     // console.log(innerLoopTokens);
-                    let valid = parseInnerLoop(bodyElements, innerLoopTokens, true);
+
+                    let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
 
                     // console.log("\n__________\n\tVALID CHECK");
                     // console.log(valid);
@@ -744,6 +750,7 @@ function generateCFG() {
         new NonTerminal("statementlist"),
     ], 
     function(nonTerminals, terminals) {
+        // exact same code as whileloop, except for some variables named differently
         let ifloops = [];
 
         // first make sure comparison of outter while loop valid
@@ -766,7 +773,10 @@ function generateCFG() {
             let closeCurlyCount = 0;
 
             for(let i = 0; i < body.length; i++) {
-                if(body[i].name == "IF") {
+                if(
+                    (body[i].name == "WHILE") || 
+                    (body[i].name == "IF")
+                ) {
                     // detect while loop list instead of nested while loops
                     if(openCurlyCount == closeCurlyCount) {
                         return undefined;
@@ -815,7 +825,7 @@ function generateCFG() {
 
                     let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
 
-                    let valid = parseInnerLoop(bodyElements, innerLoopTokens, false);
+                    let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
                     
                     if(!(valid)) {
                         return undefined;
