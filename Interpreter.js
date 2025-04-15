@@ -2,7 +2,8 @@ let fs = require("fs");
 let lexer = require("./Lexer");
 let parser = require("./Parser");
 
-let programFile = "SamplePrograms/ConditionalList.lang";
+let programName = "NestedConditional";
+let programFile = "SamplePrograms/" + programName + ".lang";
 
 // if(process.argv.length >= 3) {
 //     programFile = process.argv[2];

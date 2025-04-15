@@ -63,7 +63,7 @@
 - No
 
 ### Nesting?
-- Yes, up to infinity for everything except lists
+- Yes, up to infinity for everything except lists (no multi-dimensional lists)
 
 ### Scope?
 - No, everything is just global

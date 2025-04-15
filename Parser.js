@@ -96,8 +96,13 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
      * loop with nested while loops can be verified.
      */
     let lastNestedLoop = true;
+    let tokenName = "WHILE";
+    if(!(isWhileLoop)) {
+        tokenName = "IF";
+    }
+
     for(let token of body) {
-        if(token.name == "WHILE") {
+        if(token.name == tokenName) {
             lastNestedLoop = false;
             break;
         }
