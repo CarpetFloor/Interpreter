@@ -89,6 +89,20 @@ const tokens = [
     ), 
 
     new Pattern(
+        "IF", 
+        /if/
+    ), 
+
+    new Pattern(
+        "ELSEIF", 
+        /elseif/
+    ), 
+    new Pattern(
+        "ELSE", 
+        /else/
+    ), 
+
+    new Pattern(
         "TOSTRING", 
         /toString/
     ), 

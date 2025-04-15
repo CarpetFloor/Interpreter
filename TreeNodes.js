@@ -54,6 +54,36 @@ module.exports.WhileLoop = class WhileLoop {
     }
 }
 
+module.exports.IfLoop = class IfLoop {
+    constructor(comparison, body) {
+        this.children = [];
+
+        this.comparison = comparison;
+        this.children.push(comparison);
+
+        this.body = body;
+        for(let element of body) {
+            this.children.push(element);
+        }
+    }
+
+    print(level) {
+        let output = (
+            "\n" + 
+            getIndent(level) + 
+            "If Loop! " + 
+            this.comparison.print(level + 1) + 
+            "\n" + getIndent(level) + "_____BODY_____"
+        );
+
+        for(let element of this.body) {
+            output += element.print(level + 1)
+        }
+
+        return output;
+    }
+}
+
 module.exports.StatementList = class StatementList {
     constructor(statements) {
         this.children = statements;
