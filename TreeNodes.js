@@ -60,11 +60,17 @@ module.exports.IfLoop = class IfLoop {
 
         this.comparison = comparison;
         this.children.push(comparison);
+        this.elseStatement = null;
 
         this.body = body;
         for(let element of body) {
             this.children.push(element);
         }
+    }
+
+    addElse(elseStatement) {
+        this.elseStatement = elseStatement;
+        this.children.push(elseStatement);
     }
 
     print(level) {
@@ -78,6 +84,15 @@ module.exports.IfLoop = class IfLoop {
 
         for(let element of this.body) {
             output += element.print(level + 1)
+        }
+
+        output += "\n" + getIndent(level) + "_____ELSE_STATEMENT_____";
+
+        if(this.elseStatement == null) {
+            output += "\n" + getIndent(level + 1) + "!!!!NONE!!!!";
+        }
+        else {
+            output += this.elseStatement.print(level + 1);
         }
 
         return output;

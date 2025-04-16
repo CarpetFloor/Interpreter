@@ -1,2 +1,7 @@
-> conditional
+> else:
+    - don't allow program if else else
+    - don't allow program if anything else
+    - apply first three inside if
+    - apply first three inside while
+    - apply first three inside parseInnerLoop
 > runner
