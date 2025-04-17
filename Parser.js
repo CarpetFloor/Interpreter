@@ -37,8 +37,6 @@ class NonTerminal {
 function parseInnerLoop(loopsList, tokens, isWhileLoop) {
     let debug = false;
 
-    let isElse = (loopsList == null);
-
     if(debug) {
         console.log("_____{=}{=}{=}{=}{=}_____");
         console.log("_____{=}{=}{=}{=}{=}_____");
@@ -53,42 +51,40 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
         loopToken = "IF";
     }
 
-    if(!(isElse)) {
-        // get comparison
-        let comparisonIndices = {
-            start: 2,
-            end: -1
-        };
+    // get comparison
+    let comparisonIndices = {
+        start: 2,
+        end: -1
+    };
 
-        for(let i = 2; i < tokens.length; i++) {
-            if(tokens[i].name == "CLOSEPAREN") {
-                comparisonIndices.end = i;
-                break;
-            }
+    for(let i = 2; i < tokens.length; i++) {
+        if(tokens[i].name == "CLOSEPAREN") {
+            comparisonIndices.end = i;
+            break;
         }
+    }
 
-        if(comparisonIndices.end == -1) {
-            return false;
-        }
+    if(comparisonIndices.end == -1) {
+        return false;
+    }
 
-        let comparisonTokens = tokens.slice(comparisonIndices.start, comparisonIndices.end);
+    let comparisonTokens = tokens.slice(comparisonIndices.start, comparisonIndices.end);
 
-        if(debug) {
-            console.log("COMPARISON TOKENS");
-            console.log(comparisonTokens);
-        }
-        
-        // check comparison
-        let comparisonCheck = parseLoop(comparisonTokens, "comparison");
+    if(debug) {
+        console.log("COMPARISON TOKENS");
+        console.log(comparisonTokens);
+    }
+    
+    // check comparison
+    let comparisonCheck = parseLoop(comparisonTokens, "comparison");
 
-        if(debug) {
-            console.log("COMPARISON CHECK");
-            console.log(comparisonCheck);
-        }
+    if(debug) {
+        console.log("COMPARISON CHECK");
+        console.log(comparisonCheck);
+    }
 
-        if(comparisonCheck == undefined) {
-            return false;
-        }
+    if(comparisonCheck == undefined) {
+        return false;
     }
 
     // get body
@@ -167,10 +163,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
             }
             
             loopsList.push(loop);
-
-            if(isElse) {
-                return loopsList;
-            }
 
             return true;
         }
@@ -900,6 +892,10 @@ function generateCFG() {
 
                     let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
 
+                    console.log("\n??????????");
+                    console.log("INNER LOOP TOKENS FOR IF LOOP");
+                    console.log(innerLoopTokens);
+
                     let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
                     
                     if(!(valid)) {
@@ -1029,6 +1025,11 @@ function generateCFG() {
 
                 let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
 
+                console.log("\n??????????");
+                console.log("RIGHT BEFORE PARSE INNER LOOP");
+                console.log(body[i].name == "WHILE");
+                console.log(innerLoopTokens);
+
                 let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
                 
                 if(!(valid)) {
@@ -1139,6 +1140,10 @@ function generateCFG() {
             }
 
         }
+
+        console.log("\n??????????");
+        console.log("BODY ELEMENTS");
+        console.log(bodyElements);
 
         return new nodes.StatementList(
             bodyElements

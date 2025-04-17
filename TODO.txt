@@ -4,4 +4,5 @@
     - apply first three inside if
     - apply first three inside while
     - apply first three inside parseInnerLoop
+    - allow everything inside if and while inside else
 > runner
