@@ -2,12 +2,23 @@ if(a > 0) {
 	a -= 1;
 }
 else {
-	a += 1;
+	afirstElse += 1;
 
 	if(b > 0) {
-		b -= 1;
+		aifInElse -= 1;
 	}
 	else {
-		b += 1;
+		asecondElse += 1;
+
+		while(a < 1) {
+			a += 1;
+		}
+
+		if(a < 1) {
+			a += 1;
+		}
+		else {
+			afinalElse += 1;
+		}
 	}
 }

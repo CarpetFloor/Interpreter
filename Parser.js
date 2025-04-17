@@ -213,234 +213,265 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
         }
 
         let bodyElements = [];
-            let currentTokens = [];;
+        let currentTokens = [];;
+        let lastIf = null;
 
-            for(let i = 0; i < body.length; i++) {
+        for(let i = 0; i < body.length; i++) {
+            if(debug) {
+                console.log("\t", i, body[i]);
+            }
+
+            if(body[i].name != "ELSE") {
+                lastIf = null;
+            }
+
+            if(
+                (body[i].name == "WHILE") || 
+                (body[i].name == "IF")
+            ) {
+                let statementListCheck = parseLoop(currentTokens, "statementlist");
+
                 if(debug) {
-                    console.log("\t", i, body[i]);
+                    console.log("VALID STATEMENT LIST CHECK?");
+                    console.log("TOKENS:");
+                    console.log(currentTokens);
+                    console.log("--");
+                    console.log(statementListCheck);
+                    console.log("--DONE");
                 }
 
-                if(
-                    (body[i].name == "WHILE") || 
-                    (body[i].name == "IF")
-                ) {
-                    let statementListCheck = parseLoop(currentTokens, "statementlist");
+                if(statementListCheck == undefined) {
+                    return false;
+                }
 
+                if(statementListCheck[1].children.length > 0) {
+                    bodyElements.push(statementListCheck[1]);
+                }
+                
+                currentTokens = [];
+
+                let loopIndex = {
+                    start: i,
+                    end: -1
+                };
+
+                /**
+                 * Need to differentiate between a while loop directly succeeding another 
+                 * while loop, and a while loop nested within another while loop. To do so, 
+                 * parse through tokens from start of inner while loop until a closing curly 
+                 * bracket is found and the number of open and curly brackets found is equal.
+                 */
+                let openCurlyCount = 0;
+                let closeCurlyCount = 0;
+
+                for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
                     if(debug) {
-                        console.log("VALID STATEMENT LIST CHECK?");
-                        console.log("TOKENS:");
-                        console.log(currentTokens);
-                        console.log("--");
-                        console.log(statementListCheck);
-                        console.log("--DONE");
+                        console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
                     }
 
-                    if(statementListCheck == undefined) {
-                        return false;
+                    if(body[j].name == "OPENCURLY") {
+                        ++openCurlyCount;
                     }
 
-                    if(statementListCheck[1].children.length > 0) {
-                        bodyElements.push(statementListCheck[1]);
-                    }
-                    
-                    currentTokens = [];
+                    if(body[j].name == "CLOSECURLY") {
+                        ++closeCurlyCount;
 
-                    let loopIndex = {
-                        start: i,
-                        end: -1
-                    };
-
-                    /**
-                     * Need to differentiate between a while loop directly succeeding another 
-                     * while loop, and a while loop nested within another while loop. To do so, 
-                     * parse through tokens from start of inner while loop until a closing curly 
-                     * bracket is found and the number of open and curly brackets found is equal.
-                     */
-                    let openCurlyCount = 0;
-                    let closeCurlyCount = 0;
-
-                    for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
-                        if(debug) {
-                            console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
-                        }
-
-                        if(body[j].name == "OPENCURLY") {
-                            ++openCurlyCount;
-                        }
-
-                        if(body[j].name == "CLOSECURLY") {
-                            ++closeCurlyCount;
-
-                            if(openCurlyCount == closeCurlyCount) {
-                                if(debug) {
-                                    console.log("FOUND");
-                                }
-                                
-
-                                loopIndex.end = j;
-                                break;
+                        if(openCurlyCount == closeCurlyCount) {
+                            if(debug) {
+                                console.log("FOUND");
                             }
+                            
+
+                            loopIndex.end = j;
+                            break;
                         }
-
                     }
 
-                    if(debug) {
-                        console.log("LOOP INDICES");
-                        console.log(loopIndex.start, loopIndex.end);
-                    }
-
-                    if(loopIndex.end == -1) {
-                        return false;
-                    }
-
-                    let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
-
-                    if(debug) {
-                        console.log("\nINNER LOOP TOKENS");
-                        console.log(innerLoopTokens);
-                    }
-
-                    let valid = false;
-                    if(isElse) {
-                        valid = parseInnerLoop(bodyElements, innerLoopTokens, null);
-                    }
-                    else {
-                        valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
-                    }
-                    
-                    if(!(valid)) {
-                        return false;
-                    }
-
-                    i += innerLoopTokens.length - 1;
                 }
-                else if(body[i].name == "ELSE") {
-                    let statementListCheck = parseLoop(currentTokens, "statementlist");
 
+                if(debug) {
+                    console.log("LOOP INDICES");
+                    console.log(loopIndex.start, loopIndex.end);
+                }
+
+                if(loopIndex.end == -1) {
+                    return false;
+                }
+
+                let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
+
+                if(debug) {
+                    console.log("\nINNER LOOP TOKENS");
+                    console.log(innerLoopTokens);
+                }
+
+                valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
+
+                // let valid = false;
+                // if(isElse) {
+                //     valid = parseInnerLoop(bodyElements, innerLoopTokens, null);
+                // }
+                // else {
+                //     valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
+                // }
+                
+                if(!(valid)) {
+                    return false;
+                }
+
+                lastIf = bodyElements[bodyElements.length - 1];
+
+                i += innerLoopTokens.length - 1;
+            }
+            else if(body[i].name == "ELSE") {
+                let statementListCheck = parseLoop(currentTokens, "statementlist");
+
+                if(debug) {
+                    console.log("!!ELSE!!");
+                    console.log("VALID STATEMENT LIST CHECK?");
+                    console.log("TOKENS:");
+                    console.log(currentTokens);
+                    console.log("--");
+                    console.log(statementListCheck);
+                    console.log("--DONE");
+                }
+
+                if(statementListCheck == undefined) {
+                    return false;
+                }
+
+                if(statementListCheck[1].children.length > 0) {
+                    bodyElements.push(statementListCheck[1]);
+                }
+                
+                currentTokens = [];
+
+                let loopIndex = {
+                    start: i,
+                    end: -1
+                };
+
+                let openCurlyCount = 0;
+                let closeCurlyCount = 0;
+
+                for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
                     if(debug) {
-                        console.log("!!ELSE!!");
-                        console.log("VALID STATEMENT LIST CHECK?");
-                        console.log("TOKENS:");
-                        console.log(currentTokens);
-                        console.log("--");
-                        console.log(statementListCheck);
-                        console.log("--DONE");
+                        console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
                     }
 
-                    if(statementListCheck == undefined) {
-                        return false;
+                    if(body[j].name == "OPENCURLY") {
+                        ++openCurlyCount;
                     }
 
-                    if(statementListCheck[1].children.length > 0) {
-                        bodyElements.push(statementListCheck[1]);
-                    }
-                    
-                    currentTokens = [];
+                    if(body[j].name == "CLOSECURLY") {
+                        ++closeCurlyCount;
 
-                    let loopIndex = {
-                        start: i,
-                        end: -1
-                    };
-
-                    let openCurlyCount = 0;
-                    let closeCurlyCount = 0;
-
-                    for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
-                        if(debug) {
-                            console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
-                        }
-
-                        if(body[j].name == "OPENCURLY") {
-                            ++openCurlyCount;
-                        }
-
-                        if(body[j].name == "CLOSECURLY") {
-                            ++closeCurlyCount;
-
-                            if(openCurlyCount == closeCurlyCount) {
-                                if(debug) {
-                                    console.log("FOUND");
-                                }
-                                
-
-                                loopIndex.end = j;
-                                break;
+                        if(openCurlyCount == closeCurlyCount) {
+                            if(debug) {
+                                console.log("FOUND");
                             }
+                            
+
+                            loopIndex.end = j;
+                            break;
                         }
-
                     }
 
-                    if(debug) {
-                        console.log("LOOP INDICES");
-                        console.log(loopIndex.start, loopIndex.end);
-                    }
-
-                    if(loopIndex.end == -1) {
-                        return false;
-                    }
-
-                    let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
-
-                    if(debug) {
-                        console.log("\nINNER LOOP TOKENS");
-                        console.log(innerLoopTokens);
-                    }
-
-                    let valid = false;
-                    if(isElse) {
-                        valid = parseInnerLoop(bodyElements, innerLoopTokens, null);
-                    }
-                    else {
-                        valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
-                    }
-                    
-                    if(!(valid)) {
-                        return false;
-                    }
-
-                    i += innerLoopTokens.length - 1;
                 }
-                else if(i == body.length - 1) {
-                    let statementListCheck = parseLoop(currentTokens, "statementlist");
 
-                    if(statementListCheck == undefined) {
-                        return false;
-                    }
+                if(debug) {
+                    console.log("LOOP INDICES");
+                    console.log(loopIndex.start, loopIndex.end);
+                }
 
-                    if(statementListCheck[1].children.length > 0) {
-                        bodyElements.push(statementListCheck[1]);
-                    }
+                if(loopIndex.end == -1) {
+                    return false;
+                }
 
-                    if(debug) {
-                        console.log("\n\n\t\tADDED BOTTOM");
-                        console.log(statementListCheck[1].children.length);
-                    }
+                let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
+
+                if(debug) {
+                    console.log("\nINNER LOOP TOKENS");
+                    console.log(innerLoopTokens);
+                }
+
+                let valid = false;
+                if(isElse) {
+                    valid = parseInnerLoop(bodyElements, innerLoopTokens, null);
                 }
                 else {
-                    currentTokens.push(body[i]);
+                    valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
+                }
+                
+                if(!(valid)) {
+                    return false;
                 }
 
+                if(lastIf == null) {
+                    return false;
+                }
+
+                let elseStatement = bodyElements[bodyElements.length - 1];
+
+                if(debug) {
+                    console.log("\nRIGH BEFORE SPLICING IN PARSE INNER LOOP")
+                    console.log("\n!!+!!LAST IF");
+                    console.log(lastIf);
+                    console.log("__________");
+                    console.log("!!+!!ELSE STATEMENT");
+                    console.log(elseStatement);
+                }
+
+                lastIf.addElse(elseStatement);
+                bodyElements.splice(bodyElements.length - 1, 1);
+
+                i += innerLoopTokens.length - 1;
             }
+            else if(i == body.length - 1) {
+                let statementListCheck = parseLoop(currentTokens, "statementlist");
 
-            if(debug) {
-                console.log("COMBINING BODY ELEMENTS");
-            }
+                if(statementListCheck == undefined) {
+                    return false;
+                }
 
-            // combine while loops
-            for(let i = bodyElements.length - 1; i > 0; i--) {
-                if(bodyElements[i].name == loopToken) {
-                    let loop = bodyElements[i];
+                if(statementListCheck[1].children.length > 0) {
+                    bodyElements.push(statementListCheck[1]);
+                }
 
-                    if(bodyElements[i - 1].name == loopToken) {
-                        bodyElements[i - 1].body.push(loop);
-                    }
-
-                    bodyElements.splice(i, 1);
+                if(debug) {
+                    console.log("\n\n\t\tADDED BOTTOM");
+                    console.log(statementListCheck[1].children.length);
                 }
             }
+            else {
+                currentTokens.push(body[i]);
+            }
 
-            let loop = null;
+        }
 
+        if(debug) {
+            console.log("COMBINING BODY ELEMENTS");
+        }
+
+        // combine while loops
+        for(let i = bodyElements.length - 1; i > 0; i--) {
+            if(bodyElements[i].name == loopToken) {
+                let loop = bodyElements[i];
+
+                if(bodyElements[i - 1].name == loopToken) {
+                    bodyElements[i - 1].body.push(loop);
+                }
+
+                bodyElements.splice(i, 1);
+            }
+        }
+
+        let loop = null;
+
+        if(isElse) {
+            loop = new nodes.StatementList(bodyElements);
+        }
+        else {
             if(isWhileLoop) {
                 loop = new nodes.WhileLoop(
                     comparisonCheck[1], 
@@ -453,15 +484,16 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                     bodyElements
                 );
             }
+        }
 
-            loopsList.push(loop);
+        loopsList.push(loop);
 
-            if(debug) {
-                console.log("FINAL WHILE LOOP");
-                console.log(loop);
-            }
-            
-            return true;
+        if(debug) {
+            console.log("FINAL WHILE LOOP");
+            console.log(loop);
+        }
+        
+        return true;
 
     }
 
@@ -1095,12 +1127,15 @@ function generateCFG() {
         let openCurlyCount = 1;
         let closeCurlyCount = 0;
 
-        let lastIf = true;
+        let lastIf = null;
 
         for(let i = 0; i < body.length; i++) {
             console.log("\n??????????");
             console.log(i, "TOKEN:", body[i].name);
 
+            if(body[i].name != "ELSE") {
+                lastIf = null;
+            }
 
             if(
                 (body[i].name == "WHILE") || 
@@ -1247,6 +1282,14 @@ function generateCFG() {
                 if(lastIf == null) {
                     return undefined;
                 }
+
+                let elseStatement = bodyElements[bodyElements.length - 1];
+                console.log("\n??????????");
+                console.log("ELSE STATEMENT");
+                console.log(elseStatement);
+
+                lastIf.addElse(elseStatement);
+                bodyElements.splice(bodyElements.length - 1, 1);
 
                 console.log("\n??????????");
                 console.log("RIGHT BEFORE i INCREMENT");
