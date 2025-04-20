@@ -339,6 +339,195 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
 
 }
 
+function parseWhileIf(nonTerminals, terminals, isWhile) {
+    let whileloops = [];
+
+    // first make sure comparison of outter while loop valid
+    let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
+
+    if(comparisonCheck != undefined) {
+        // make sure inner while loop exists
+        let body = nonTerminals[1];
+        let bodyElements = [];
+
+        /**
+         * keep array that body elements are sequentially added to.
+         * go through body
+         */
+        let currentTokens = [];
+        // check to make sure that a while loop list isn't parsed like 
+        // nested while loops by checking if the first "inner" while token 
+        // is found before the first open curly is closed
+        let openCurlyCount = 1;
+        let closeCurlyCount = 0;
+        let lastIf = false;
+
+        for(let i = 0; i < body.length; i++) {
+            if(body[i].name != "ELSE") {
+                lastIf = null;
+            }
+
+            if(
+                (body[i].name == "WHILE") || 
+                (body[i].name == "IF")
+            ) {
+                if(openCurlyCount == closeCurlyCount) {
+                    return undefined;
+                }
+
+                // check if currentTokens is a valid statement list
+                let statementListCheck = parseLoop(currentTokens, "statementlist");
+
+                if(statementListCheck == undefined) {
+                    return undefined;
+                }
+
+                if(statementListCheck[1].children.length > 0) {
+                    bodyElements.push(statementListCheck[1]);
+                }
+                currentTokens = [];
+
+                // find entire inner-loop context
+                let loopIndex = {
+                    start: i,
+                    end: -1
+                };
+
+                let innerOpenCurlyCount = 0;
+                let innerCloseCurlyCount = 0;
+
+                for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
+                    if(body[j].name == "OPENCURLY") {
+                        ++innerOpenCurlyCount;
+                    }
+
+                    if(body[j].name == "CLOSECURLY") {
+                        ++innerCloseCurlyCount;
+
+                        if(innerOpenCurlyCount == innerCloseCurlyCount) {
+                            loopIndex.end = j;
+                            break;
+                        }
+                    }
+                    
+                }
+
+                if(loopIndex.end == -1) {
+                    return undefined;
+                }
+
+                // recursively check inner while loops by calling method 
+                // and passing inner loop context
+                let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
+                let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
+                
+                if(!(valid)) {
+                    return undefined;
+                }
+
+                if(body[i].name == "IF") {
+                    lastIf = bodyElements[bodyElements.length - 1];
+                }
+
+                i += innerLoopTokens.length - 1;
+            }
+            else if(body[i].name == "ELSE") {
+                let statementListCheck = parseLoop(currentTokens, "statementlist");
+
+                if(statementListCheck == undefined) {
+                    return undefined;
+                }
+
+                bodyElements.push(statementListCheck[1]);
+                currentTokens = [];
+                
+                let loopIndices = {
+                    start: i, 
+                    end: -1
+                };
+
+                let openCurlyCount = 0;
+                let closeCurlyCount = 0;
+
+                for(let i = loopIndices.start + 1; i < body.length; i++) {
+                    if(body[i].name == "OPENCURLY") {
+                        ++openCurlyCount;
+                    }
+                    else if(body[i].name == "CLOSECURLY") {
+                        ++closeCurlyCount;
+
+                        if(openCurlyCount == closeCurlyCount) {
+                            loopIndices.end = i;
+                            break;
+                        }
+                    }
+
+                }
+
+                if(loopIndices.end == -1) {
+                    return undefined;
+                }
+
+                let elseTokens = body.slice(loopIndices.start, loopIndices.end + 1);
+
+                let elseLoopCheck = parseLoop(elseTokens, "elseloop");
+
+                if(elseLoopCheck == undefined) {
+                    return undefined;
+                }
+
+                if(lastIf == null) {
+                    return undefined;
+                }
+
+                lastIf.addElse(elseLoopCheck[1]);
+                lastIf = null;
+
+                currentTokens = [];
+                i = loopIndices.end;
+            }
+            else if(i == body.length - 1) {
+                let statementListCheck = parseLoop(currentTokens, "statementlist");
+
+                if(statementListCheck == undefined) {
+                    return undefined;
+                }
+
+                if(statementListCheck[1].children.length > 0) {
+                    bodyElements.push(statementListCheck[1]);
+                }
+            }
+            else {
+                if(body[i].name == "OPENCURLY") {
+                    ++openCurlyCount;
+                }
+                else if(body[i].name == "CLOSECURLY") {
+                    ++closeCurlyCount;
+                }
+
+                currentTokens.push(body[i]);
+            }
+
+        }
+
+        if(isWhile) {
+            return new nodes.WhileLoop(
+                comparisonCheck[1], 
+                bodyElements
+            );
+        }
+        else {
+            return new nodes.IfLoop(
+                comparisonCheck[1], 
+                bodyElements
+            );
+        }
+
+    }
+    
+    return undefined;
+}
+
 // create context-free grammar
 let cfg = [];
 
@@ -573,184 +762,7 @@ function generateCFG() {
         new NonTerminal("statementlist"),
     ], 
     function(nonTerminals, terminals) {
-        let whileloops = [];
-
-        // first make sure comparison of outter while loop valid
-        let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
-
-        if(comparisonCheck != undefined) {
-            // make sure inner while loop exists
-            let body = nonTerminals[1];
-            let bodyElements = [];
-
-            /**
-             * keep array that body elements are sequentially added to.
-             * go through body
-             */
-            let currentTokens = [];
-            // check to make sure that a while loop list isn't parsed like 
-            // nested while loops by checking if the first "inner" while token 
-            // is found before the first open curly is closed
-            let openCurlyCount = 1;
-            let closeCurlyCount = 0;
-            let lastIf = false;
-
-            for(let i = 0; i < body.length; i++) {
-                if(body[i].name != "ELSE") {
-                    lastIf = null;
-                }
-
-                if(
-                    (body[i].name == "WHILE") || 
-                    (body[i].name == "IF")
-                ) {
-                    if(openCurlyCount == closeCurlyCount) {
-                        return undefined;
-                    }
-
-                    // check if currentTokens is a valid statement list
-                    let statementListCheck = parseLoop(currentTokens, "statementlist");
-
-                    if(statementListCheck == undefined) {
-                        return undefined;
-                    }
-
-                    if(statementListCheck[1].children.length > 0) {
-                        bodyElements.push(statementListCheck[1]);
-                    }
-                    currentTokens = [];
-
-                    // find entire inner-loop context
-                    let loopIndex = {
-                        start: i,
-                        end: -1
-                    };
-
-                    let innerOpenCurlyCount = 0;
-                    let innerCloseCurlyCount = 0;
-
-                    for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
-                        if(body[j].name == "OPENCURLY") {
-                            ++innerOpenCurlyCount;
-                        }
-
-                        if(body[j].name == "CLOSECURLY") {
-                            ++innerCloseCurlyCount;
-
-                            if(innerOpenCurlyCount == innerCloseCurlyCount) {
-                                loopIndex.end = j;
-                                break;
-                            }
-                        }
-                        
-                    }
-
-                    if(loopIndex.end == -1) {
-                        return undefined;
-                    }
-
-                    // recursively check inner while loops by calling method 
-                    // and passing inner loop context
-                    let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
-                    let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
-                    
-                    if(!(valid)) {
-                        return undefined;
-                    }
-
-                    if(body[i].name == "IF") {
-                        lastIf = bodyElements[bodyElements.length - 1];
-                    }
-
-                    i += innerLoopTokens.length - 1;
-                }
-                else if(body[i].name == "ELSE") {
-                    let statementListCheck = parseLoop(currentTokens, "statementlist");
-
-                    if(statementListCheck == undefined) {
-                        return undefined;
-                    }
-
-                    bodyElements.push(statementListCheck[1]);
-                    currentTokens = [];
-                    
-                    let loopIndices = {
-                        start: i, 
-                        end: -1
-                    };
-
-                    let openCurlyCount = 0;
-                    let closeCurlyCount = 0;
-
-                    for(let i = loopIndices.start + 1; i < body.length; i++) {
-                        if(body[i].name == "OPENCURLY") {
-                            ++openCurlyCount;
-                        }
-                        else if(body[i].name == "CLOSECURLY") {
-                            ++closeCurlyCount;
-
-                            if(openCurlyCount == closeCurlyCount) {
-                                loopIndices.end = i;
-                                break;
-                            }
-                        }
-
-                    }
-
-                    if(loopIndices.end == -1) {
-                        return undefined;
-                    }
-
-                    let elseTokens = body.slice(loopIndices.start, loopIndices.end + 1);
-
-                    let elseLoopCheck = parseLoop(elseTokens, "elseloop");
-
-                    if(elseLoopCheck == undefined) {
-                        return undefined;
-                    }
-
-                    if(lastIf == null) {
-                        return undefined;
-                    }
-
-                    lastIf.addElse(elseLoopCheck[1]);
-                    lastIf = null;
-
-                    currentTokens = [];
-                    i = loopIndices.end;
-                }
-                else if(i == body.length - 1) {
-                    let statementListCheck = parseLoop(currentTokens, "statementlist");
-
-                    if(statementListCheck == undefined) {
-                        return undefined;
-                    }
-
-                    if(statementListCheck[1].children.length > 0) {
-                        bodyElements.push(statementListCheck[1]);
-                    }
-                }
-                else {
-                    if(body[i].name == "OPENCURLY") {
-                        ++openCurlyCount;
-                    }
-                    else if(body[i].name == "CLOSECURLY") {
-                        ++closeCurlyCount;
-                    }
-
-                    currentTokens.push(body[i]);
-                }
-
-            }
-
-            return new nodes.WhileLoop(
-                comparisonCheck[1], 
-                bodyElements
-            );
-
-        }
-        
-        return undefined;
+        return parseWhileIf(nonTerminals, terminals, true);
     });
     cfg.push(rule);
 
@@ -763,186 +775,7 @@ function generateCFG() {
         new NonTerminal("statementlist"),
     ], 
     function(nonTerminals, terminals) {
-        // exact same code as whileloop, except for some variables named differently
-        let ifloops = [];
-
-        // first make sure comparison of outter while loop valid
-        let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
-
-        if(comparisonCheck != undefined) {
-            // make sure inner while loop exists
-            let body = nonTerminals[1];
-            let bodyElements = [];
-
-            /**
-             * keep array that body elements are sequentially added to.
-             * go through body
-             */
-            let currentTokens = [];
-            // check to make sure that a while loop list isn't parsed like 
-            // nested while loops by checking if the first "inner" while token 
-            // is found before the first open curly is closed
-            let openCurlyCount = 1;
-            let closeCurlyCount = 0;
-
-            let lastIf = null;
-
-            for(let i = 0; i < body.length; i++) {
-                if(body[i].name != "ELSE") {
-                    lastIf = false;
-                }
-
-                if(
-                    (body[i].name == "WHILE") || 
-                    (body[i].name == "IF")
-                ) {
-                    // detect while loop list instead of nested while loops
-                    if(openCurlyCount == closeCurlyCount) {
-                        return undefined;
-                    }
-
-                    // check if currentTokens is a valid statement list
-                    let statementListCheck = parseLoop(currentTokens, "statementlist");
-
-                    if(statementListCheck == undefined) {
-                        return undefined;
-                    }
-
-                    if(statementListCheck[1].children.length > 0) {
-                        bodyElements.push(statementListCheck[1]);
-                    }
-                    currentTokens = [];
-
-                    // find entire inner-loop context
-                    let loopIndex = {
-                        start: i,
-                        end: -1
-                    };
-
-                    let innerOpenCurlyCount = 0;
-                    let innerCloseCurlyCount = 0;
-
-                    for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
-                        if(body[j].name == "OPENCURLY") {
-                            ++innerOpenCurlyCount;
-                        }
-
-                        if(body[j].name == "CLOSECURLY") {
-                            ++innerCloseCurlyCount;
-
-                            if(innerOpenCurlyCount == innerCloseCurlyCount) {
-                                loopIndex.end = j;
-                                break;
-                            }
-                        }
-                        
-                    }
-
-                    if(loopIndex.end == -1) {
-                        return undefined;
-                    }
-
-                    let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
-
-                    let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
-                    
-                    if(!(valid)) {
-                        return undefined;
-                    }
-
-                    if(body[i].name == "IF") {
-                        lastIf = bodyElements[bodyElements.length - 1];
-                    }
-
-                    i += innerLoopTokens.length - 1;
-                }
-                else if(body[i].name == "ELSE") {
-                    let statementListCheck = parseLoop(currentTokens, "statementlist");
-
-                    if(statementListCheck == undefined) {
-                        return undefined;
-                    }
-
-                    bodyElements.push(statementListCheck[1]);
-                    currentTokens = [];
-                    
-                    let loopIndices = {
-                        start: i, 
-                        end: -1
-                    };
-
-                    let openCurlyCount = 0;
-                    let closeCurlyCount = 0;
-
-                    for(let i = loopIndices.start + 1; i < body.length; i++) {
-                        if(body[i].name == "OPENCURLY") {
-                            ++openCurlyCount;
-                        }
-                        else if(body[i].name == "CLOSECURLY") {
-                            ++closeCurlyCount;
-
-                            if(openCurlyCount == closeCurlyCount) {
-                                loopIndices.end = i;
-                                break;
-                            }
-                        }
-
-                    }
-
-                    if(loopIndices.end == -1) {
-                        return undefined;
-                    }
-
-                    let elseTokens = body.slice(loopIndices.start, loopIndices.end + 1);
-
-                    let elseLoopCheck = parseLoop(elseTokens, "elseloop");
-
-                    if(elseLoopCheck == undefined) {
-                        return undefined;
-                    }
-
-                    if(lastIf == null) {
-                        return undefined;
-                    }
-
-                    lastIf.addElse(elseLoopCheck[1]);
-                    lastIf = null;
-
-                    currentTokens = [];
-                    i = loopIndices.end;
-                }
-                else if(i == body.length - 1) {
-                    let statementListCheck = parseLoop(currentTokens, "statementlist");
-
-                    if(statementListCheck == undefined) {
-                        return undefined;
-                    }
-
-                    if(statementListCheck[1].children.length > 0) {
-                        bodyElements.push(statementListCheck[1]);
-                    }
-                }
-                else {
-                    if(body[i].name == "OPENCURLY") {
-                        ++openCurlyCount;
-                    }
-                    else if(body[i].name == "CLOSECURLY") {
-                        ++closeCurlyCount;
-                    }
-
-                    currentTokens.push(body[i]);
-                }
-
-            }
-
-            return new nodes.IfLoop(
-                comparisonCheck[1], 
-                bodyElements
-            );
-
-        }
-        
-        return undefined;
+        return parseWhileIf(nonTerminals, terminals, false);
     });
     cfg.push(rule);
 
@@ -952,6 +785,7 @@ function generateCFG() {
         new NonTerminal("statementlist"), 
     ], 
     function(nonTerminals, terminals) {
+        // largely similar to while and if, but without comparison stuff
         let ifloops = [];
         let body = nonTerminals[0];
         let bodyElements = [];
