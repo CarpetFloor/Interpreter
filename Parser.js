@@ -35,28 +35,9 @@ class NonTerminal {
 // for while and conditional loops
 // if loopsList is null then checking for else
 function parseInnerLoop(loopsList, tokens, isWhileLoop) {
-    let debug = true;
-
-    if(debug) {
-        console.log("_____{=}{=}{=}{=}{=}_____");
-        console.log("_____{=}{=}{=}{=}{=}_____");
-        console.log("_____{=}{=}{=}{=}{=}_____");
-        console.log("_____{=}{=}{=}{=}{=}_____");
-        console.log("_____{=}{=}{=}{=}{=}_____");
-        console.log("PARSING INNER LOOP");
-    }
-
     let isElse = false;
     if(isWhileLoop == null) {
         isElse = true;
-    }
-
-    if(debug) {
-        console.log("\nIS ELSE?", isElse);
-        
-        if(!(isElse)) {
-            console.log("IS WHILE LOOP?", isWhileLoop);
-        }
     }
 
     let loopToken = "WHILE";
@@ -85,19 +66,10 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
         }
 
         let comparisonTokens = tokens.slice(comparisonIndices.start, comparisonIndices.end);
-
-        if(debug) {
-            console.log("COMPARISON TOKENS");
-            console.log(comparisonTokens);
-        }
         
         // check comparison
         comparisonCheck = parseLoop(comparisonTokens, "comparison");
 
-        if(debug) {
-            console.log("COMPARISON CHECK");
-            console.log(comparisonCheck);
-        }
 
         if(comparisonCheck == undefined) {
             return false;
@@ -111,11 +83,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
     }
     else {
         body = tokens.slice(comparisonIndices.end + 2, tokens.length);
-    }
-
-    if(debug) {
-        console.log("BODY TOKENS");
-        console.log(body);
     }
 
     /**
@@ -138,48 +105,15 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
         }
     }
 
-    if(debug) {
-        console.log("LAST NESTED LOOP?", lastNestedLoop);
-    }
-
     // check if entire body is valid statement list
     if(lastNestedLoop) {
-        if(debug) {
-            console.log("DOING LAST NESTED LOOP CHECK STUFF");
-            console.log("BODY BEING PASSED INTO STATEMENT LIST CHECK:");
-        }
-        
         let bodyForStatementListCheck = [...(body.slice(0, body.length - 1))];
-        
-        if(debug) {
-            console.log(bodyForStatementListCheck);
-        }
-        
         let statementListCheck = parseLoop(bodyForStatementListCheck, "statementlist");
-        
-        if(debug) {
-            console.log("ARE WE HERE?");
-        }
-
-        if(debug) {
-            console.log("STATEMENT LIST CHECK");
-            console.log(statementListCheck);
-        }
 
         if(statementListCheck == undefined) {
             return false;
         }
         else {
-            if(debug) {
-                console.log("_____");
-                console.log("CHECKING LOOP PARTS");
-                if(!(isElse)) {
-                    console.log(comparisonCheck[1]);
-                }
-                console.log("_____");
-                console.log(statementListCheck[1]);
-            }
-
             let loop = null;
 
             if(isElse) {
@@ -193,11 +127,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                     loop = new nodes.IfLoop(comparisonCheck[1], [statementListCheck[1]]);
                 }
             }
-
-            if(debug) {
-                console.log("\nLOOP");
-                console.log(loop);
-            }
             
             loopsList.push(loop);
 
@@ -205,22 +134,11 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
         }
     }
     else {
-        if(debug) {
-            console.log("GOING THROUGH BODY");
-            console.log("BODY:");
-            console.log(body);
-            console.log("_____\n");
-        }
-
         let bodyElements = [];
         let currentTokens = [];;
         let lastIf = null;
 
         for(let i = 0; i < body.length; i++) {
-            if(debug) {
-                console.log("\t", i, body[i]);
-            }
-
             if(body[i].name != "ELSE") {
                 lastIf = null;
             }
@@ -230,15 +148,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 (body[i].name == "IF")
             ) {
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
-
-                if(debug) {
-                    console.log("VALID STATEMENT LIST CHECK?");
-                    console.log("TOKENS:");
-                    console.log(currentTokens);
-                    console.log("--");
-                    console.log(statementListCheck);
-                    console.log("--DONE");
-                }
 
                 if(statementListCheck == undefined) {
                     return false;
@@ -265,10 +174,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 let closeCurlyCount = 0;
 
                 for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
-                    if(debug) {
-                        console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
-                    }
-
                     if(body[j].name == "OPENCURLY") {
                         ++openCurlyCount;
                     }
@@ -277,11 +182,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                         ++closeCurlyCount;
 
                         if(openCurlyCount == closeCurlyCount) {
-                            if(debug) {
-                                console.log("FOUND");
-                            }
-                            
-
                             loopIndex.end = j;
                             break;
                         }
@@ -289,21 +189,11 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
 
                 }
 
-                if(debug) {
-                    console.log("LOOP INDICES");
-                    console.log(loopIndex.start, loopIndex.end);
-                }
-
                 if(loopIndex.end == -1) {
                     return false;
                 }
 
                 let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
-
-                if(debug) {
-                    console.log("\nINNER LOOP TOKENS");
-                    console.log(innerLoopTokens);
-                }
 
                 valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
 
@@ -326,16 +216,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
             else if(body[i].name == "ELSE") {
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
 
-                if(debug) {
-                    console.log("!!ELSE!!");
-                    console.log("VALID STATEMENT LIST CHECK?");
-                    console.log("TOKENS:");
-                    console.log(currentTokens);
-                    console.log("--");
-                    console.log(statementListCheck);
-                    console.log("--DONE");
-                }
-
                 if(statementListCheck == undefined) {
                     return false;
                 }
@@ -355,10 +235,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 let closeCurlyCount = 0;
 
                 for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
-                    if(debug) {
-                        console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
-                    }
-
                     if(body[j].name == "OPENCURLY") {
                         ++openCurlyCount;
                     }
@@ -367,11 +243,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                         ++closeCurlyCount;
 
                         if(openCurlyCount == closeCurlyCount) {
-                            if(debug) {
-                                console.log("FOUND");
-                            }
-                            
-
                             loopIndex.end = j;
                             break;
                         }
@@ -379,21 +250,11 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
 
                 }
 
-                if(debug) {
-                    console.log("LOOP INDICES");
-                    console.log(loopIndex.start, loopIndex.end);
-                }
-
                 if(loopIndex.end == -1) {
                     return false;
                 }
 
                 let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
-
-                if(debug) {
-                    console.log("\nINNER LOOP TOKENS");
-                    console.log(innerLoopTokens);
-                }
 
                 let valid = false;
                 if(isElse) {
@@ -413,15 +274,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
 
                 let elseStatement = bodyElements[bodyElements.length - 1];
 
-                if(debug) {
-                    console.log("\nRIGH BEFORE SPLICING IN PARSE INNER LOOP")
-                    console.log("\n!!+!!LAST IF");
-                    console.log(lastIf);
-                    console.log("__________");
-                    console.log("!!+!!ELSE STATEMENT");
-                    console.log(elseStatement);
-                }
-
                 lastIf.addElse(elseStatement);
                 bodyElements.splice(bodyElements.length - 1, 1);
 
@@ -437,20 +289,11 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 if(statementListCheck[1].children.length > 0) {
                     bodyElements.push(statementListCheck[1]);
                 }
-
-                if(debug) {
-                    console.log("\n\n\t\tADDED BOTTOM");
-                    console.log(statementListCheck[1].children.length);
-                }
             }
             else {
                 currentTokens.push(body[i]);
             }
 
-        }
-
-        if(debug) {
-            console.log("COMBINING BODY ELEMENTS");
         }
 
         // combine while loops
@@ -487,11 +330,6 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
         }
 
         loopsList.push(loop);
-
-        if(debug) {
-            console.log("FINAL WHILE LOOP");
-            console.log(loop);
-        }
         
         return true;
 
@@ -521,20 +359,8 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let tokens = [...nonTerminals];
 
-        console.log("=====");
-        console.log("=====");
-        console.log("=====");
-        console.log("=====");
-        console.log("=====");
-        console.log("PARSING PROGRAM");
-        console.log("TOKENS");
-        console.log(tokens);
-
         let currentTokens = [];
         let bodyElements = [];
-
-        console.log("\n_____");
-        console.log("GOING THROUGH TOKENS");
 
         let lastIf = null;
 
@@ -545,22 +371,10 @@ function generateCFG() {
             if(token.name != "ELSE") {
                 lastIf = null;
             }
-
-            console.log("\t", token.name);
             
             if(token.name == "WHILE") {
-                console.log("_____");
-                console.log("CHECKING WHILE LOOP");
-                console.log("_____");
-
                 // first check if current tokens valid statement list
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
-                console.log("FIRST CHECKING STATEMENT LIST");
-                console.log("TOKENS");
-                console.log(currentTokens);
-                console.log("CHECK");
-                console.log(statementListCheck);
-                console.log("_____");
 
                 if(statementListCheck == undefined) {
                     return undefined;
@@ -597,21 +411,12 @@ function generateCFG() {
 
                 }
 
-                console.log("LOOP INDICES");
-                console.log(loopIndices.start, loopIndices.end);
-
                 if(loopIndices.end == -1) {
                     return undefined;
                 }
 
                 let whileTokens = tokens.slice(loopIndices.start, loopIndices.end + 1);
-                console.log("WHILE TOKENS");
-                console.log(whileTokens);
-
                 let whileLoopCheck = parseLoop(whileTokens, "whileloop");
-
-                console.log("WHILE LOOP CHECK");
-                console.log(whileLoopCheck);
 
                 if(whileLoopCheck == undefined) {
                     return undefined;
@@ -622,8 +427,6 @@ function generateCFG() {
                 i = loopIndices.end;
             }
             else if(token.name == "IF") {
-                console.log("\n??????????");
-                console.log("PROGRAM IF TOKEN");
                 // first check if current tokens valid statement list
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
 
@@ -675,17 +478,11 @@ function generateCFG() {
                 }
 
                 lastIf = ifLoopCheck[1];
-                console.log("\n??????????");
-                console.log("LAST IF");
-                console.log(lastIf);
                 bodyElements.push(ifLoopCheck[1]);
                 currentTokens = [];
                 i = loopIndices.end;
             }
             else if(token.name == "ELSE") {
-                console.log("\n??????????");
-                console.log("ELSE IN PROGRAM");
-
                 // first check if current tokens valid statement list
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
 
@@ -729,20 +526,11 @@ function generateCFG() {
                 }
 
                 let elseTokens = tokens.slice(loopIndices.start, loopIndices.end + 1);
-
-                console.log("\n??????????");
-                console.log("ELSE TOKENS");
-                console.log(elseTokens);
-
                 let elseLoopCheck = parseLoop(elseTokens, "elseloop");
 
                 if(elseLoopCheck == undefined) {
                     return undefined;
                 }
-
-                console.log("\n??????????");
-                console.log("LAST IF");
-                console.log(lastIf);
 
                 if(lastIf == null) {
                     return undefined;
@@ -755,14 +543,7 @@ function generateCFG() {
                 i = loopIndices.end;
             }
             else if(tokens.indexOf(token) == tokens.length - 1) {
-                console.log("_____");
-                console.log("REACHED END");
-
                 currentTokens.push(token);
-
-                console.log("STATEMENT LIST CHECK");
-                console.log("TOKENS");
-                console.log(currentTokens);
 
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
 
@@ -777,11 +558,6 @@ function generateCFG() {
             }
 
         }
-
-        console.log("\n??????????");
-        console.log("RIGHT BEFORE CREATING PROGRAM NODE");
-        console.log("BODY ELMEENTS");
-        console.log(bodyElements);
 
         // create program node
         return new nodes.Program(bodyElements);
@@ -798,38 +574,14 @@ function generateCFG() {
     ], 
     function(nonTerminals, terminals) {
         let whileloops = [];
-        
-        console.log("----------");
-        console.log("----------");
-        console.log("Parsing while loop");
-        console.log("----------");
-        console.log("----------");
-
-        // console.log("\tnonTerminals");
-        // console.log(nonTerminals);
-        // console.log("-----");
-        // console.log("\tterminals");
-        // console.log(terminals);
-        // console.log("-")
 
         // first make sure comparison of outter while loop valid
         let comparisonCheck = parseLoop(nonTerminals[0], "comparison");
-        console.log("\tCOMPARISON")
-        console.log("TOKENS");
-        console.log(nonTerminals[0]);
-        console.log("_____");
-        console.log(parseLoop(nonTerminals[0], "comparison"));
 
         if(comparisonCheck != undefined) {
             // make sure inner while loop exists
             let body = nonTerminals[1];
             let bodyElements = [];
-
-            // console.log("==========");
-            // console.log("==========");
-            // console.log("==========");
-            // console.log("==========");
-            // console.log("==========");
 
             /**
              * keep array that body elements are sequentially added to.
@@ -844,8 +596,6 @@ function generateCFG() {
             let lastIf = false;
 
             for(let i = 0; i < body.length; i++) {
-                // console.log("\t", i, body[i]);
-
                 if(body[i].name != "ELSE") {
                     lastIf = null;
                 }
@@ -854,18 +604,12 @@ function generateCFG() {
                     (body[i].name == "WHILE") || 
                     (body[i].name == "IF")
                 ) {
-                    // console.log(openCurlyCount, closeCurlyCount);
-                    // detect while loop list instead of nested while loops
                     if(openCurlyCount == closeCurlyCount) {
                         return undefined;
                     }
 
                     // check if currentTokens is a valid statement list
                     let statementListCheck = parseLoop(currentTokens, "statementlist");
-                    // console.log("STATEMENT LIST CHECK");
-                    // console.log(currentTokens);
-                    // console.log("--");
-                    // console.log(statementListCheck);
 
                     if(statementListCheck == undefined) {
                         return undefined;
@@ -886,10 +630,6 @@ function generateCFG() {
                     let innerCloseCurlyCount = 0;
 
                     for(let j = loopIndex.start + 1; j < body.length - 1; j++) {
-                        if(debug) {
-                            // console.log("\tTRYING TO FIND CLOSECURLY", j, body[j].name);
-                        }
-
                         if(body[j].name == "OPENCURLY") {
                             ++innerOpenCurlyCount;
                         }
@@ -898,20 +638,12 @@ function generateCFG() {
                             ++innerCloseCurlyCount;
 
                             if(innerOpenCurlyCount == innerCloseCurlyCount) {
-                                if(debug) {
-                                    // console.log("FOUND");
-                                }
-                                
-
                                 loopIndex.end = j;
                                 break;
                             }
                         }
                         
                     }
-
-                    // console.log("LOOP INDICES:");
-                    // console.log(loopIndex.start, loopIndex.end);
 
                     if(loopIndex.end == -1) {
                         return undefined;
@@ -920,14 +652,7 @@ function generateCFG() {
                     // recursively check inner while loops by calling method 
                     // and passing inner loop context
                     let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
-
-                    // console.log("TOKENS");
-                    // console.log(innerLoopTokens);
-
                     let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
-
-                    // console.log("\n__________\n\tVALID CHECK");
-                    // console.log(valid);
                     
                     if(!(valid)) {
                         return undefined;
@@ -1017,16 +742,6 @@ function generateCFG() {
                 }
 
             }
-
-            // console.log("-----");
-            // console.log("\tDONE");
-            // console.log("-----");
-            // console.log("\tBODY ELEMENTS");
-            // console.log(bodyElements);
-            // console.log("-----");
-            // console.log("\tCOMPARISON")
-            // console.log(comparisonCheck[1])
-            // console.log("-----");
 
             return new nodes.WhileLoop(
                 comparisonCheck[1], 
@@ -1220,9 +935,6 @@ function generateCFG() {
 
             }
 
-            console.log("\n()()()()()()()()()()");
-            console.log("RETURNING");
-
             return new nodes.IfLoop(
                 comparisonCheck[1], 
                 bodyElements
@@ -1240,15 +952,9 @@ function generateCFG() {
         new NonTerminal("statementlist"), 
     ], 
     function(nonTerminals, terminals) {
-        console.log("\n??????????");
-        console.log("ACTUAL ELSE LOOP CHECK");
-
         let ifloops = [];
         let body = nonTerminals[0];
         let bodyElements = [];
-
-        console.log("BODY");
-        console.log(body);
 
         /**
          * keep array that body elements are sequentially added to.
@@ -1264,9 +970,6 @@ function generateCFG() {
         let lastIf = null;
 
         for(let i = 0; i < body.length; i++) {
-            console.log("\n??????????");
-            console.log(i, "TOKEN:", body[i].name);
-
             if(body[i].name != "ELSE") {
                 lastIf = null;
             }
@@ -1275,8 +978,6 @@ function generateCFG() {
                 (body[i].name == "WHILE") || 
                 (body[i].name == "IF")
             ) {
-                console.log("\n??????????");
-                console.log("WHILE/ IF TOKEN");
                 // detect while loop list instead of nested while loops
                 if(openCurlyCount == closeCurlyCount) {
                     return undefined;
@@ -1324,12 +1025,6 @@ function generateCFG() {
                 }
 
                 let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
-
-                console.log("\n??????????");
-                console.log("RIGHT BEFORE PARSE INNER LOOP");
-                console.log(body[i].name == "WHILE");
-                console.log(innerLoopTokens);
-
                 let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
                 
                 if(!(valid)) {
@@ -1343,8 +1038,6 @@ function generateCFG() {
                 i += innerLoopTokens.length - 1;
             }
             else if(body[i].name == "ELSE") {
-                console.log("\n??????????");
-                console.log("ELSE TOKEN");
                 // detect while loop list instead of nested while loops
                 if(openCurlyCount == closeCurlyCount) {
                     return undefined;
@@ -1393,19 +1086,8 @@ function generateCFG() {
 
                 let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
                 let beforeLength = bodyElements.length;
-                console.log("LENGTH BEFORE", bodyElements.length);
-
                 let elseCheck = parseInnerLoop(bodyElements, innerLoopTokens, null);
-
                 let afterLength = bodyElements.length;
-                console.log("LENGTH AFTER", bodyElements.length);
-
-                console.log("LAST IF");
-                console.log(lastIf);
-
-                console.log("\n??????????");
-                console.log("VALID?");
-                console.log(elseCheck);
                 
                 if(!(elseCheck)) {
                     return undefined;
@@ -1417,37 +1099,19 @@ function generateCFG() {
                 }
 
                 let elseStatement = bodyElements[bodyElements.length - 1];
-                console.log("\n??????????");
-                console.log("ELSE STATEMENT");
-                console.log(elseStatement);
-
                 lastIf.addElse(elseStatement);
                 lastIf = null;
 
                 bodyElements.splice(bodyElements.length - 1, 1);
 
-                console.log("\n??????????");
-                console.log("RIGHT BEFORE i INCREMENT");
-
                 i += innerLoopTokens.length - 1;
-
-                console.log("\n??????????");
-                console.log("REACHED END OF BRANCH");
             }
             else if(i == body.length - 1) {
-                console.log("\n??????????");
-                console.log("LAST TOKEN");
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
-
-                console.log(currentTokens);
 
                 if(statementListCheck == undefined) {
                     return undefined;
                 }
-
-                console.log("\n??????????");
-                console.log("STATEMENT LIST CHECK");
-                console.log(statementListCheck);
 
                 if(statementListCheck[1].children.length > 0) {
                     bodyElements.push(statementListCheck[1]);
@@ -1466,10 +1130,6 @@ function generateCFG() {
 
         }
 
-        console.log("\n??????????");
-        console.log("BODY ELEMENTS");
-        console.log(bodyElements);
-
         return new nodes.StatementList(
             bodyElements
         );
@@ -1481,11 +1141,8 @@ function generateCFG() {
         new NonTerminal("statementlist")
     ], 
     function(nonTerminals, terminals) {
-        // console.log("\n\n\n\n\nSTATEMENT LIST CHECk");
         let statements = [];
         let passContext = [...nonTerminals];
-        // console.log("PASS CONTEXT");
-        // console.log(passContext);
         let statementCheck = parseLoop(passContext, "statement");
         
         while((statementCheck != undefined) || (passContext.length != 0)) {
@@ -2008,7 +1665,6 @@ function generateCFG() {
         new Terminal("SEMICOLON")
     ], 
     function(nonTerminals, terminals) {
-        console.log("string here");
         let check = parseLoop(nonTerminals[0], "stringexpression");
         
         if((check != undefined) && (check[1].children != undefined)) {
@@ -2275,19 +1931,8 @@ function generateCFG() {
         new Terminal("CLOSEPIPE")
     ], 
     function(nonTerminals, terminals) {
-        console.log("DO WE EVER GET HERE???");
-        console.log("DO WE EVER GET HERE???");
-        console.log("DO WE EVER GET HERE???");
-        console.log("DO WE EVER GET HERE???");
-        console.log("DO WE EVER GET HERE???");
-
         // deal with directly-nested nots
         let context = [...nonTerminals[0]];
-        
-        console.log("\ncontext");
-        console.log(nonTerminals);
-        console.log("-----");
-        console.log(context);
 
         let names = [];
         for(let token of context) {
@@ -2299,22 +1944,14 @@ function generateCFG() {
             (context[0].name == "NOT") && 
             !(names.includes("OR") || names.includes("AND"))
         ) {
-            console.log("WE GOOD");
-            console.log("WE GOOD");
-            console.log("WE GOOD");
-            console.log("WE GOOD");
-            console.log("WE GOOD");
             while(
                 (context[0].name == "NOT") && 
                 (context[1].name == "OPENPIPE")
             ) {
-                console.log("YUUUUUUUUUUP!");
                 context.splice(0, 2);
                 ++notCount;
             }
         }
-
-        console.log("notCount", notCount);
 
         let comparisonCheck = parseLoop(context, "comparison");
 
@@ -2442,7 +2079,6 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let leftCheck = parseLoop(nonTerminals[0], "expression");
         let rightCheck = parseLoop(nonTerminals[1], "expression");
-
 
         if(
             (leftCheck != undefined) && 
@@ -2599,12 +2235,7 @@ function generateCFG() {
         new Terminal("PIPE")
     ], 
     function(nonTerminals, terminals) {
-        console.log("+++++");
-        console.log("+++++");
-        console.log("TERM LIST GET");
-
         let list = terminals[0];
-
         let termCheck = parseLoop(nonTerminals[0], "expression");
 
         if(termCheck == undefined) {
@@ -2708,13 +2339,7 @@ function generateCFG() {
         new Terminal("CLOSEPIPE")
     ], 
     function(nonTerminals, terminals) {
-        console.log("\n+++++");
-        console.log("+++++");
-        console.log("TO STRING");
-
         let expressionCheck = parseLoop(nonTerminals[0], "expression");
-        console.log("EXPRESSION CHECK");
-        console.log(expressionCheck);
 
         if(expressionCheck == undefined) {
             return undefined;
