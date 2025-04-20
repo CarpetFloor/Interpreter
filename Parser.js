@@ -841,9 +841,14 @@ function generateCFG() {
             // is found before the first open curly is closed
             let openCurlyCount = 1;
             let closeCurlyCount = 0;
+            let lastIf = false;
 
             for(let i = 0; i < body.length; i++) {
                 // console.log("\t", i, body[i]);
+
+                if(body[i].name != "ELSE") {
+                    lastIf = null;
+                }
 
                 if(
                     (body[i].name == "WHILE") || 
@@ -928,7 +933,66 @@ function generateCFG() {
                         return undefined;
                     }
 
+                    if(body[i].name == "IF") {
+                        lastIf = bodyElements[bodyElements.length - 1];
+                    }
+
                     i += innerLoopTokens.length - 1;
+                }
+                else if(body[i].name == "ELSE") {
+                    let statementListCheck = parseLoop(currentTokens, "statementlist");
+
+                    if(statementListCheck == undefined) {
+                        return undefined;
+                    }
+
+                    bodyElements.push(statementListCheck[1]);
+                    currentTokens = [];
+                    
+                    let loopIndices = {
+                        start: i, 
+                        end: -1
+                    };
+
+                    let openCurlyCount = 0;
+                    let closeCurlyCount = 0;
+
+                    for(let i = loopIndices.start + 1; i < body.length; i++) {
+                        if(body[i].name == "OPENCURLY") {
+                            ++openCurlyCount;
+                        }
+                        else if(body[i].name == "CLOSECURLY") {
+                            ++closeCurlyCount;
+
+                            if(openCurlyCount == closeCurlyCount) {
+                                loopIndices.end = i;
+                                break;
+                            }
+                        }
+
+                    }
+
+                    if(loopIndices.end == -1) {
+                        return undefined;
+                    }
+
+                    let elseTokens = body.slice(loopIndices.start, loopIndices.end + 1);
+
+                    let elseLoopCheck = parseLoop(elseTokens, "elseloop");
+
+                    if(elseLoopCheck == undefined) {
+                        return undefined;
+                    }
+
+                    if(lastIf == null) {
+                        return undefined;
+                    }
+
+                    lastIf.addElse(elseLoopCheck[1]);
+                    lastIf = null;
+
+                    currentTokens = [];
+                    i = loopIndices.end;
                 }
                 else if(i == body.length - 1) {
                     let statementListCheck = parseLoop(currentTokens, "statementlist");
@@ -1065,10 +1129,6 @@ function generateCFG() {
 
                     let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
 
-                    console.log("\n??????????");
-                    console.log("INNER LOOP TOKENS FOR IF LOOP");
-                    console.log(innerLoopTokens);
-
                     let valid = parseInnerLoop(bodyElements, innerLoopTokens, body[i].name == "WHILE");
                     
                     if(!(valid)) {
@@ -1090,9 +1150,6 @@ function generateCFG() {
 
                     bodyElements.push(statementListCheck[1]);
                     currentTokens = [];
-
-                    console.log("\n()()()()()()()()()()");
-                    console.log("START OF ELSE");
                     
                     let loopIndices = {
                         start: i, 
@@ -1101,9 +1158,6 @@ function generateCFG() {
 
                     let openCurlyCount = 0;
                     let closeCurlyCount = 0;
-
-                    console.log("\n()()()()()()()()()()");
-                    console.log("FINDING CURLYS");
 
                     for(let i = loopIndices.start + 1; i < body.length; i++) {
                         if(body[i].name == "OPENCURLY") {
@@ -1123,9 +1177,6 @@ function generateCFG() {
                     if(loopIndices.end == -1) {
                         return undefined;
                     }
-
-                    console.log("\n()()()()()()()()()()");
-                    console.log("FINDING ELSE TOKENS");
 
                     let elseTokens = body.slice(loopIndices.start, loopIndices.end + 1);
 
