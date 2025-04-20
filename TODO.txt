@@ -1,8 +1,3 @@
-> else:
-    - don't allow program if else else
-    - don't allow program if anything else
-    - apply first three inside if
-    - apply first three inside while
-    - apply first three inside parseInnerLoop
-    - allow everything inside if and while inside else
+> Recheck parsing
+> Make sure Fibonacci.lang parses correctly
 > runner

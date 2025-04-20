@@ -7,10 +7,13 @@ while(count < upTo) {
         sequence.add(count);
     }
     else {
-        num a = sequence.get(count - 2);
-        num b = sequence.get(count - 1);
+        num temp = count - 2;
+        num a = get|sequence, temp|;
+        temp = count - 1;
+        num b = get|sequence, temp|;
 
-        sequence.add(a + b);
+        temp = a + b;
+        sequence.add(temp);
     }
 
     count += 1;
@@ -18,10 +21,10 @@ while(count < upTo) {
 
 string output = "";
 count = 0;
-while(count < sequence.length()) {
-    output += sequence.get(count);
+while(count < length|sequence|) {
+    output += get|sequence, count|;
 
-    if(count < sequence.length() - 1) {
+    if(count < length|squence| - 1) {
         output += ", ";
     }
     
