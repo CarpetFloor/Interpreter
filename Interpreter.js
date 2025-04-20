@@ -1,9 +1,15 @@
-let fs = require("fs");
-let lexer = require("./Lexer");
-let parser = require("./Parser");
+const fs = require("fs");
+const lexer = require("./Lexer");
+const parser = require("./Parser");
+const runner = require("./Runner");
 
-let programName = "Fibonacci";
-let programFile = "SamplePrograms/" + programName + ".lang";
+const programName = "SimpleRunner";
+const programFile = "SamplePrograms/" + programName + ".lang";
+
+const show = {
+    lexer: true, 
+    parser: true
+}
 
 // if(process.argv.length >= 3) {
 //     programFile = process.argv[2];
@@ -18,18 +24,31 @@ fs.readFile(programFile, "utf-8", function(error, data) {
         console.log("READ FILE: " + programFile + " SUCCESSFUL!")
         const program = data;
 
-        console.log("\nSTARTED LEXING");
+        if(show.lexer) {
+            console.log("\nSTARTED LEXING");
+        }
+        
         const tokens = lexer.lex(program);
-        console.log("FINISHED LEXING");
         
-        console.log("\nTOKEN STREAM: ");
-        console.log(tokens);
+        if(show.lexer) {
+            console.log("FINISHED LEXING");
+            console.log("\nTOKEN STREAM: ");
+            console.log(tokens);
+        }
         
-        console.log("\nSTARTED PARSING");
+        if(show.parser) {
+            console.log("\nSTARTED PARSING");
+        }
+        
         const parseTree = parser.parse(tokens);
-        console.log("\nFINISHED PARSING");
-
-        console.log("\nPARSE TREE:");
-        parser.print();
+        
+        if(show.parser) {
+            console.log("\nFINISHED PARSING");
+            console.log("\nPARSE TREE:");
+            parser.print();
+        }
+        
+        console.log("\nSTARTED RUNNING");
+        runner.run(parseTree);
     }
 });

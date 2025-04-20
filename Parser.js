@@ -2476,6 +2476,8 @@ module.exports.parse = function(tokenStream) {
             debugPrint(tree[i], 0);
         }
     }
+
+    return tree;
 }
 
 module.exports.print = function() {

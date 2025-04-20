@@ -1,0 +1,4 @@
+num a = 5;
+num b = 2;
+num c = a + b;
+print("c is: " + c);

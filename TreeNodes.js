@@ -1,3 +1,5 @@
+const variables = new Map();
+
 function getIndent(level) {
     return ("....").repeat(level);
 }
@@ -19,6 +21,17 @@ module.exports.Program = class Program {
         }
 
         return output;
+    }
+
+    run() {
+        for(let child of this.children) {
+            let check = child.run();
+            
+            if(check == false) {
+                break;
+            }
+        }
+
     }
 }
 
@@ -117,6 +130,17 @@ module.exports.StatementList = class StatementList {
 
         return output;
     }
+
+    run() {
+        for(let child of this.children) {
+            let check = child.run();
+            
+            if(check == false) {
+                break;
+            }
+        }
+        
+    }
 }
 
 module.exports.DeclarationAssignment = class DeclarationAssignment {
@@ -145,6 +169,22 @@ module.exports.DeclarationAssignment = class DeclarationAssignment {
         }
 
         return output;
+    }
+
+    run() {
+        let actualValue = this.value.run();
+        if(actualValue == false) {
+            return false;
+        }
+
+        try {
+            variables.set(this.varName, actualValue);
+            return true;
+        }
+        catch(exception) {
+            console.log(exception.message);
+            return false;
+        }
     }
 }
 
