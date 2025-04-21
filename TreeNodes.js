@@ -336,6 +336,10 @@ module.exports.Print = class Print {
 
         return output;
     }
+
+    run() {
+        console.log(this.stringexpression.run());
+    }
 }
 
 // expression 
@@ -434,11 +438,41 @@ module.exports.BinaryOperatorExpression = class BinaryOperatorExpression {
 
         return output;
     }
+
+    run() {
+        switch(this.operator) {
+            case "+":
+                return this.left.run() + this.right.run();
+                break;
+            
+            case "-":
+                return this.left.run() - this.right.run();
+                break;
+            
+            case "*":
+                return this.left.run() * this.right.run();
+                break;
+            
+            case "/":
+                let leftValue = this.left.run();
+                let rightValue = this.right.run();
+
+                if(rightValue == 0) {
+                    console.error("Cannot divide by 0!");
+                    return false;
+                }
+
+                return leftValue / rightValue;
+                break;
+        }
+
+        return false;
+    }
 }
 
 module.exports.Term = class Term {
-    constructor(children) {
-        this.children = [children];
+    constructor(child) {
+        this.child = child;
     }
 
     print(level) {
@@ -448,17 +482,19 @@ module.exports.Term = class Term {
             "Term!"
         );
 
-        for(let i = 0; i < this.children.length; i++) {
-            output += this.children[i].print(level + 1);
-        }
+        output += this.child.print(level + 1);
 
         return output;
+    }
+
+    run() {
+        return this.child.run();
     }
 }
 
 module.exports.Factor = class Factor {
-    constructor(children) {
-        this.children = [children];
+    constructor(child) {
+        this.child = child;
     }
 
     print(level) {
@@ -468,11 +504,13 @@ module.exports.Factor = class Factor {
             "Factor!"
         );
 
-        for(let i = 0; i < this.children.length; i++) {
-            output += this.children[i].print(level + 1);
-        }
+        output += this.child.print(level + 1);
 
         return output;
+    }
+
+    run() {
+        return this.child.run();
     }
 }
 
@@ -489,6 +527,21 @@ module.exports.IdReference = class IdReference {
         );
 
         return output;
+    }
+
+    run() {
+        let value = null;
+
+        try {
+            value = variables.get(this.id);
+        }
+        catch(exception) {
+            console.error("Variable " + this.id + " does not exist!");
+            return false;
+        }
+
+        value = variables.get(this.id);
+        return value;
     }
 }
 
@@ -587,8 +640,8 @@ module.exports.ListSetValue = class ListSetValue {
 }
 
 module.exports.StringTerm = class StringTerm {
-    constructor(children) {
-        this.children = [children];
+    constructor(child) {
+        this.child = child;
     }
 
     print(level) {
@@ -598,11 +651,13 @@ module.exports.StringTerm = class StringTerm {
             "String Term!"
         );
 
-        for(let i = 0; i < this.children.length; i++) {
-            output += this.children[i].print(level + 1);
-        }
+        output += this.child.print(level + 1);
 
         return output;
+    }
+
+    run() {
+        return this.child.run();
     }
 }
 
@@ -616,6 +671,10 @@ module.exports.Num = class Num {
     print(level) {
         return "\n" + getIndent(level) + "Num! " + this.value;
     }
+
+    run() {
+        return parseInt(this.value);
+    }
 }
 
 module.exports.String = class String {
@@ -625,6 +684,10 @@ module.exports.String = class String {
 
     print(level) {
         return "\n" + getIndent(level) + "String! " + this.value;
+    }
+
+    run() {
+        return this.value;
     }
 }
 

@@ -2,6 +2,7 @@
 
 const { debug } = require("console");
 let nodes = require("./TreeNodes");
+const debugFail = false;
 
 // context-free grammar class
 class Rule {
@@ -2429,23 +2430,26 @@ function parseLoop(context, nonTerminal) {
             failed = true;
 
             console.log("");
+            console.log("!!!!!FAILED PARSING!!!!!");
 
-            console.log("FAILED PARSING");
-            console.log("\nGiven context:");
-            console.log(context);
+            if(debugFail) {
+                console.log("\nGiven context:");
+                console.log(context);
 
-            if(nonTerminal.length > 0) {
-                console.log("\nTrying to find");
-                console.log(nonTerminal);
+                if(nonTerminal.length > 0) {
+                    console.log("\nTrying to find");
+                    console.log(nonTerminal);
+                }
+
+                if(lastIndex != -1) {
+                    console.log("\nTrying to match with:");
+                    console.log(cfg[lastIndex].name);
+                    console.log(cfg[lastIndex].parts);
+                }
+
+                console.log("");
             }
 
-            if(lastIndex != -1) {
-                console.log("\nTrying to match with:");
-                console.log(cfg[lastIndex].name);
-                console.log(cfg[lastIndex].parts);
-            }
-
-            console.log("");
         }
     }
 }
@@ -2469,15 +2473,18 @@ module.exports.parse = function(tokenStream) {
     let check = parseLoop(tokenStream, "program");
     if(check != undefined) {
         tree.push(check[1]);
-    }
 
-    if(printAsDebug) {
-        for(let i = 0; i < tree.length; i++) {
-            debugPrint(tree[i], 0);
+        if(printAsDebug) {
+            for(let i = 0; i < tree.length; i++) {
+                debugPrint(tree[i], 0);
+            }
         }
-    }
 
-    return tree;
+        return tree;
+    }
+    else {
+        return false;
+    }
 }
 
 module.exports.print = function() {
