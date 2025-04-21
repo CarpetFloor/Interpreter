@@ -26,7 +26,6 @@
 
 #### String
 - Can use either `"` or `'`.
-- Can convert numbers and/ or variables to string with `toString[a + 5]`
 - Can concatenate two strings with `+`
 - Can concatenate a string with a number with `+`, but the first term must be a string
 

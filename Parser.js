@@ -2164,24 +2164,6 @@ function generateCFG() {
     });
     cfg.push(rule);
 
-    // toString()
-    rule = new Rule("stringexpression", [
-        new Terminal("TOSTRING"), 
-        new Terminal("OPENPIPE"), 
-        new NonTerminal("expression"), 
-        new Terminal("CLOSEPIPE")
-    ], 
-    function(nonTerminals, terminals) {
-        let expressionCheck = parseLoop(nonTerminals[0], "expression");
-
-        if(expressionCheck == undefined) {
-            return undefined;
-        }
-
-        return new nodes.ToString(expressionCheck[1]);
-    });
-    cfg.push(rule);
-
     rule = new Rule("stringexpression", [
         new NonTerminal("stringterm")
     ], 

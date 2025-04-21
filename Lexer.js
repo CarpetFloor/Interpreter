@@ -103,11 +103,6 @@ const tokens = [
     ), 
 
     new Pattern(
-        "TOSTRING", 
-        /toString/
-    ), 
-
-    new Pattern(
         "OR", 
         /or/
     ), 
