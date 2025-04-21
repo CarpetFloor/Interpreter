@@ -43,6 +43,7 @@
 - Nested lists? No, including getting values 
 - Multi-dimensional lists? No
 - Negative index values? No
+- Note that lists are 0-indexed
 
 ### Loops
 - ```
@@ -84,3 +85,7 @@
 ### Comments
 - `#`: Single-line comment
 - `## comment here #`: Multi-line comment
+
+### Output
+- Can print stuff out with `print([any expression or string expression])`
+- Every print statement prints out to a new line

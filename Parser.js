@@ -1258,7 +1258,7 @@ function generateCFG() {
             return undefined;
         }
 
-        let valueTokens = nonTerminals[0];
+        let valueTokens = nonTerminals[1];
         let valueFactorCheck = parseLoop(valueTokens, "factor");
 
         if(valueFactorCheck == undefined) {
@@ -2068,7 +2068,7 @@ function generateCFG() {
         new Terminal("PIPE")
     ], 
     function(nonTerminals, terminals) {
-        let list = terminals[0];
+        let list = terminals[2];
         let termCheck = parseLoop(nonTerminals[0], "expression");
 
         if(termCheck == undefined) {
@@ -2207,7 +2207,7 @@ function generateCFG() {
         new Terminal("PIPE")
     ], 
     function(nonTerminals, terminals) {
-        let list = terminals[0];
+        let list = terminals[2];
 
         let expressionCheck = parseLoop(nonTerminals[0], "expression");
 

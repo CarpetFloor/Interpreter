@@ -1,4 +1,9 @@
+/**
+ * Every variable is:
+ * string varName, whateverType value
+ */
 const variables = new Map();
+const listTypes = new Map();
 
 function getIndent(level) {
     return ("....").repeat(level);
@@ -173,13 +178,18 @@ module.exports.DeclarationAssignment = class DeclarationAssignment {
     }
 
     run() {
-        let actualValue = this.value.run();
+        let actualValue = this.value.run(this.type);
         if(actualValue === false) {
             return false;
         }
 
         try {
             variables.set(this.varName, actualValue);
+
+            if(this.type == "list") {
+                listTypes.set(this.varName, this.value.type);
+            }
+
             return true;
         }
         catch(exception) {
@@ -251,6 +261,45 @@ module.exports.ListAssignment = class ListAssignement {
         }
 
         return output;
+    }
+
+    run() {
+        let oldList = variables.get(this.varName);;
+        
+        if(oldList == undefined) {
+            console.error("!!!!!Varibale " + this.varName + " doesn't exist!!!!!");
+            return false;
+        }
+
+        let newList = [];
+        let type = listTypes.get(this.varName);
+
+        for(let child of this.children) {
+            let value = child.run();
+
+            switch(type) {
+                case "num":
+                    if((typeof value) != "number") {
+                        console.error("!!!!!List value must be of type num!!!!!");
+                        return false;
+                    }
+
+                    break;
+                
+                case "string":
+                    if((typeof value) != "string") {
+                        console.error("!!!!!List value must be of type string!!!!!");
+                        return false;
+                    }
+
+                    break;
+            }
+
+            newList.push(value);
+        }
+
+        variables.set(this.varName, newList);
+        return true;
     }
 }
 
@@ -359,6 +408,19 @@ module.exports.DecrementAssignment = class DecrementAssignment {
 
         return output;
     }
+
+    run() {
+        // first make sure variable exists
+        let value = variables.get(this.varName);
+
+        if(value == undefined) {
+            console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
+            return false;
+        }
+
+        variables.set(this.varName, value - this.decrement.run());
+        return true;
+    }
 }
 
 module.exports.Print = class Print {
@@ -378,7 +440,6 @@ module.exports.Print = class Print {
     }
 
     run() {
-        console.log("PRINTING")
         console.log(this.stringexpression.run());
     }
 }
@@ -604,6 +665,25 @@ module.exports.ListElementReference = class ListElementReference {
 
         return output;
     }
+
+    run() {
+        let list = variables.get(this.list);
+
+        if(list == undefined) {
+            console.error("!!!!!Variable " + this.list + " doesn't exist!!!!!");
+            return false;
+        }
+
+        let index = this.index.run();
+        let value = list[index];
+
+        if(value == undefined) {
+            console.error("!!!!!Index " + index + " is out of bounds!!!!!");
+            return false;
+        }
+
+        return value;
+    }
 }
 
 module.exports.ListLength = class ListLength {
@@ -619,6 +699,17 @@ module.exports.ListLength = class ListLength {
         );
 
         return output;
+    }
+
+    run() {
+        let list = variables.get(this.list);
+
+        if(list == undefined) {
+            console.log("!!!!!Variable " + list + " list doesn't exist!!!!!");
+            return false;
+        }
+
+        return list.length;
     }
 }
 
@@ -638,6 +729,41 @@ module.exports.ListAdd = class ListAdd {
 
         return output;
     }
+
+    run() {
+        let list = variables.get(this.list);
+
+        if(list == undefined) {
+            console.error("!!!!!Variable " + list + " doesn't exist!!!!!");
+            return false;
+        }
+
+        let type = listTypes.get(this.list);
+
+        let value = this.value.run();
+
+        switch(type) {
+            case "num":
+                if((typeof value) != "number") {
+                    console.error("!!!!!Value must be of type num!!!!!");
+                    return false;
+                }
+
+                break;
+            
+            case "string":
+                if((typeof value) != "string") {
+                    console.error("!!!!!Value must be of type string!!!!!");
+                    return false;
+                }
+
+                break;
+        }
+
+        list.push(value);
+
+        return true;
+    }
 }
 
 module.exports.ListRemove = class ListRemove {
@@ -655,6 +781,19 @@ module.exports.ListRemove = class ListRemove {
         );
 
         return output;
+    }
+
+    run() {
+        let list = variables.get(this.list);
+
+        if(list == undefined) {
+            console.error("!!!!!Variable " + list + " doesn't exist!!!!!");
+            return false;
+        }
+
+        let index = this.index.run();
+
+        list.splice(index, 1);
     }
 }
 
@@ -677,6 +816,43 @@ module.exports.ListSetValue = class ListSetValue {
         );
 
         return output;
+    }
+
+    run() {
+        let list = variables.get(this.list);
+
+        if(list == undefined) {
+            console.error("!!!!!Variable " + list + " doesn't exist!!!!!");
+            return false;
+        }
+
+        let index = this.index.run();
+
+        let type = listTypes.get(this.list);
+
+        let value = this.value.run();
+
+        switch(type) {
+            case "num":
+                if((typeof value) != "number") {
+                    console.error("!!!!!Value must be of type num!!!!!");
+                    return false;
+                }
+
+                break;
+            
+            case "string":
+                if((typeof value) != "string") {
+                    console.error("!!!!!Value must be of type string!!!!!");
+                    return false;
+                }
+
+                break;
+        }
+
+        list[index] = value;
+
+        return true;
     }
 }
 
@@ -765,5 +941,18 @@ module.exports.List = class List {
         }
 
         return output;
+    }
+
+    run() {
+        let list = [];
+
+        for(let child of this.children) {
+            let value = child.run();
+            
+            // type checking is handled during parsing
+            list.push(value);
+        }
+
+        return list;
     }
 }

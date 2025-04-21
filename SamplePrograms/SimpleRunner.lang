@@ -5,8 +5,43 @@ num c = a + b;
 print("c is: " + c);
 #
 
+##
 num a = 0;
 a = 1;
 a += 2;
 a *= 5;
+a -= 1;
 print("a is " + a);
+#
+
+list[num] a = [1, 2, 3];
+print("start");
+print(a);
+
+a = [4, 5];
+print("reassign");
+print(a);
+
+print("access second element");
+print(get|a, 1|);
+
+a.add(0);
+print("add element");
+print(a);
+
+a.remove(1);
+print("remove second element");
+print(a);
+
+a.set(1, 8);
+print("setting second element");
+print(a);
+
+num len = length|a|;
+print("length");
+print(len);
+
+num index = length|a| - 1;
+a.remove(index);
+print("remove last element");
+print(a);
