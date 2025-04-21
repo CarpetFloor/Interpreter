@@ -3,8 +3,8 @@ const lexer = require("./Lexer");
 const parser = require("./Parser");
 const runner = require("./Runner");
 
-const programName = "SimpleRunner";
-const programFile = "SamplePrograms/" + programName + ".lang";
+// const programName = "SimpleRunner";
+// const programFile = "SamplePrograms/" + programName + ".lang";
 
 const show = {
     fileOperations: false, 
@@ -17,9 +17,52 @@ const show = {
     runner: false
 }
 
-// if(process.argv.length >= 3) {
-//     programFile = process.argv[2];
-// }
+if(process.argv.length >= 3) {
+    programFile = process.argv[2];
+}
+else {
+    console.error("!!!!!Must include path to file to run!!!!!");
+    return;
+}
+
+if(process.argv.length > 3) {
+    if(process.argv.length < 7) {
+        console.error("!!!!!Must include values for extra options (show file operation info, show lexer info, show parser info, and show runner info)!!!!!");
+        return;
+    }
+
+    if(process.argv.length > 7) {
+        console.error("!!!!!Must only include values for extra options (show file operation info, show lexer info, show parser info, and show runner info), and nothing more!!!!!");
+        return;
+    }
+
+    for(let i = 3; i < 7; i++) {
+        let newValue = true;
+
+        if(process.argv[i] == "f") {
+            newValue = false;
+        }
+        else if(process.argv[i] != "t") {
+            console.error("!!!!!Invalid extra option value, must be either t or f!!!!!");
+            return;
+        }
+
+        switch(i) {
+            case 3:
+                show.fileOperations = newValue;
+                break;
+            case 4:
+                show.lexer = newValue;
+                break;
+            case 5:
+                show.parser = newValue;
+                break;
+            case 6:
+                show.runner = newValue;
+                break;
+        }
+    }
+}
 
 fs.readFile(programFile, "utf-8", function(error, data) {
     if(error) {
