@@ -27,7 +27,7 @@ module.exports.Program = class Program {
         for(let child of this.children) {
             let check = child.run();
             
-            if(check == false) {
+            if(check === false) {
                 break;
             }
         }
@@ -135,11 +135,12 @@ module.exports.StatementList = class StatementList {
         for(let child of this.children) {
             let check = child.run();
             
-            if(check == false) {
+            if(check === false) {
                 break;
             }
         }
         
+        return true;
     }
 }
 
@@ -173,7 +174,7 @@ module.exports.DeclarationAssignment = class DeclarationAssignment {
 
     run() {
         let actualValue = this.value.run();
-        if(actualValue == false) {
+        if(actualValue === false) {
             return false;
         }
 
@@ -211,6 +212,19 @@ module.exports.Assignment = class Assignement {
         }
 
         return output;
+    }
+
+    run() {
+        // first make sure variable exists
+        let value = variables.get(this.varName);
+
+        if(value == undefined) {
+            console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
+            return false;
+        }
+
+        variables.set(this.varName, this.value.run());
+        return true;
     }
 }
 
@@ -265,6 +279,19 @@ module.exports.MultIncrementAssignment = class MultIncrementAssignment {
 
         return output;
     }
+
+    run() {
+        // first make sure variable exists
+        let value = variables.get(this.varName);
+
+        if(value == undefined) {
+            console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
+            return false;
+        }
+
+        variables.set(this.varName, value * this.increment.run());
+        return true;
+    }
 }
 
 module.exports.IncrementAssignment = class IncrementAssignment {
@@ -291,6 +318,19 @@ module.exports.IncrementAssignment = class IncrementAssignment {
         }
 
         return output;
+    }
+
+    run() {
+        // first make sure variable exists
+        let value = variables.get(this.varName);
+
+        if(value == undefined) {
+            console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
+            return false;
+        }
+
+        variables.set(this.varName, value + this.increment.run());
+        return true;
     }
 }
 
@@ -338,6 +378,7 @@ module.exports.Print = class Print {
     }
 
     run() {
+        console.log("PRINTING")
         console.log(this.stringexpression.run());
     }
 }

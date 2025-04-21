@@ -1,5 +1,3 @@
-// make sure checking if non terminal equals non terminal listed in cfg rule
-
 const { debug } = require("console");
 let nodes = require("./TreeNodes");
 const debugFail = false;
@@ -1427,7 +1425,7 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let check = parseLoop(nonTerminals[0], "expression");
         
-        if((check != undefined) && (check[1].children != undefined)) {
+        if((check != undefined) && (check[1].child != undefined)) {
             let varName = terminals[0];
             let increment = check[1];
             
@@ -1452,7 +1450,7 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let check = parseLoop(nonTerminals[0], "expression");
         
-        if((check != undefined) && (check[1].children != undefined)) {
+        if((check != undefined) && (check[1].child != undefined)) {
             let varName = terminals[0];
             let increment = check[1];
             
@@ -1477,7 +1475,7 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let check = parseLoop(nonTerminals[0], "expression");
         
-        if((check != undefined) && (check[1].children != undefined)) {
+        if((check != undefined) && (check[1].child != undefined)) {
             let varName = terminals[0];
             let increment = check[1];
             
@@ -1502,7 +1500,7 @@ function generateCFG() {
     function(nonTerminals, terminals) {
         let check = parseLoop(nonTerminals[0], "stringexpression");
         
-        if((check != undefined) && (check[1].children != undefined)) {
+        if((check != undefined) && (check[1].child != undefined)) {
             let varName = terminals[0];
             let increment = check[1];
             
