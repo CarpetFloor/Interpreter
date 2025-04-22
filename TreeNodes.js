@@ -116,6 +116,26 @@ module.exports.IfLoop = class IfLoop {
 
         return output;
     }
+
+    run() {
+        let comparisonEval = this.comparison.run();
+
+        if(comparisonEval) {
+            for(let statement of this.body) {
+                statement.run();
+            }
+
+            return true;
+        }
+        else if(this.elseStatement != null) {
+            this.elseStatement.run();
+
+            return true;
+        }
+        else {
+            return true;
+        }
+    }
 }
 
 module.exports.StatementList = class StatementList {
@@ -485,6 +505,10 @@ module.exports.Not = class Not {
 
         return output;
     }
+
+    run() {
+        return !(this.comparison.run());
+    }
 }
 
 module.exports.Comparison = class Comparison {
@@ -512,6 +536,35 @@ module.exports.Comparison = class Comparison {
         }
 
         return output;
+    }
+
+    run() {
+        let leftValue = this.left.run();
+        if(leftValue == undefined) {
+            return undefined;
+        }
+
+        let rightValue = this.right.run();
+        if(rightValue == undefined) {
+            return undefined;
+        }
+
+        switch(this.comparison) {
+            case "==":
+                return (leftValue == rightValue);
+
+            case ">":
+                return (leftValue > rightValue);
+            
+            case ">=":
+                return (leftValue >= rightValue);
+
+            case "<":
+                return (leftValue < rightValue);
+            
+            case "<=":
+                return (leftValue <= rightValue);
+        }
     }
 }
 

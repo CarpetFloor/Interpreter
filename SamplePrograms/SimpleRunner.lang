@@ -53,5 +53,23 @@ list[bool] t = [true, true, true];
 print(t);
 #
 
+##
 bool t = false;
 print(t);
+#
+
+num a = 1;
+if(a > 0) {
+	print("YES");
+}
+else {
+	print("NO");
+}
+
+a = -1;
+if(a > 0) {
+	print("YES");
+}
+else {
+	print("NO");
+}

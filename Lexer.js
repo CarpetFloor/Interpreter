@@ -177,6 +177,11 @@ const tokens = [
     ), 
 
     new Pattern(
+        "NUM", 
+        /(\-)[0-9]+/
+    ), 
+
+    new Pattern(
         "STRING", 
         /(")[^"]*(")/
     ), 
