@@ -1086,11 +1086,97 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    // bool list declaration
+    rule = new Rule("statement", [
+        new Terminal("LISTTYPE"), 
+        new Terminal("OPENPIPE"), 
+        new Terminal("BOOLTYPE"), 
+        new Terminal("CLOSEPIPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("OPENPIPE"), 
+        new NonTerminal("values"), 
+        new Terminal("CLOSEPIPE"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let valueTokens = nonTerminals[0];
+        let values = [];
+        let currentTokens = [];
+
+        let pipeCount = 0;
+
+        // validate values
+        for(let token of valueTokens) {
+            if(token.name != "COMMA") {
+                let boolValueCheck = parseLoop([token], "boolvalue");
+
+                if(boolValueCheck == undefined) {
+                    return undefined;
+                }
+
+                values.push(boolValueCheck[1]);
+            }
+        }
+
+        let varName = terminals[4];
+        let listType = "bool";
+
+        return new nodes.DeclarationAssignment(
+            "list", 
+            varName, 
+            new nodes.List(listType, values)
+        );
+    });
+    cfg.push(rule);
+
     // string list declaration
     rule = new Rule("statement", [
         new Terminal("LISTTYPE"), 
         new Terminal("OPENPIPE"), 
         new Terminal("STRINGTYPE"), 
+        new Terminal("CLOSEPIPE"), 
+        new Terminal("ID"), 
+        new Terminal("ASSIGN"), 
+        new Terminal("OPENPIPE"),
+        new NonTerminal("values"),  
+        new Terminal("CLOSEPIPE"), 
+        new Terminal("SEMICOLON")
+    ], 
+    function(nonTerminals, terminals) {
+        let currentTokens = [];
+        let valueTokens = nonTerminals[0];
+        let values = [];
+
+        // validate values
+        for(let token of valueTokens) {
+            if(token.name != "COMMA") {
+                let stringTermCheck = parseLoop([token], "stringterm");
+
+                if(stringTermCheck == undefined) {
+                    return undefined;
+                }
+
+                values.push(stringTermCheck[1]);
+            }
+        }
+
+        let varName = terminals[4];
+        let listType = terminals[2];
+
+        return new nodes.DeclarationAssignment(
+            "list", 
+            varName, 
+            new nodes.List(listType, values)
+        );
+    });
+    cfg.push(rule);
+
+    // string list declaration
+    rule = new Rule("statement", [
+        new Terminal("LISTTYPE"), 
+        new Terminal("OPENPIPE"), 
+        new Terminal("BOOLTYPE"), 
         new Terminal("CLOSEPIPE"), 
         new Terminal("ID"), 
         new Terminal("ASSIGN"), 
@@ -2096,6 +2182,22 @@ function generateCFG() {
 
         return new nodes.ListLength(list);
 
+    });
+    cfg.push(rule);
+
+    rule = new Rule("boolvalue", [
+        new Terminal("TRUEVALUE")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.BoolValue("true");
+    });
+    cfg.push(rule);
+
+    rule = new Rule("boolvalue", [
+        new Terminal("FALSEVALUE")
+    ], 
+    function(nonTerminals, terminals) {
+        return new nodes.BoolValue("false");
     });
     cfg.push(rule);
 

@@ -14,6 +14,7 @@ a -= 1;
 print("a is " + a);
 #
 
+##
 list[num] a = [1, 2, 3];
 print("start");
 print(a);
@@ -45,3 +46,7 @@ num index = length|a| - 1;
 a.remove(index);
 print("remove last element");
 print(a);
+#
+
+list[bool] t = [true, true, true];
+print(t);

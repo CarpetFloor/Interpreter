@@ -293,6 +293,14 @@ module.exports.ListAssignment = class ListAssignement {
                     }
 
                     break;
+
+                case "bool":
+                    if((typeof value) != "boolean") {
+                        console.error("!!!!!List value must be of type bool!!!!!");
+                        return false;
+                    }
+
+                    break;
             }
 
             newList.push(value);
@@ -511,6 +519,10 @@ module.exports.BoolValue = class BoolValue {
         );
 
         return output;
+    }
+
+    run() {
+        return (this.value == true);
     }
 }
 
@@ -758,6 +770,14 @@ module.exports.ListAdd = class ListAdd {
                 }
 
                 break;
+
+            case "bool":
+                if((typeof value) != "boolean") {
+                    console.error("!!!!!List value must be of type bool!!!!!");
+                    return false;
+                }
+
+                break;
         }
 
         list.push(value);
@@ -844,6 +864,14 @@ module.exports.ListSetValue = class ListSetValue {
             case "string":
                 if((typeof value) != "string") {
                     console.error("!!!!!Value must be of type string!!!!!");
+                    return false;
+                }
+
+                break;
+
+            case "bool":
+                if((typeof value) != "boolean") {
+                    console.error("!!!!!List value must be of type bool!!!!!");
                     return false;
                 }
 
