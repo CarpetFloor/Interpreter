@@ -92,7 +92,18 @@ fs.readFile(programFile, "utf-8", function(error, data) {
             console.log("\nSTARTED PARSING");
         }
         
-        const parseTree = parser.parse(tokens);
+        let parseTree = parser.parse(tokens);
+
+        /**
+         * Sometimes parser will try to parse a syntatically-incorrect 
+         * program, and won't fail but will return undefined. This only 
+         * happens in a few cases though, and more often than not 
+         * parseTree will be false from the parser failing to parse when 
+         * given a syntatically-incorrect program.
+         */
+        if(parseTree == undefined) {
+            parseTree = false;
+        }
         
         if(parseTree != false) {
             if(show.parser) {

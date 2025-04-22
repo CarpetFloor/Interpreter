@@ -78,6 +78,7 @@
 - `&&`: And
 - `and`: And
 - `![comparison]`: Not operator - the only way to use the not operation is to wrap a comparison around the not brackets. Also works for or and and, for instance `![a < 1 && b > 2]`
+- Note that, as outlined above under boolean, the not operation **cannot** be used for boolean variable declaration or assignments, and can **only** be used in comparisons
 
 *Note that parentheses are not supported around comparisons or expressions*
 

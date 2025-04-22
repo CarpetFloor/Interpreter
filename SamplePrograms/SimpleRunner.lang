@@ -48,5 +48,10 @@ print("remove last element");
 print(a);
 #
 
+##
 list[bool] t = [true, true, true];
+print(t);
+#
+
+bool t = false;
 print(t);

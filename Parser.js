@@ -61,7 +61,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
         }
 
         if(comparisonIndices.end == -1) {
-            return false;
+            return undefined;
         }
 
         let comparisonTokens = tokens.slice(comparisonIndices.start, comparisonIndices.end);
@@ -71,7 +71,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
 
 
         if(comparisonCheck == undefined) {
-            return false;
+            return undefined;
         }
     }
 
@@ -110,7 +110,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
         let statementListCheck = parseLoop(bodyForStatementListCheck, "statementlist");
 
         if(statementListCheck == undefined) {
-            return false;
+            return undefined;
         }
         else {
             let loop = null;
@@ -149,7 +149,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
 
                 if(statementListCheck == undefined) {
-                    return false;
+                    return undefined;
                 }
 
                 if(statementListCheck[1].children.length > 0) {
@@ -189,7 +189,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 }
 
                 if(loopIndex.end == -1) {
-                    return false;
+                    return undefined;
                 }
 
                 let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
@@ -205,7 +205,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 // }
                 
                 if(!(valid)) {
-                    return false;
+                    return undefined;
                 }
 
                 lastIf = bodyElements[bodyElements.length - 1];
@@ -216,7 +216,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
 
                 if(statementListCheck == undefined) {
-                    return false;
+                    return undefined;
                 }
 
                 if(statementListCheck[1].children.length > 0) {
@@ -250,7 +250,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 }
 
                 if(loopIndex.end == -1) {
-                    return false;
+                    return undefined;
                 }
 
                 let innerLoopTokens = body.slice(loopIndex.start, loopIndex.end + 1);
@@ -264,11 +264,11 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 }
                 
                 if(!(valid)) {
-                    return false;
+                    return undefined;
                 }
 
                 if(lastIf == null) {
-                    return false;
+                    return undefined;
                 }
 
                 let elseStatement = bodyElements[bodyElements.length - 1];
@@ -282,7 +282,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
                 let statementListCheck = parseLoop(currentTokens, "statementlist");
 
                 if(statementListCheck == undefined) {
-                    return false;
+                    return undefined;
                 }
 
                 if(statementListCheck[1].children.length > 0) {
@@ -334,7 +334,7 @@ function parseInnerLoop(loopsList, tokens, isWhileLoop) {
 
     }
 
-    return false;
+    return undefined;
 
 }
 
@@ -2565,7 +2565,7 @@ module.exports.parse = function(tokenStream) {
         return tree;
     }
     else {
-        return false;
+        return undefined;
     }
 }
 

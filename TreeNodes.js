@@ -4,6 +4,7 @@
  */
 const variables = new Map();
 const listTypes = new Map();
+const debugStatementList = false;
 
 function getIndent(level) {
     return ("....").repeat(level);
@@ -32,7 +33,7 @@ module.exports.Program = class Program {
         for(let child of this.children) {
             let check = child.run();
             
-            if(check === false) {
+            if(check == undefined) {
                 break;
             }
         }
@@ -138,9 +139,17 @@ module.exports.StatementList = class StatementList {
 
     run() {
         for(let child of this.children) {
+            if(debugStatementList) {
+                console.log("\t", child.constructor.name);
+            }
+
             let check = child.run();
+
+            if(debugStatementList) {
+                console.log("\t\t", check);
+            }
             
-            if(check === false) {
+            if(check == undefined) {
                 break;
             }
         }
@@ -179,8 +188,8 @@ module.exports.DeclarationAssignment = class DeclarationAssignment {
 
     run() {
         let actualValue = this.value.run(this.type);
-        if(actualValue === false) {
-            return false;
+        if(actualValue == undefined) {
+            return undefined;
         }
 
         try {
@@ -194,7 +203,7 @@ module.exports.DeclarationAssignment = class DeclarationAssignment {
         }
         catch(exception) {
             console.log(exception.message);
-            return false;
+            return undefined;
         }
     }
 }
@@ -230,7 +239,7 @@ module.exports.Assignment = class Assignement {
 
         if(value == undefined) {
             console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
-            return false;
+            return undefined;
         }
 
         variables.set(this.varName, this.value.run());
@@ -268,7 +277,7 @@ module.exports.ListAssignment = class ListAssignement {
         
         if(oldList == undefined) {
             console.error("!!!!!Varibale " + this.varName + " doesn't exist!!!!!");
-            return false;
+            return undefined;
         }
 
         let newList = [];
@@ -281,7 +290,7 @@ module.exports.ListAssignment = class ListAssignement {
                 case "num":
                     if((typeof value) != "number") {
                         console.error("!!!!!List value must be of type num!!!!!");
-                        return false;
+                        return undefined;
                     }
 
                     break;
@@ -289,7 +298,7 @@ module.exports.ListAssignment = class ListAssignement {
                 case "string":
                     if((typeof value) != "string") {
                         console.error("!!!!!List value must be of type string!!!!!");
-                        return false;
+                        return undefined;
                     }
 
                     break;
@@ -297,7 +306,7 @@ module.exports.ListAssignment = class ListAssignement {
                 case "bool":
                     if((typeof value) != "boolean") {
                         console.error("!!!!!List value must be of type bool!!!!!");
-                        return false;
+                        return undefined;
                     }
 
                     break;
@@ -343,7 +352,7 @@ module.exports.MultIncrementAssignment = class MultIncrementAssignment {
 
         if(value == undefined) {
             console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
-            return false;
+            return undefined;
         }
 
         variables.set(this.varName, value * this.increment.run());
@@ -383,7 +392,7 @@ module.exports.IncrementAssignment = class IncrementAssignment {
 
         if(value == undefined) {
             console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
-            return false;
+            return undefined;
         }
 
         variables.set(this.varName, value + this.increment.run());
@@ -423,7 +432,7 @@ module.exports.DecrementAssignment = class DecrementAssignment {
 
         if(value == undefined) {
             console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
-            return false;
+            return undefined;
         }
 
         variables.set(this.varName, value - this.decrement.run());
@@ -449,6 +458,7 @@ module.exports.Print = class Print {
 
     run() {
         console.log(this.stringexpression.run());
+        return true;
     }
 }
 
@@ -522,7 +532,7 @@ module.exports.BoolValue = class BoolValue {
     }
 
     run() {
-        return (this.value == true);
+        return (this.value == "true");
     }
 }
 
@@ -573,14 +583,14 @@ module.exports.BinaryOperatorExpression = class BinaryOperatorExpression {
 
                 if(rightValue == 0) {
                     console.error("Cannot divide by 0!");
-                    return false;
+                    return undefined;
                 }
 
                 return leftValue / rightValue;
                 break;
         }
 
-        return false;
+        return undefined;
     }
 }
 
@@ -651,7 +661,7 @@ module.exports.IdReference = class IdReference {
         }
         catch(exception) {
             console.error("Variable " + this.id + " does not exist!");
-            return false;
+            return undefined;
         }
 
         value = variables.get(this.id);
@@ -683,7 +693,7 @@ module.exports.ListElementReference = class ListElementReference {
 
         if(list == undefined) {
             console.error("!!!!!Variable " + this.list + " doesn't exist!!!!!");
-            return false;
+            return undefined;
         }
 
         let index = this.index.run();
@@ -691,7 +701,7 @@ module.exports.ListElementReference = class ListElementReference {
 
         if(value == undefined) {
             console.error("!!!!!Index " + index + " is out of bounds!!!!!");
-            return false;
+            return undefined;
         }
 
         return value;
@@ -718,7 +728,7 @@ module.exports.ListLength = class ListLength {
 
         if(list == undefined) {
             console.log("!!!!!Variable " + list + " list doesn't exist!!!!!");
-            return false;
+            return undefined;
         }
 
         return list.length;
@@ -747,7 +757,7 @@ module.exports.ListAdd = class ListAdd {
 
         if(list == undefined) {
             console.error("!!!!!Variable " + list + " doesn't exist!!!!!");
-            return false;
+            return undefined;
         }
 
         let type = listTypes.get(this.list);
@@ -758,7 +768,7 @@ module.exports.ListAdd = class ListAdd {
             case "num":
                 if((typeof value) != "number") {
                     console.error("!!!!!Value must be of type num!!!!!");
-                    return false;
+                    return undefined;
                 }
 
                 break;
@@ -766,7 +776,7 @@ module.exports.ListAdd = class ListAdd {
             case "string":
                 if((typeof value) != "string") {
                     console.error("!!!!!Value must be of type string!!!!!");
-                    return false;
+                    return undefined;
                 }
 
                 break;
@@ -774,7 +784,7 @@ module.exports.ListAdd = class ListAdd {
             case "bool":
                 if((typeof value) != "boolean") {
                     console.error("!!!!!List value must be of type bool!!!!!");
-                    return false;
+                    return undefined;
                 }
 
                 break;
@@ -808,12 +818,14 @@ module.exports.ListRemove = class ListRemove {
 
         if(list == undefined) {
             console.error("!!!!!Variable " + list + " doesn't exist!!!!!");
-            return false;
+            return undefined;
         }
 
         let index = this.index.run();
 
         list.splice(index, 1);
+
+        return true;
     }
 }
 
@@ -843,7 +855,7 @@ module.exports.ListSetValue = class ListSetValue {
 
         if(list == undefined) {
             console.error("!!!!!Variable " + list + " doesn't exist!!!!!");
-            return false;
+            return undefined;
         }
 
         let index = this.index.run();
@@ -856,7 +868,7 @@ module.exports.ListSetValue = class ListSetValue {
             case "num":
                 if((typeof value) != "number") {
                     console.error("!!!!!Value must be of type num!!!!!");
-                    return false;
+                    return undefined;
                 }
 
                 break;
@@ -864,7 +876,7 @@ module.exports.ListSetValue = class ListSetValue {
             case "string":
                 if((typeof value) != "string") {
                     console.error("!!!!!Value must be of type string!!!!!");
-                    return false;
+                    return undefined;
                 }
 
                 break;
@@ -872,7 +884,7 @@ module.exports.ListSetValue = class ListSetValue {
             case "bool":
                 if((typeof value) != "boolean") {
                     console.error("!!!!!List value must be of type bool!!!!!");
-                    return false;
+                    return undefined;
                 }
 
                 break;
