@@ -13,7 +13,5 @@ Also check out [CFG.json](CFG.json) to view the context-free grammar for this la
 # Roadmap
 &#9745; Context-Free Grammar\
 &#9745; Lexer\
-&#9744; Parser\
-&#9744; Runner\
-&#9744; Sublime Text syntax file\
-&#9744; VS Code syntax file
+&#9745; Parser\
+&#9745; Runner

@@ -71,6 +71,20 @@ module.exports.WhileLoop = class WhileLoop {
 
         return output;
     }
+
+    run() {
+        let comparisonEval = this.comparison.run();
+
+        while(comparisonEval) {
+            for(let statement of this.body) {
+                statement.run();
+            }
+
+            comparisonEval = this.comparison.run();
+        }
+
+        return true;
+    }
 }
 
 module.exports.IfLoop = class IfLoop {
