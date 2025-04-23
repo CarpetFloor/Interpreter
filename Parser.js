@@ -2163,26 +2163,24 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    // get the length of a list
+    rule = new Rule("factor", [
+        new Terminal("ID"), 
+        new Terminal("DOT"), 
+        new Terminal("LENGTH")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+
+        return new nodes.ListLength(list);
+    });
+    cfg.push(rule);
+
     rule = new Rule("factor", [
         new Terminal("ID")
     ], 
     function(nonTerminals, terminals) {
         return new nodes.IdReference(terminals[0]);
-    });
-    cfg.push(rule);
-
-    // get the length of a list
-    rule = new Rule("factor", [
-        new Terminal("LENGTH"), 
-        new Terminal("PIPE"), 
-        new Terminal("ID"), 
-        new Terminal("PIPE")
-    ], 
-    function(nonTerminals, terminals) {
-        let list = terminals[2];
-
-        return new nodes.ListLength(list);
-
     });
     cfg.push(rule);
 

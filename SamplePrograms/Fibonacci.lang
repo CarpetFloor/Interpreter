@@ -2,7 +2,7 @@
 Calculates the Fibonacci seuquence up to n (upTo)
 #
 
-num upTo = 5;
+num upTo = 10;
 list[num] sequence = [];
 
 num count = 0;
@@ -12,9 +12,9 @@ while(count < upTo) {
     }
     else {
         num temp = count - 2;
-        num a = get|sequence, temp|;
+        num a = sequence.get(temp);
         temp = count - 1;
-        num b = get|sequence, temp|;
+        num b = sequence.get(temp);
 
         temp = a + b;
         sequence.add(temp);
@@ -25,10 +25,10 @@ while(count < upTo) {
 
 string output = "";
 count = 0;
-while(count < length|sequence|) {
-    output += get|sequence, count|;
+while(count < sequence.length()) {
+    output += sequence.get(count);
 
-    if(count < length|sequence| - 1) {
+    if(count < sequence.length() - 1) {
         output += ", ";
     }
     

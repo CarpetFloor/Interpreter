@@ -3,9 +3,6 @@ const lexer = require("./Lexer");
 const parser = require("./Parser");
 const runner = require("./Runner");
 
-// const programName = "SimpleRunner";
-// const programFile = "SamplePrograms/" + programName + ".lang";
-
 const show = {
     fileOperations: false, 
     lexer: false, 

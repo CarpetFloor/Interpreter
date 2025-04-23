@@ -36,7 +36,7 @@
 - Add element with `myList.add(value)`
 - Remove element with `myList.remove(index)`
 - Modify element with `myList.set(index, value)`
-- Get length with `length|myLength|`
+- Get length with `myLength.length()`
 - The only two supported list types are num and string *(for instance **cannot** use `a = get|myList, i + 1|`)*
 - List indices and values **cannot** be expressions or string expressions
 - Nested lists? No, including getting values 
