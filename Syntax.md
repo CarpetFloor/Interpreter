@@ -32,7 +32,7 @@
 #### List
 - Declare with `list[num] myList = [1, 2, 3]`
 - Can reassign with `myList = [4, 3]`
-- Access element with `get|myList, index|`
+- Access element with `myList.get(index)`
 - Add element with `myList.add(value)`
 - Remove element with `myList.remove(index)`
 - Modify element with `myList.set(index, value)`

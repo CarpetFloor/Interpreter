@@ -2,8 +2,28 @@
 while("test" == get|myList, 1|) {
 	a += 1;
 }
-#
 
 while(a < get|myList, a| * 2) {
 	a += 1;
 }
+#
+
+##
+list[num] myList = [1, 2];
+num i = 0;
+num a = myList.get(i);
+print(a);
+#
+
+##
+while(a < myList.get(i)) {
+	num a = 1;
+}
+#
+
+list[string] myList = ["no"];
+while("test" == myList.get(0)) {
+	num a = 1;
+	print("in here");
+}
+print("out of while");

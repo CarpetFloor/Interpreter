@@ -1,3 +1,7 @@
+##
+Calculates the Fibonacci seuquence up to n (upTo)
+#
+
 num upTo = 5;
 list[num] sequence = [];
 

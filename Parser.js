@@ -1439,7 +1439,7 @@ function generateCFG() {
         new NonTerminal("expression"), 
         new Terminal("SEMICOLON")
     ], 
-    function(nonTerminals, terminals) {        
+    function(nonTerminals, terminals) {
         let type = terminals[0];
         let varName = terminals[1];
 
@@ -2136,37 +2136,38 @@ function generateCFG() {
     });
     cfg.push(rule);
 
+    // access list num element
+    rule = new Rule("factor", [ 
+        new Terminal("ID"), 
+        new Terminal("DOT"), 
+        new Terminal("GET")
+    ], 
+    function(nonTerminals, terminals) {
+        let list = terminals[0];
+        
+        let indexValue = terminals[2].slice(4, terminals[2].length - 1);
+        let indexNode = null;
+
+        const nums = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        if(nums.includes(indexValue[0])) {
+            indexNode = new nodes.Num(indexValue);
+        }
+        else {
+            indexNode = new nodes.IdReference(indexValue);
+        }
+        
+        return new nodes.ListElementReference(
+            list, 
+            indexNode
+        );
+    });
+    cfg.push(rule);
+
     rule = new Rule("factor", [
         new Terminal("ID")
     ], 
     function(nonTerminals, terminals) {
         return new nodes.IdReference(terminals[0]);
-    });
-    cfg.push(rule);
-
-    // access list num element by index
-    rule = new Rule("factor", [ 
-        new Terminal("GET"), 
-        new Terminal("PIPE"), 
-        new Terminal("ID"), 
-        new Terminal("COMMA"), 
-        new NonTerminal("factor"), 
-        new Terminal("PIPE")
-    ], 
-    function(nonTerminals, terminals) {
-        let list = terminals[2];
-        let termCheck = parseLoop(nonTerminals[0], "expression");
-
-        if(termCheck == undefined) {
-            return undefined;
-        }
-        else {
-            return new nodes.ListElementReference(
-                list, 
-                termCheck[1]
-            );
-        }
-
     });
     cfg.push(rule);
 
@@ -2283,28 +2284,28 @@ function generateCFG() {
 
     // access list string element by index
     rule = new Rule("stringterm", [ 
-        new Terminal("GET"), 
-        new Terminal("PIPE"), 
         new Terminal("ID"), 
-        new Terminal("COMMA"), 
-        new NonTerminal("expression"), 
-        new Terminal("PIPE")
+        new Terminal("DOT"), 
+        new Terminal("GET")
     ], 
     function(nonTerminals, terminals) {
-        let list = terminals[2];
+        let list = terminals[0];
+        
+        let indexValue = terminals[2].slice(4, terminals[2].length - 1);
+        let indexNode = null;
 
-        let expressionCheck = parseLoop(nonTerminals[0], "expression");
-
-        if(expressionCheck == undefined) {
-            return undefined;
+        const nums = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        if(nums.includes(indexValue[0])) {
+            indexNode = new nodes.Num(indexValue);
         }
         else {
-            return new nodes.ListElementReference(
-                list, 
-                expressionCheck[1]
-            );
+            indexNode = new nodes.IdReference(indexValue);
         }
-
+        
+        return new nodes.ListElementReference(
+            list, 
+            indexNode
+        );
     });
     cfg.push(rule);
 

@@ -59,7 +59,7 @@ const tokens = [
 
     new Pattern(
         "GET", 
-        /get/
+        /get\(([0-9]+|[a-zA-Z]+)\)/
     ), 
 
     new Pattern(
@@ -74,7 +74,7 @@ const tokens = [
 
     new Pattern(
         "LENGTH", 
-        /length/
+        /length\(\)/
     ), 
 
     new Pattern(
@@ -286,7 +286,7 @@ const tokens = [
 ];
 
 const tokensWithValue = [
-    "NUMTYPE", "ID", "NUM", "_ERROR_", "STRING"
+    "NUMTYPE", "ID", "NUM", "GET", "_ERROR_", "STRING"
 ];
 
 /**
