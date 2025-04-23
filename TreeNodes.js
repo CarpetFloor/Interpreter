@@ -272,7 +272,7 @@ module.exports.Assignment = class Assignement {
         let value = variables.get(this.varName);
 
         if(value == undefined) {
-            console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
+            console.error("!!!!!Variable '" + this.varName + "' does not exist!!!!!");
             return undefined;
         }
 
@@ -385,7 +385,7 @@ module.exports.MultIncrementAssignment = class MultIncrementAssignment {
         let value = variables.get(this.varName);
 
         if(value == undefined) {
-            console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
+            console.error("!!!!!Variable '" + this.varName + "' does not exist!!!!!");
             return undefined;
         }
 
@@ -425,7 +425,7 @@ module.exports.IncrementAssignment = class IncrementAssignment {
         let value = variables.get(this.varName);
 
         if(value == undefined) {
-            console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
+            console.error("!!!!!Variable '" + this.varName + "' does not exist!!!!!");
             return undefined;
         }
 
@@ -465,7 +465,7 @@ module.exports.DecrementAssignment = class DecrementAssignment {
         let value = variables.get(this.varName);
 
         if(value == undefined) {
-            console.error("!!!!!Variable " + this.varName + " does not exist!!!!!");
+            console.error("!!!!!Variable '" + this.varName + "' does not exist!!!!!");
             return undefined;
         }
 
@@ -727,7 +727,7 @@ module.exports.IdReference = class IdReference {
             value = variables.get(this.id);
         }
         catch(exception) {
-            console.error("Variable " + this.id + " does not exist!");
+            console.error("Variable '" + this.id + "' does not exist!");
             return undefined;
         }
 
@@ -759,7 +759,7 @@ module.exports.ListElementReference = class ListElementReference {
         let list = variables.get(this.list);
 
         if(list == undefined) {
-            console.error("!!!!!Variable " + this.list + " doesn't exist!!!!!");
+            console.error("!!!!!Variable '" + this.list + "' doesn't exist!!!!!");
             return undefined;
         }
 
@@ -794,7 +794,7 @@ module.exports.ListLength = class ListLength {
         let list = variables.get(this.list);
 
         if(list == undefined) {
-            console.log("!!!!!Variable " + list + " list doesn't exist!!!!!");
+            console.log("!!!!!Variable '" + list + "' list doesn't exist!!!!!");
             return undefined;
         }
 
@@ -823,7 +823,7 @@ module.exports.ListAdd = class ListAdd {
         let list = variables.get(this.list);
 
         if(list == undefined) {
-            console.error("!!!!!Variable " + list + " doesn't exist!!!!!");
+            console.error("!!!!!Variable '" + list + "' doesn't exist!!!!!");
             return undefined;
         }
 
@@ -884,7 +884,7 @@ module.exports.ListRemove = class ListRemove {
         let list = variables.get(this.list);
 
         if(list == undefined) {
-            console.error("!!!!!Variable " + list + " doesn't exist!!!!!");
+            console.error("!!!!!Variable '" + list + "' doesn't exist!!!!!");
             return undefined;
         }
 
@@ -921,7 +921,7 @@ module.exports.ListSetValue = class ListSetValue {
         let list = variables.get(this.list);
 
         if(list == undefined) {
-            console.error("!!!!!Variable " + list + " doesn't exist!!!!!");
+            console.error("!!!!!Variable '" + list + "' doesn't exist!!!!!");
             return undefined;
         }
 

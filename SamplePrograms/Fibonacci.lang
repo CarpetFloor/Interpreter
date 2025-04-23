@@ -1,4 +1,4 @@
-num upTo = 10;
+num upTo = 5;
 list[num] sequence = [];
 
 num count = 0;
@@ -24,7 +24,7 @@ count = 0;
 while(count < length|sequence|) {
     output += get|sequence, count|;
 
-    if(count < length|squence| - 1) {
+    if(count < length|sequence| - 1) {
         output += ", ";
     }
     
